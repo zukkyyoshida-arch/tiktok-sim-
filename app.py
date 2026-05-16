@@ -208,12 +208,47 @@ with tab_dash:
     st.markdown("---")
     st.markdown("### 📊 運用コンサルタントの定量アドバイス")
     advice_content = []
+
+    # 1. リソース・ボトルネック分析 (基本機能)
     if daily_parent_cap < daily_child_cap:
         req_p = int(np.ceil(daily_child_cap * p_cycle))
-        advice_content.append(f"🔴 <b>親端末の不足 (ボトルネック)</b>: <b>あと {req_p - parent_dev} 台</b> の親を追加すれば、月間収益は約 <b>¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}</b> 増加します。")
+        advice_content.append(f"🔴 <b>親端末の不足</b>: あと <b>{req_p - parent_dev} 台</b> の親を追加すれば、月間収益は約 <b>¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}</b> 増加します。")
     else:
         req_c = int(np.ceil(daily_parent_cap * avg_cycle))
-        advice_content.append(f"🔵 <b>子端末の不足</b>: <b>あと {req_c - child_dev} 台</b> の子を追加すれば、月間収益を約 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 上乗せできます。")
+        advice_content.append(f"🔵 <b>子端末の不足</b>: あと <b>{req_c - child_dev} 台</b> の子を追加すれば、月間収益を約 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 上乗せできます。")
+
+    # 実績データに基づく高度な分析
+    if st.session_state.actual_res:
+        res = st.session_state.actual_res
+        
+        # 2. 成功率ギャップ分析 (現実と理想の乖離)
+        actual_s_rate = res['rate'] / 100
+        sim_s_rate = success_p
+        gap = actual_s_rate - sim_s_rate
+        if abs(gap) > 0.03: # 3%以上の乖離がある場合
+            loss_gain = int(actual_daily_invites * 30 * gap * per_invite_revenue)
+            if gap < 0:
+                advice_content.append(f"⚠️ <b>成功率の下振れ注意</b>: 実績({actual_s_rate*100:.1f}%)が想定({sim_s_rate*100:.1f}%)を下回っています。このままでは月間収益が予測より <b>¥{abs(loss_gain):,}</b> 減少するリスクがあります。")
+            else:
+                advice_content.append(f"✨ <b>想定以上のパフォーマンス</b>: 実績成功率が想定を上回っています！月間予測に <b>¥{loss_gain:,}</b> のポジティブな上振れが期待できます。")
+
+        # 3. 機種リプレイスによる機会損失の算出
+        if "brand" in res:
+            b_df = res['brand']
+            if len(b_df) > 1:
+                # 成功率トップとワーストを比較
+                best_b = b_df.loc[b_df['成功率'].idxmax()]
+                worst_b = b_df.loc[b_df['成功率'].idxmin()]
+                diff_p = (best_b['成功率'] - worst_b['成功率']) / 100
+                if diff_p > 0.05: # 5%以上の差がある場合
+                    # 全体の1/N（メーカー数分の一）が不調機だと仮定して機会損失を計算
+                    potential = int(actual_daily_invites * 30 * diff_p * per_invite_revenue / len(b_df))
+                    advice_content.append(f"📱 <b>端末の最適化</b>: {worst_b['brand']} の成功率が低迷しています。これを {best_b['brand']} 並みに改善（またはリプレイス）することで、月間約 <b>¥{potential:,}</b> の増収が見込めます。")
+
+    if not advice_content:
+        advice_content.append("✅ 現在の運用バランスは非常に良好です。実績データを同期し続けることで、さらに細かい最適化ポイントを抽出します。")
+
+    # アドバイスカードの描画
     st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 定量アクションプラン</div><div class='advice-text'>{'<br><br>'.join(advice_content)}</div></div>", unsafe_allow_html=True)
 
 with tab_analytics:
