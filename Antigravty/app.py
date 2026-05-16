@@ -500,6 +500,7 @@ def main():
 
     # 5. 相性・疲弊度分析 (新タブ)
     with tabs[4]:
+        import textwrap
         res = st.session_state.get('actual_res')
         if res:
             st.caption(f"📊 分析対象期間: {res['period']}")
@@ -589,23 +590,23 @@ def main():
                         best_pair = valid_pairs.iloc[0]
                         worst_pair = valid_pairs.iloc[-1]
                         
-                        advice_html = f"""
-                        <div class="advice-card" style="border-color: #00ff88;">
-                            <div class="advice-title">🚀 推奨組み合わせ (試行数3回以上)</div>
-                            <div class="advice-text">
-                                親機 <b>{best_pair['parent_brand']}</b> × 子機 <b>{best_pair['brand']}</b> が現在、成功率 <b>{best_pair['成功率']:.1f}%</b>（試行数: {best_pair['試行数']}回）で<b>トップ</b>です。この組み合わせを優先的に配置してください。
-                            </div>
-                        </div>
-                        """
-                        if best_pair['成功率'] - worst_pair['成功率'] > 10:
-                            advice_html += f"""
-                            <div class="advice-card" style="border-color: #ff3333; margin-top: 15px;">
-                                <div class="advice-title">⚠️ 警戒組み合わせ (試行数3回以上)</div>
+                        advice_html = textwrap.dedent(f"""
+                            <div class="advice-card" style="border-color: #00ff88;">
+                                <div class="advice-title">🚀 推奨組み合わせ (試行数3回以上)</div>
                                 <div class="advice-text">
-                                    親機 <b>{worst_pair['parent_brand']}</b> × 子機 <b>{worst_pair['brand']}</b> は成功率が <b>{worst_pair['成功率']:.1f}%</b>（試行数: {worst_pair['試行数']}回）と<b>著しく低迷</b>しています。この組み合わせでの運用は避けることを強く推奨します。
+                                    親機 <b>{best_pair['parent_brand']}</b> × 子機 <b>{best_pair['brand']}</b> が現在、成功率 <b>{best_pair['成功率']:.1f}%</b>（試行数: {best_pair['試行数']}回）で<b>トップ</b>です。この組み合わせを優先的に配置してください。
                                 </div>
                             </div>
-                            """
+                        """)
+                        if best_pair['成功率'] - worst_pair['成功率'] > 10:
+                            advice_html += textwrap.dedent(f"""
+                                <div class="advice-card" style="border-color: #ff3333; margin-top: 15px;">
+                                    <div class="advice-title">⚠️ 警戒組み合わせ (試行数3回以上)</div>
+                                    <div class="advice-text">
+                                        親機 <b>{worst_pair['parent_brand']}</b> × 子機 <b>{worst_pair['brand']}</b> は成功率が <b>{worst_pair['成功率']:.1f}%</b>（試行数: {worst_pair['試行数']}回）と<b>著しく低迷</b>しています。この組み合わせでの運用は避けることを強く推奨します。
+                                    </div>
+                                </div>
+                            """)
                         st.markdown(advice_html, unsafe_allow_html=True)
                     else:
                         st.info("相性推奨アドバイスを表示するには、試行数3回以上の組み合わせデータが必要です。")
@@ -713,27 +714,27 @@ def main():
                     
                     if not critical_devices.empty:
                         reset_list = ", ".join([f"**#{row['端末番号']}** ({row['機種']})" for _, row in critical_devices.iterrows()])
-                        st.markdown(f"""
-                        <div class="advice-card" style="border-color: #ff3333;">
-                            <div class="advice-title">🔴 工場出荷状態リセット推奨 (シャドウバン確実)</div>
-                            <div class="advice-text">
-                                以下の端末はシャドウバンされている確率が極めて高いです。リセットするか、最低でも7日間は完全に休止させてください。<br>
-                                対象端末: {reset_list}
+                        st.markdown(textwrap.dedent(f"""
+                            <div class="advice-card" style="border-color: #ff3333;">
+                                <div class="advice-title">🔴 工場出荷状態リセット推奨 (シャドウバン確実)</div>
+                                <div class="advice-text">
+                                    以下の端末はシャドウバンされている確率が極めて高いです。リセットするか、最低でも7日間は完全に休止させてください。<br>
+                                    対象端末: {reset_list}
+                                </div>
                             </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        """), unsafe_allow_html=True)
                         
                     if not warning_devices.empty:
                         ip_list = ", ".join([f"**#{row['端末番号']}**" for _, row in warning_devices.iterrows()])
-                        st.markdown(f"""
-                        <div class="advice-card" style="border-color: #ffaa00; margin-top: 15px;">
-                            <div class="advice-title">🟡 IP変更・キャッシュクリア推奨 (疲弊開始)</div>
-                            <div class="advice-text">
-                                以下の端末は連続失敗が発生し始めています。次回運用の前に、接続回線のIP切り替え（機内モードON/OFFなど）やTikTok Lite of アプリキャッシュ削除を行ってください。<br>
-                                対象端末: {ip_list}
+                        st.markdown(textwrap.dedent(f"""
+                            <div class="advice-card" style="border-color: #ffaa00; margin-top: 15px;">
+                                <div class="advice-title">🟡 IP変更・キャッシュクリア推奨 (疲弊開始)</div>
+                                <div class="advice-text">
+                                    以下の端末は連続失敗が発生し始めています。次回運用の前に、接続回線のIP切り替え（機内モードON/OFFなど）やTikTok Liteのアプリキャッシュ削除を行ってください。<br>
+                                    対象端末: {ip_list}
+                                </div>
                             </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        """), unsafe_allow_html=True)
                         
                     if critical_devices.empty and warning_devices.empty:
                         st.success("✨ 現在、すべての稼働端末が極めてクリーン（🟢 健全）な状態です！素晴らしい運用サイクルです。")
