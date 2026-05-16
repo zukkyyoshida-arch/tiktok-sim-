@@ -144,31 +144,28 @@ with tab_dash:
     advice_content = []
     # 1. ボトルネックの定量的改善案
     if daily_parent_cap < daily_child_cap:
-        # 親が足りない場合：親を何台増やせば子に追いつくか
-        # 必要親台数 = daily_child_cap * p_cycle
+        # 親が足りない場合
         req_parent = int(np.ceil(daily_child_cap * p_cycle))
         shortage = req_parent - parent_dev
-        advice_content.append(f"🔴 **親端末の不足 (ボトルネック)**: 現在の子端末の回転を最大限活かすには、**あと {shortage} 台** の親端末が必要です。これを追加することで、月間収益は約 **¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}** 増加します。")
+        advice_content.append(f"🔴 <b>親端末の不足 (ボトルネック)</b>: 現在の子端末の回転を最大限活かすには、<b>あと {shortage} 台</b> の親端末が必要です。これを追加することで、月間収益は約 <b>¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}</b> 増加します。")
     else:
-        # 子が足りない場合：子を何台増やせば親に追いつくか
-        # 必要子台数 = daily_parent_cap * avg_cycle
+        # 子が足りない場合
         req_child = int(np.ceil(daily_parent_cap * avg_cycle))
         shortage = req_child - child_dev
-        advice_content.append(f"🔵 **子端末の不足**: 親端末の招待能力に余裕があります。**あと {shortage} 台** の子端末を追加調達すれば、現在の親端末をフル稼働させ、月間収益を約 **¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}** 上乗せできます。")
+        advice_content.append(f"🔵 <b>子端末の不足</b>: 親端末の招待能力に余裕があります。<b>あと {shortage} 台</b> の子端末を追加調達すれば、現在の親端末をフル稼働させ、月間収益を約 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 上乗せできます。")
     
     # 2. 成功率低下による損失計算
     if st.session_state.actual_res:
         act_rate = st.session_state.actual_res['rate']
         if act_rate < 80:
-            # 理想(80%)との比較
             loss_per_day = actual_daily_invites * (0.8 - act_rate/100) * per_invite_revenue
-            advice_content.append(f"🚨 **収益漏れ警告**: 現在の成功率は {act_rate:.1f}% です。これを標準的な 80% まで改善するだけで、月間 **¥{int(loss_per_day * 30):,}** の利益が積み増せます。不調な機種の特定を急いでください。")
+            advice_content.append(f"🚨 <b>収益漏れ警告</b>: 現在の成功率は {act_rate:.1f}% です。これを標準的な 80% まで改善するだけで、月間 <b>¥{int(loss_per_day * 30):,}</b> の利益が積み増せます。不調な機種の特定を急いでください。")
         elif act_rate >= 80:
-            advice_content.append(f"✨ **高効率運用中**: 成功率 {act_rate:.1f}% を維持できています。このクオリティを保ったまま、端末台数を 1.2倍〜1.5倍にスケールさせることを推奨します。")
+            advice_content.append(f"✨ <b>高効率運用中</b>: 成功率 {act_rate:.1f}% を維持できています。このクオリティを保ったまま、端末台数を 1.2倍〜1.5倍にスケールさせることを推奨します。")
             
     # 3. 単価改善
     if per_invite_revenue < 8000:
-        advice_content.append(f"💡 **単価改善案**: 1招待期待値が ¥{int(per_invite_revenue):,} です。完走報酬が高いキャンペーン（例：5500円系）の比率を 20% 高めるだけで、月間収益は ¥{int(actual_daily_invites * 30 * 500):,} 増加する見込みです。")
+        advice_content.append(f"💡 <b>単価改善案</b>: 1招待期待値が ¥{int(per_invite_revenue):,} です。完走報酬が高いキャンペーンの比率を高めるだけで、収益はさらに向上する見込みです。")
 
     st.markdown(f"""
         <div class="advice-card">
