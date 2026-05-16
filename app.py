@@ -124,7 +124,11 @@ ratio_f_keep = (1 - success_rate) * keep_rate_fail
 cycle_full = prep_days + checkin_days
 cycle_reset = prep_days + 1
 avg_child_cycle = (cycle_full * (ratio_s_keep + ratio_f_keep)) + (cycle_reset * (1 - (ratio_s_keep + ratio_f_keep)))
-actual_daily_invites = min(parent_count/parent_cycle, child_count/avg_child_cycle)
+
+# 変数を明示的に定義
+daily_parent_cap = parent_count / parent_cycle
+daily_child_cap = child_count / avg_child_cycle
+actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
 # --- タブ ---
 tab1, tab2, tab3, tab4 = st.tabs(["📊 ダッシュボード", "🔄 稼働分析", "💰 報酬・種別管理", "📈 実績分析"])
