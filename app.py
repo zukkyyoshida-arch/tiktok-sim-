@@ -8,7 +8,7 @@ import re
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Studio Midnight v6.4",
+    page_title="TikTok Studio Midnight v7.0",
     page_icon="🕶️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -17,7 +17,6 @@ st.set_page_config(
 # --- 漆黒のプレミアム・ダークモード CSS ---
 st.markdown("""
     <style>
-    /* 全体背景とフォント */
     .main { background-color: #000000; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     [data-testid="stSidebar"] { background-color: #050505; border-right: 1px solid #222222; }
     h1, h2, h3 { color: #ffffff; font-weight: 700; letter-spacing: -0.02em; }
@@ -63,17 +62,81 @@ if 'checkin_rewards_df' not in st.session_state:
     ])
 if 'actual_res' not in st.session_state: st.session_state.actual_res = None
 
+# --- 解析・補正関数 ---
+def fetch_data(f_mode, l_days=None, t_month=None):
+    sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
+    gid = "937207441"
+    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
+    try:
+        df = pd.read_csv(url, header=4)
+        f_col, l_col, q_col, j_col = df.columns[5], df.columns[11], df.columns[16], df.columns[9]
+        def parse_date(date_str):
+            if pd.isna(date_str) or not isinstance(date_str, str): return pd.NaT
+            clean = re.sub(r'\(.*?\)', '', date_str).strip()
+            try:
+                dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
+                if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
+                return dt
+            except: return pd.NaT
+        df['date'] = df[l_col].apply(parse_date)
+        df['is_success'] = df[f_col].astype(str).str.contains("成功")
+        df['model'] = df[j_col].fillna("不明")
+        
+        # メーカー判定ロジック
+        def get_brand(model_name):
+            m = str(model_name).upper()
+            if "XPERIA" in m: return "Xperia"
+            if "AQUOS" in m or "SH-" in m: return "AQUOS"
+            if "PIXEL" in m or "GOOGLE" in m: return "Pixel"
+            if "GALAXY" in m or "SC-" in m: return "Galaxy"
+            if "IPHONE" in m or "APPLE" in m: return "iPhone"
+            if "OPPO" in m: return "OPPO"
+            if "REDMI" in m or "XIAOMI" in m: return "Xiaomi"
+            return "その他"
+        df['brand'] = df['model'].apply(get_brand)
+
+        df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
+        if f_mode == "直近28日間":
+            rdf = df[df['date'] >= (datetime.now() - timedelta(days=l_days))].copy()
+        else:
+            target_dt = datetime.strptime(t_month, "%Y/%m")
+            rdf = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
+        if len(rdf) == 0: return "指定期間にデータが見つかりませんでした。"
+        
+        # 1. 基本集計 (キャンペーン別)
+        sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
+        sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
+        sum_df['運用比率'] = np.ceil((sum_df['試行数']/len(rdf))*100*1000)/1000
+        
+        # 2. メーカー別集計
+        brand_df = rdf.groupby('brand').agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
+        brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
+        
+        # 3. 具体機種別集計
+        model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
+        model_df['成功率'] = np.ceil(model_df['成功率']*100*1000)/1000
+        
+        daily = rdf.groupby(rdf['date'].dt.date).agg(試行数=('is_success','count'), 成功数=('is_success','sum')).reset_index()
+        daily['成功率'] = (daily['成功数']/daily['試行数'])*100
+        
+        st.session_state.actual_res = {
+            "summary": sum_df, "daily": daily, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
+            "brand": brand_df, "model_rank": model_df,
+            "total": len(rdf), "success": rdf['is_success'].sum(),
+            "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
+        }
+        return None
+    except Exception as e: return str(e)
+
 # --- サイドバー設定 ---
 with st.sidebar:
     st.markdown("<h2 style='color:#0088ff;'>設定パネル</h2>", unsafe_allow_html=True)
     total_dev = st.number_input("総デバイス数", value=1800)
     parent_dev = st.number_input("親デバイス数", value=300)
     st.markdown("---")
-    default_s = 80
-    if st.session_state.actual_res: 
-        # 実績がある場合は四捨五入して整数にする
-        default_s = int(round(st.session_state.actual_res['rate']))
-    success_p = st.slider("想定成功率 (%)", 0, 100, default_s, step=1) / 100
+    default_s = 80.0
+    if st.session_state.actual_res: default_s = st.session_state.actual_res['rate']
+    success_p = st.slider("想定成功率 (%)", 0, 100, int(round(default_s)), step=1) / 100
     keep_s = st.slider("成功時キープ率 (%)", 0, 100, 100) / 100
     keep_f = st.slider("失敗時キープ率 (%)", 0, 100, 30) / 100
 
@@ -89,63 +152,17 @@ actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 c_inv = st.session_state.invite_types_df.fillna(0)
 w_immediate = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
 w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
-
-c_vid = st.session_state.video_rewards_df.copy()
-if "有効" in c_vid.columns:
-    c_vid["有効"] = c_vid["有効"].fillna(False).astype(bool)
-    final_video_reward = c_vid[c_vid["有効"]]["報酬額"].fillna(0).sum()
-else: final_video_reward = 0
-
 c_check = st.session_state.checkin_rewards_df.fillna(0)
 expected_checkin_reward = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
-
-per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + final_video_reward) * r_keep)
-
-# --- 解析・補正関数 ---
-def fetch_data(f_mode, l_days=None, t_month=None):
-    sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
-    gid = "937207441"
-    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
-    try:
-        df = pd.read_csv(url, header=4)
-        f_col, l_col, q_col = df.columns[5], df.columns[11], df.columns[16]
-        def parse_date(date_str):
-            if pd.isna(date_str) or not isinstance(date_str, str): return pd.NaT
-            clean = re.sub(r'\(.*?\)', '', date_str).strip()
-            try:
-                dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
-                if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
-                return dt
-            except: return pd.NaT
-        df['date'] = df[l_col].apply(parse_date)
-        df['is_success'] = df[f_col].astype(str).str.contains("成功")
-        df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
-        if f_mode == "直近28日間":
-            rdf = df[df['date'] >= (datetime.now() - timedelta(days=l_days))].copy()
-        else:
-            target_dt = datetime.strptime(t_month, "%Y/%m")
-            rdf = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
-        if len(rdf) == 0: return "指定期間にデータが見つかりませんでした。"
-        sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
-        sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
-        sum_df['運用比率'] = np.ceil((sum_df['試行数']/len(rdf))*100*1000)/1000
-        daily = rdf.groupby(rdf['date'].dt.date).agg(試行数=('is_success','count'), 成功数=('is_success','sum')).reset_index()
-        daily['成功率'] = (daily['成功数']/daily['試行数'])*100
-        st.session_state.actual_res = {
-            "summary": sum_df, "daily": daily, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
-            "total": len(rdf), "success": rdf['is_success'].sum(),
-            "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
-        }
-        return None
-    except Exception as e: return str(e)
+per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + 1000) * r_keep) # 動画報酬概算1000円
 
 # --- タブ表示 ---
-tab_dash, tab_analytics, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
+tab_dash, tab_analytics, tab_device, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
 with tab_dash:
     st.markdown("## 運用パフォーマンス予測")
     c1, c2, c3 = st.columns(3)
-    with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", "現在の設定に基づく概算")
+    with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", "設定に基づく概算")
     with c2: custom_metric("1日あたり招待予測", f"{actual_daily_invites:.1f} 件", f"ボトルネック: {'親端末' if daily_parent_cap < daily_child_cap else '子端末'}")
     with c3: custom_metric("リソース効率", f"{r_keep*100:.1f}%", "端末の平均稼働率")
     
@@ -160,18 +177,17 @@ with tab_dash:
 with tab_analytics:
     st.markdown("## リアルタイム実績分析")
     ac1, ac2, ac3 = st.columns([2,2,1])
-    with ac1: f_m = st.radio("集計期間", ["直近28日間", "月指定"], horizontal=True)
+    with ac1: f_m = st.radio("集計期間", ["直近28日間", "月指定"], horizontal=True, key="an_fmode")
     with ac2:
         if f_m == "直近28日間": l_d = 28; t_m = None
         else:
             months = [(datetime.now() - timedelta(days=30*i)).strftime("%Y/%m") for i in range(12)]
-            t_m = st.selectbox("対象月", months); l_d = None
-    with ac3: st.write(""); st.write(""); btn_s = st.button("データを同期", use_container_width=True)
-
+            t_m = st.selectbox("対象月", months, key="an_month"); l_d = None
+    with ac3: st.write(""); st.write(""); btn_s = st.button("データを同期", use_container_width=True, key="an_sync")
     if btn_s: 
         err = fetch_data(f_m, l_days=l_d, t_month=t_m)
         if err: st.error(err)
-        else: st.success("同期が完了しました！")
+        else: st.success("同期完了！")
 
     if st.session_state.actual_res:
         res = st.session_state.actual_res
@@ -180,23 +196,36 @@ with tab_analytics:
         with mc1: custom_metric("総試行数", f"{res['total']:,}")
         with mc2: custom_metric("成功数", f"{res['success']:,}")
         with mc3: custom_metric("平均成功率", f"{res['rate']:.3f}%")
-        
         st.markdown("### 掲載結果の推移")
         fig = px.area(res['daily'], x='date', y='試行数', color_discrete_sequence=['#0088ff'])
-        fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#666", 
-                          xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor="#111"))
+        fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#666", xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor="#111"))
         st.plotly_chart(fig, use_container_width=True)
+        st.dataframe(res['summary'].sort_values('成功率', ascending=False), use_container_width=True, hide_index=True)
+
+with tab_device:
+    st.markdown("## 📱 機種別パフォーマンス・インサイト")
+    if st.session_state.actual_res:
+        res = st.session_state.actual_res
+        st.markdown("### 🏢 メーカー別（ブランド別）成功率ランキング")
+        b_df = res['brand'].sort_values('成功率', ascending=False)
+        fig_brand = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
+        fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
+        st.plotly_chart(fig_brand, use_container_width=True)
         
-        st.markdown("### キャンペーン別ランキング")
-        df_p = res['summary'].sort_values('成功率', ascending=False)
-        df_p['成功率'] = df_p['成功率'].map('{:.3f}%'.format)
-        df_p['運用比率'] = df_p['運用比率'].map('{:.3f}%'.format)
-        st.dataframe(df_p, use_container_width=True, hide_index=True)
+        st.markdown("---")
+        st.markdown("### 🔍 詳細機種別（型番別）成功率ランキング")
+        m_df = res['model_rank'].sort_values('成功率', ascending=False)
+        # 試行数が少なすぎるものは除外（ノイズ対策）
+        m_df = m_df[m_df['試行数'] >= 1] 
+        display_m = m_df.copy()
+        display_m['成功率'] = display_m['成功率'].map('{:.3f}%'.format)
+        st.dataframe(display_m, use_container_width=True, hide_index=True)
+    else:
+        st.info("「実績分析」タブでデータを同期すると、機種別の詳細分析が表示されます。")
 
 with tab_sim:
     st.markdown("## 回転戦略の深掘り")
     st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:4px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
-    
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     with c1:
@@ -215,4 +244,4 @@ with tab_config:
     st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True)
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Midnight Pro v6.4 | 日本語完全対応")
+st.sidebar.caption("Midnight Pro v7.0 | Device Insight Edition")
