@@ -267,7 +267,9 @@ with tab_dash:
                 worst_b = b_df.loc[b_df['成功率'].idxmin()]
                 diff_p = (best_b['成功率'] - worst_b['成功率']) / 100
                 if diff_p > 0.05: # 5%以上の差がある場合
-                    potential = int(actual_daily_invites * 30 * diff_p * per_invite_revenue / len(b_df))
+                    # そのブランドが占める実稼働シェア（試行数/全試行数）を基に計算
+                    brand_share = worst_b['試行数'] / res['total']
+                    potential = int(actual_daily_invites * 30 * diff_p * per_invite_revenue * brand_share)
                     advice_content.append(f"📱 <b>端末の最適化</b>: {worst_b['brand']} の成功率が低迷しています。これを {best_b['brand']} 並みに改善（またはリプレイス）することで、月間約 <b>¥{potential:,}</b> の増収が見込めます。")
 
         # 5. キャンペーン期待値のガチンコ比較 (ROI分析)
