@@ -241,9 +241,26 @@ with tab_dash:
                 worst_b = b_df.loc[b_df['成功率'].idxmin()]
                 diff_p = (best_b['成功率'] - worst_b['成功率']) / 100
                 if diff_p > 0.05: # 5%以上の差がある場合
-                    # 全体の1/N（メーカー数分の一）が不調機だと仮定して機会損失を計算
                     potential = int(actual_daily_invites * 30 * diff_p * per_invite_revenue / len(b_df))
                     advice_content.append(f"📱 <b>端末の最適化</b>: {worst_b['brand']} の成功率が低迷しています。これを {best_b['brand']} 並みに改善（またはリプレイス）することで、月間約 <b>¥{potential:,}</b> の増収が見込めます。")
+
+    # 4. 総デバイス数固定での最適配分アドバイス (黄金比)
+    p_opt = int(total_dev * p_cycle / (avg_cycle + p_cycle))
+    c_opt = total_dev - p_opt
+    
+    # 現状と最適値の差
+    diff_p = p_opt - parent_dev
+    if abs(diff_p) >= 1: # 1台以上のズレがある場合
+        # 最適化後の招待数
+        opt_daily_invites = p_opt / p_cycle
+        # 増収額 (1日あたり -> 月間)
+        monthly_boost = int((opt_daily_invites - actual_daily_invites) * 30 * per_invite_revenue)
+        
+        if monthly_boost > 1000: # 有意な増収が見込める場合
+            if diff_p > 0:
+                advice_content.append(f"⚖️ <b>リソース配分の最適化</b>: 現在、子端末が過剰です。子端末 <b>{abs(diff_p)} 台</b> を「親」に転換して <b>親:{p_opt}台 / 子:{c_opt}台</b> の構成にすることで、追加投資なしで月間 <b>¥{monthly_boost:,}</b> の増収が可能です。")
+            else:
+                advice_content.append(f"⚖️ <b>リソース配分の最適化</b>: 現在、親端末が過剰です。親端末 <b>{abs(diff_p)} 台</b> を「子」に転換して <b>親:{p_opt}台 / 子:{c_opt}台</b> の構成にすることで、回転効率が上がり月間 <b>¥{monthly_boost:,}</b> の増収が可能です。")
 
     if not advice_content:
         advice_content.append("✅ 現在の運用バランスは非常に良好です。実績データを同期し続けることで、さらに細かい最適化ポイントを抽出します。")
