@@ -71,20 +71,22 @@ if 'initialized' not in st.session_state:
     st.session_state.invite_types_df = pd.DataFrame([
         {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
         {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0.0},
+        {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0.0},
         {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0.0},
-        {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0.0}
+        {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0.0},
+        {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0.0}
     ])
-    st.session_state.video_rewards_df = pd.DataFrame([{"動画パターン名": "通常再生報酬", "報酬額": 1000, "有効": True}])
+    st.session_state.video_rewards_df = pd.DataFrame([
+        {"動画パターン名": "なし", "報酬額": 0, "運用比率(%)": 0.0},
+        {"動画パターン名": "特別1350", "報酬額": 1350, "運用比率(%)": 100.0},
+        {"動画パターン名": "特別2700", "報酬額": 2700, "運用比率(%)": 0.0},
+        {"動画パターン名": "特別6000", "報酬額": 6000, "運用比率(%)": 0.0}
+    ])
     st.session_state.checkin_rewards_df = pd.DataFrame([
-        {"報酬名": "ティア1", "報酬額": 1350, "出現確率(%)": 40.0},
-        {"報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
-        {"報酬名": "ティア3", "報酬額": 6750, "出現確率(%)": 20.0}
+        {"チェックイン追加報酬名": "ティア1", "報酬額": 1350, "出現確率(%)": 40.0},
+        {"チェックイン追加報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
+        {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
     ])
-    st.session_state.total_dev_val = 1800
-    st.session_state.parent_dev_val = 300
-    st.session_state.success_rate_val = 80
-    st.session_state.keep_success_val = 100
-    st.session_state.keep_failure_val = 30
     load_settings_from_sheet()
     st.session_state.initialized = True
 if 'actual_res' not in st.session_state: st.session_state.actual_res = None
@@ -130,9 +132,9 @@ c_inv = st.session_state.invite_types_df.fillna(0)
 w_immediate = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
 w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
 
-# 動画報酬 (有効なものだけ合計)
+# 動画報酬 (運用比率に基づいて期待値を計算)
 c_vid = st.session_state.video_rewards_df.fillna(0)
-expected_video_reward = sum(c_vid[c_vid["有効"] == True]["報酬額"]) if "報酬額" in c_vid.columns else 1000
+expected_video_reward = sum(c_vid["報酬額"] * c_vid["運用比率(%)"] / 100)
 
 # チェックイン報酬
 c_check = st.session_state.checkin_rewards_df.fillna(0)
@@ -370,11 +372,31 @@ with tab_sim:
     with sc2: st.markdown("<div style='background:#0a0a0a; padding:20px; border-radius:10px; border:1px solid #1a1a1a;'><b>❌ 失敗時の挙動</b><br>発生確率: "+f"{(1-success_p)*100:.1f}%<br>キープ率: "+f"{keep_f*100:.1f}%<br>拘束期間: "+f"{(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f} 日</div>", unsafe_allow_html=True)
 
 with tab_config:
-    st.markdown("## 報酬・種別設定 (クラウド連携)")
-    # ユーザーが自由に編集できるテーブル
-    new_invite_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True, key="editor_invite_types")
-    new_video_df = st.data_editor(st.session_state.video_rewards_df, num_rows="dynamic", use_container_width=True, key="editor_video_rewards")
-    new_checkin_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True, key="editor_checkin_rewards")
+    st.markdown("## 報酬・種別設定 (運用比率のみ編集可能)")
+    
+    st.markdown("### 1. 招待キャンペーン設定")
+    new_invite_df = st.data_editor(
+        st.session_state.invite_types_df, 
+        use_container_width=True, 
+        disabled=["キャンペーン名", "即時報酬", "完走報酬"],
+        key="editor_invite_types"
+    )
+    
+    st.markdown("### 2. 動画報酬パターン設定")
+    new_video_df = st.data_editor(
+        st.session_state.video_rewards_df, 
+        use_container_width=True, 
+        disabled=["動画パターン名", "報酬額"],
+        key="editor_video_rewards"
+    )
+    
+    st.markdown("### 3. チェックイン追加報酬設定")
+    new_checkin_df = st.data_editor(
+        st.session_state.checkin_rewards_df, 
+        use_container_width=True, 
+        disabled=["チェックイン追加報酬名", "報酬額"],
+        key="editor_checkin_rewards"
+    )
     
     # 変更があったら即座にセッション状態に反映（計算に使うため）
     st.session_state.invite_types_df = new_invite_df
