@@ -7,9 +7,13 @@ from datetime import datetime, timedelta
 import re
 import json
 import requests
+from streamlit_autorefresh import st_autorefresh
 
 # ページ設定
 st.set_page_config(page_title="TikTok Studio Midnight v10.8", page_icon="🕶️", layout="wide", initial_sidebar_state="expanded")
+
+# 10分ごとに自動更新 (600,000ミリ秒)
+st_autorefresh(interval=600000, key="datarefresh")
 
 # --- スプレッドシート連携 (GAS API) ロジック ---
 GAS_URL = "https://script.google.com/macros/s/AKfycbwQuf80VDu7cqIaF2lM9CzIR1vFoDcFzxZzLU1rQakbgIgK6VW7c0EXtyQ8baZtaL3bzg/exec"
@@ -104,6 +108,8 @@ if 'initialized' not in st.session_state:
         {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
     ])
     load_settings_from_sheet()
+    # 起動時に自動でデータを取得 (リアルタイムAPI)
+    fetch_data("直近28日間", l_days=28)
     st.session_state.initialized = True
 if 'actual_res' not in st.session_state: st.session_state.actual_res = None
 
