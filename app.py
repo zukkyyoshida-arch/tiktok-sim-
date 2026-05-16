@@ -176,13 +176,7 @@ with tab_dash:
     with c2: custom_metric("1日あたりの招待予測", f"{actual_daily_invites:.1f}", f"最大成功: {actual_daily_invites*success_p:.1f}/日")
     with c3: custom_metric("リソース稼働率", f"{r_keep*100:.1f}%", "端末回転の健全性")
     
-    st.markdown("### 収益の推移予測 (今後30日間)")
-    days_range = list(range(1, 31))
-    rev_forecast = [int(actual_daily_invites * d * per_invite_revenue) for d in days_range]
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=days_range, y=rev_forecast, mode='lines', line=dict(color='#0088ff', width=4), fill='tozeroy', fillcolor='rgba(0,136,255,0.1)'))
-    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=20, b=0), height=300, xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#222'))
-    st.plotly_chart(fig, use_container_width=True)
+    st.markdown("---")
 
     st.markdown("---")
     st.markdown("### 📊 運用コンサルタントの定量アドバイス")
