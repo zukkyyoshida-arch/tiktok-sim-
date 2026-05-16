@@ -201,7 +201,12 @@ with tab_analytics:
     if st.session_state.actual_res:
         res = st.session_state.actual_res
         mc1, mc2, mc3 = st.columns(3)
-        with mc1: custom_metric("総試行数", f"{res['total']:,}"); with mc2: custom_metric("成功数", f"{res['success']:,}"); with mc3: custom_metric("成功率", f"{res['rate']:.3f}%")
+        with mc1:
+            custom_metric("総試行数", f"{res['total']:,}")
+        with mc2:
+            custom_metric("成功数", f"{res['success']:,}")
+        with mc3:
+            custom_metric("成功率", f"{res['rate']:.3f}%")
 
 with tab_device:
     st.markdown("## 📱 機種別パフォーマンス")
