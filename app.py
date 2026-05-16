@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Lite Strategy Simulator v2.2",
+    page_title="TikTok Lite Strategy Simulator v2.3",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -27,14 +27,18 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📱 TikTok Lite 運用戦略シミュレーター v2.2")
+st.title("📱 TikTok Lite 運用戦略シミュレーター v2.3")
 st.markdown("1800台体制での招待・回転・収益を最適化するための参謀ツール")
 
 # --- セッション状態の初期化 ---
-if 'base_invite_patterns' not in st.session_state:
-    st.session_state.base_invite_patterns = [
-        {"name": "通常招待キャンペーン", "amount": 2500, "active": True},
-        {"name": "特別イベント招待", "amount": 5000, "active": False}
+if 'invite_types' not in st.session_state:
+    st.session_state.invite_types = [
+        {"name": "ブタ5000", "immediate": 5000, "task": 0, "ratio": 100},
+        {"name": "ブタ2500", "immediate": 2500, "task": 2500, "ratio": 0},
+        {"name": "QRコード招待", "immediate": 3000, "task": 0, "ratio": 0},
+        {"name": "通常招待", "immediate": 0, "task": 5500, "ratio": 0},
+        {"name": "ヒットチャレンジ", "immediate": 5500, "task": 0, "ratio": 0},
+        {"name": "即招待", "immediate": 2800, "task": 0, "ratio": 0}
     ]
 
 if 'checkin_rewards' not in st.session_state:
@@ -71,20 +75,14 @@ with st.sidebar:
     with st.expander("🎯 成功・歩留まり率", expanded=True):
         success_rate = st.slider("招待成功率 (%)", 0, 100, 80) / 100
         high_reward_on_fail = st.slider("失敗時の高報酬(キープ)率 (%)", 0, 100, 30) / 100
-        st.caption("※高報酬端末は失敗しても14日間維持すると仮定")
 
 # --- ロジック計算 ---
 
 # 子端末の平均サイクル計算
-# 1. 成功 + 失敗キープ端末 (prep + task)
 full_cycle = prep_days + checkin_days
 full_ratio = success_rate + (1 - success_rate) * high_reward_on_fail
-
-# 2. 失敗即リセット端末 (prep + 1日)
 reset_cycle = prep_days + 1
 reset_ratio = (1 - success_rate) * (1 - high_reward_on_fail)
-
-# 平均サイクル (加重平均)
 avg_child_cycle = (full_cycle * full_ratio) + (reset_cycle * reset_ratio)
 
 # 1日あたりのキャパシティ
@@ -93,21 +91,38 @@ daily_child_cap = child_count / avg_child_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
 # タブ構成
-tab1, tab2, tab3 = st.tabs(["📊 ダッシュボード", "🔄 稼働シミュレーション", "💰 報酬・パターン設定"])
+tab1, tab2, tab3 = st.tabs(["📊 ダッシュボード", "🔄 稼働シミュレーション", "💰 招待種別・報酬設定"])
 
 with tab3:
-    st.subheader("💰 報酬ソースの個別管理")
-    col_a, col_b, col_c = st.columns(3)
+    st.subheader("💼 招待種別ポートフォリオ")
+    st.write("運用する招待種別の配分を設定してください（合計100%に調整）。")
     
-    with col_a:
-        st.markdown("### ① 招待種別")
-        selected_base = 0
-        for i, p in enumerate(st.session_state.base_invite_patterns):
-            if st.checkbox(f"{p['name']} (¥{p['amount']:,})", value=p['active'], key=f"base_{i}"):
-                selected_base = p['amount']
+    updated_types = []
+    total_ratio = 0
+    cols = st.columns(len(st.session_state.invite_types))
     
-    with col_b:
-        st.markdown("### ② チェックイン報酬")
+    for i, itype in enumerate(st.session_state.invite_types):
+        with st.expander(f"{itype['name']}", expanded=True):
+            ratio = st.number_input(f"配分 (%)", min_value=0, max_value=100, value=itype['ratio'], key=f"ratio_{i}")
+            imm = st.number_input(f"即時報酬", value=itype['immediate'], key=f"imm_{i}")
+            task = st.number_input(f"完走報酬", value=itype['task'], key=f"task_{i}")
+            updated_types.append({"name": itype['name'], "immediate": imm, "task": task, "ratio": ratio})
+            total_ratio += ratio
+
+    if total_ratio != 100:
+        st.error(f"配分の合計を100%にしてください（現在: {total_ratio}%）")
+    
+    st.session_state.invite_types = updated_types
+
+    # 加重平均の算出
+    w_immediate = sum(t['immediate'] * t['ratio'] / 100 for t in updated_types)
+    w_task = sum(t['task'] * t['ratio'] / 100 for t in updated_types)
+
+    st.divider()
+    st.subheader("💰 追加報酬設定")
+    c_b, c_v = st.columns(2)
+    with c_b:
+        st.markdown("### チェックイン追加報酬")
         p1 = st.slider("1350円の確率 (%)", 0, 100, st.session_state.checkin_rewards["tier1"]["prob"])
         p2 = st.slider("2700円の確率 (%)", 0, 100 - p1, st.session_state.checkin_rewards["tier2"]["prob"])
         p3 = 100 - p1 - p2
@@ -115,21 +130,17 @@ with tab3:
         expected_checkin = (1350 * p1/100) + (2700 * p2/100) + (6750 * p3/100)
         st.write(f"**期待値: ¥{int(expected_checkin):,}**")
 
-    with col_c:
-        st.markdown("### ③ 動画再生報酬")
+    with c_v:
+        st.markdown("### 動画再生追加報酬")
         selected_video = 0
         for i, p in enumerate(st.session_state.video_rewards):
             if st.checkbox(f"{p['name']} (¥{p['amount']:,})", value=p['active'], key=f"video_{i}"):
                 selected_video += p['amount']
-    
-    # 収益計算（成功時のみもらえるものと、チェックイン等でもらえるものを考慮）
-    # ここでは単純化のため、招待成功率を全体の期待値に乗じる
-    # 招待種別は成功時のみ、追加報酬（チェックイン/動画）は「キープ」した端末からももらえると仮定
-    per_invite_revenue = (selected_base * success_rate) + (expected_checkin * full_ratio) + (selected_video * full_ratio)
-    
-    st.divider()
-    st.metric("1招待(試行)あたりの平均期待収益", f"¥{int(per_invite_revenue):,}")
-    st.caption("※招待成功報酬は成功率を乗算、追加報酬はキープ端末分も含む")
+        st.write(f"**合計: ¥{selected_video:,}**")
+
+    # 最終的な1招待あたりの期待収益
+    # 即時報酬は成功時のみ、後続報酬(Task + Checkin + Video)は成功およびキープ端末から
+    per_invite_revenue = (w_immediate * success_rate) + ((w_task + expected_checkin + selected_video) * full_ratio)
 
 with tab1:
     col1, col2, col3, col4 = st.columns(4)
@@ -145,12 +156,12 @@ with tab1:
         bottleneck = "親端末" if daily_parent_cap < daily_child_cap else "子端末"
         st.metric("ボトルネック", bottleneck)
 
-    st.subheader("📊 収益ソースの内訳 (1招待あたり)")
+    st.subheader("📊 収益の内訳")
     reward_breakdown = pd.DataFrame({
-        "ソース": ["招待種別(成功分)", "チェックイン報酬(キープ分)", "動画再生報酬(キープ分)"],
-        "金額": [selected_base * success_rate, expected_checkin * full_ratio, selected_video * full_ratio]
+        "ソース": ["即時報酬 (成功分)", "完走・追加報酬 (キープ分)"],
+        "金額": [w_immediate * success_rate, (w_task + expected_checkin + selected_video) * full_ratio]
     })
-    fig_pie = px.pie(reward_breakdown, values='金額', names='ソース', hole=0.4, color_discrete_sequence=px.colors.sequential.RdBu)
+    fig_pie = px.pie(reward_breakdown, values='金額', names='ソース', hole=0.4)
     fig_pie.update_layout(template="plotly_dark")
     st.plotly_chart(fig_pie, use_container_width=True)
 
@@ -167,7 +178,6 @@ with tab1:
 with tab2:
     st.subheader("🔄 回転戦略の詳細")
     st.write(f"平均子端末サイクル: **{avg_child_cycle:.2f} 日**")
-    
     c1, c2, c3 = st.columns(3)
     with c1:
         st.success(f"### 成功端末\n割合: {success_rate*100:.0f}%\nサイクル: {full_cycle:.1f}日")
@@ -176,8 +186,5 @@ with tab2:
     with c3:
         st.error(f"### 失敗(リセット)\n割合: {reset_ratio*100:.0f}%\nサイクル: {reset_cycle:.1f}日")
 
-    st.divider()
-    st.info(f"### 1日あたりの供給能力\n- 親端末枠: {daily_parent_cap:.1f} 件\n- 子端末供給: {daily_child_cap:.1f} 件")
-
 st.sidebar.markdown("---")
-st.sidebar.caption("Created by Antigravity Assistant v2.2")
+st.sidebar.caption("Created by Antigravity Assistant v2.3")
