@@ -262,10 +262,31 @@ else:
     w_immediate = w_task = expected_video_reward = expected_checkin_reward = 0
     per_invite_revenue = 1000 # フォールバック
 
+# --- アプリ起動の門番（初期化完了まで待機） ---
+if not st.session_state.get('initialized'):
+    st.markdown("<h3 style='text-align:center; margin-top:100px;'>🕶️ Midnight Analytics 起動中...</h3>", unsafe_allow_html=True)
+    st.stop()
+
 tab_dash, tab_analytics, tab_device, tab_parent, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
 with tab_dash:
     st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
+    
+    # 20時以降の「本日確定レポート」ロジック
+    now_hour = datetime.now().hour
+    if now_hour >= 20:
+        st.info(f"🌙 **20:00を過ぎました。本日の運用データ（8-17時分）が確定しています。**")
+        if st.session_state.actual_res:
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            d_trend = st.session_state.actual_res.get('daily_trend')
+            if d_trend is not None and not d_trend.empty:
+                d_trend['date_str'] = pd.to_datetime(d_trend['date']).dt.strftime('%Y-%m-%d')
+                today_res = d_trend[d_trend['date_str'] == today_str]
+                if not today_res.empty:
+                    t_success = today_res.iloc[0]['成功数']
+                    t_rate = today_res.iloc[0]['成功率']
+                    st.success(f"📈 **本日の最終リザルト**: 成功数 **{t_success} 台** / 成功率 **{t_rate:.1f}%** でした。お疲れ様でした！")
+    
     monthly_revenue = actual_daily_invites * 30 * per_invite_revenue
     c1, c2, c3 = st.columns(3)
     with c1: custom_metric("予測月間収益", f"¥{int(monthly_revenue):,}", f"1招待期待: ¥{int(per_invite_revenue):,}")
