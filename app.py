@@ -69,9 +69,11 @@ with st.sidebar:
     total_dev = st.number_input("総デバイス数", value=1800)
     parent_dev = st.number_input("親デバイス数", value=300)
     st.markdown("---")
-    default_s = 80.0
-    if st.session_state.actual_res: default_s = st.session_state.actual_res['rate']
-    success_p = st.slider("想定成功率 (%)", 0.0, 100.0, default_s) / 100
+    default_s = 80
+    if st.session_state.actual_res: 
+        # 実績がある場合は四捨五入して整数にする
+        default_s = int(round(st.session_state.actual_res['rate']))
+    success_p = st.slider("想定成功率 (%)", 0, 100, default_s, step=1) / 100
     keep_s = st.slider("成功時キープ率 (%)", 0, 100, 100) / 100
     keep_f = st.slider("失敗時キープ率 (%)", 0, 100, 30) / 100
 
