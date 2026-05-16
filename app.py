@@ -10,7 +10,7 @@ import os
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Studio Midnight v9.0",
+    page_title="TikTok Studio Midnight v9.2",
     page_icon="🕶️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -120,7 +120,7 @@ with st.sidebar:
     # 手動保存ボタン
     if st.sidebar.button("💾 現在の設定を保存", use_container_width=True):
         save_settings()
-        st.sidebar.success("保存しました！")
+        st.sidebar.success("保存完了！")
 
 # --- 計算ロジック ---
 child_dev = total_dev - parent_dev
@@ -138,7 +138,7 @@ c_check = st.session_state.checkin_rewards_df.fillna(0)
 expected_checkin_reward = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
 per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + 1000) * r_keep)
 
-# --- 解析・補正関数 ---
+# --- 解析関数 ---
 def fetch_data(f_mode, l_days=None, t_month=None):
     sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
     gid = "937207441"
@@ -196,13 +196,11 @@ with tab_dash:
         req_child = int(np.ceil(daily_parent_cap * avg_cycle))
         shortage = req_child - child_dev
         advice_content.append(f"🔵 <b>子端末の不足</b>: <b>あと {shortage} 台</b> の子を追加すれば、月間収益を約 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 上乗せできます。")
-    
     if st.session_state.actual_res:
         act_rate = st.session_state.actual_res['rate']
         if act_rate < 80:
             loss_per_day = actual_daily_invites * (0.8 - act_rate/100) * per_invite_revenue
             advice_content.append(f"🚨 <b>収益漏れ警告</b>: 成功率を 80% まで改善するだけで、月間 <b>¥{int(loss_per_day * 30):,}</b> の利益が積み増せます。")
-    
     st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 定量アクションプラン</div><div class='advice-text'>{'<br><br>'.join(advice_content)}</div></div>", unsafe_allow_html=True)
     st.markdown("## 運用パフォーマンス予測")
     c1, c2, c3 = st.columns(3)
@@ -252,12 +250,13 @@ with tab_sim:
 
 with tab_config:
     st.markdown("## 報酬・種別設定")
-    # キーを追加することで、編集内容がリセットされるのを防ぎます
+    
+    # 日本語入力（IME）の安定性を高めるためのデータ編集
     new_invite_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True, key="editor_invite_types")
     new_video_df = st.data_editor(st.session_state.video_rewards_df, num_rows="dynamic", use_container_width=True, key="editor_video_rewards")
     new_checkin_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True, key="editor_checkin_rewards")
     
-    # 変更があったら自動保存
+    # 変更があったら「静かに」同期
     if not new_invite_df.equals(st.session_state.invite_types_df) or \
        not new_video_df.equals(st.session_state.video_rewards_df) or \
        not new_checkin_df.equals(st.session_state.checkin_rewards_df):
@@ -265,7 +264,12 @@ with tab_config:
         st.session_state.video_rewards_df = new_video_df
         st.session_state.checkin_rewards_df = new_checkin_df
         save_settings()
-        st.success("設定を自動保存しました。")
+        # ここで st.success() を出すと画面が再描画されて日本語入力が途切れるため、あえて何も出しません。
+    
+    st.markdown("---")
+    if st.button("💾 全ての設定を今すぐ保存", use_container_width=True, key="manual_save_btn"):
+        save_settings()
+        st.success("全ての設定を保存しました。")
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Midnight Pro v9.0 | Persistence Edition")
+st.sidebar.caption("Midnight Pro v9.2 | IME Stable Edition")
