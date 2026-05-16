@@ -136,6 +136,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
             return "その他"
         
         rdf['brand'] = rdf['model'].apply(get_brand)
+        rdf['parent_brand'] = rdf['parent_model'].apply(get_brand)
         rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
 
         # 集計
@@ -149,6 +150,10 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         p_model_df = rdf.groupby('parent_model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         p_model_df['成功率'] = np.ceil(p_model_df['成功率']*100*1000)/1000
         p_model_df = p_model_df.sort_values('成功率', ascending=False)
+
+        p_brand_df = rdf.groupby('parent_brand').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        p_brand_df['成功率'] = np.ceil(p_brand_df['成功率']*100*1000)/1000
+        p_brand_df = p_brand_df.sort_values('成功率', ascending=False)
 
         brand_df = rdf.groupby('brand').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
@@ -164,6 +169,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
             "parent_rank": parent_df, "parent_model_rank": p_model_df,
+            "parent_brand_rank": p_brand_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
         }
@@ -439,6 +445,14 @@ def main():
         st.markdown("## 👑 親機パフォーマンス分析")
         res = st.session_state.get('actual_res')
         if res and 'parent_rank' in res:
+            # ブランド別集計を表示
+            if 'parent_brand_rank' in res:
+                st.markdown("### 🏷️ 親機ブランド別パフォーマンス")
+                pb_df = res['parent_brand_rank'].sort_values('成功率', ascending=False)
+                fig_pb = px.bar(pb_df, x='成功率', y='parent_brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.1f')
+                fig_pb.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=300)
+                st.plotly_chart(fig_pb, use_container_width=True)
+            
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown("### 🏆 個体別 (TOP10)")
