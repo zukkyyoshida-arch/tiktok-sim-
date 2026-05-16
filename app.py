@@ -16,9 +16,9 @@ st.set_page_config(
 
 # --- 漆黒のプレミアム・ダークモード CSS ---
 st.markdown("""
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-    .main { background-color: #000000; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+    /* 全体背景とフォント */
+    .main { background-color: #000000; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     [data-testid="stSidebar"] { background-color: #050505; border-right: 1px solid #222222; }
     h1, h2, h3 { color: #ffffff; font-weight: 700; letter-spacing: -0.02em; }
     .metric-container {
