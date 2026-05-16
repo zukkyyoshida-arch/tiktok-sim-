@@ -63,17 +63,17 @@ if 'checkin_rewards_df' not in st.session_state:
     ])
 if 'actual_res' not in st.session_state: st.session_state.actual_res = None
 
-# --- サイドバー設定 (ここで基本入力を受ける) ---
+# --- サイドバー設定 ---
 with st.sidebar:
-    st.markdown("<h2 style='color:#0088ff;'>Configuration</h2>", unsafe_allow_html=True)
-    total_dev = st.number_input("Total Devices", value=1800)
-    parent_dev = st.number_input("Parent Devices", value=300)
+    st.markdown("<h2 style='color:#0088ff;'>設定パネル</h2>", unsafe_allow_html=True)
+    total_dev = st.number_input("総デバイス数", value=1800)
+    parent_dev = st.number_input("親デバイス数", value=300)
     st.markdown("---")
     default_s = 80.0
     if st.session_state.actual_res: default_s = st.session_state.actual_res['rate']
-    success_p = st.slider("Success Rate (%)", 0.0, 100.0, default_s) / 100
-    keep_s = st.slider("Keep on Success (%)", 0, 100, 100) / 100
-    keep_f = st.slider("Keep on Failure (%)", 0, 100, 30) / 100
+    success_p = st.slider("想定成功率 (%)", 0.0, 100.0, default_s) / 100
+    keep_s = st.slider("成功時キープ率 (%)", 0, 100, 100) / 100
+    keep_f = st.slider("失敗時キープ率 (%)", 0, 100, 30) / 100
 
 # --- グローバル計算ロジック (全てのタブの前に実行) ---
 # 1. 子端末の計算
@@ -158,53 +158,53 @@ with tab_dash:
         st.markdown(f"<div style='background:#111; padding:24px; border-radius:12px; border:1px solid #00ff88;'>本日見込み収益: <span style='color:#00ff88; font-size:1.8rem; font-weight:700;'>¥{int(s_inv * per_invite_revenue):,}</span></div>", unsafe_allow_html=True)
 
 with tab_analytics:
-    st.markdown("## Real-time Data Analytics")
+    st.markdown("## リアルタイム実績分析")
     ac1, ac2, ac3 = st.columns([2,2,1])
-    with ac1: f_m = st.radio("Range", ["直近28日間", "月指定"], horizontal=True)
+    with ac1: f_m = st.radio("集計期間", ["直近28日間", "月指定"], horizontal=True)
     with ac2:
         if f_m == "直近28日間": l_d = 28; t_m = None
         else:
             months = [(datetime.now() - timedelta(days=30*i)).strftime("%Y/%m") for i in range(12)]
-            t_m = st.selectbox("Month", months); l_d = None
-    with ac3: st.write(""); st.write(""); btn_s = st.button("Sync Data", use_container_width=True)
+            t_m = st.selectbox("対象月", months); l_d = None
+    with ac3: st.write(""); st.write(""); btn_s = st.button("データを同期", use_container_width=True)
 
     if btn_s: 
         err = fetch_data(f_m, l_days=l_d, t_month=t_m)
         if err: st.error(err)
-        else: st.success("Data Synced!")
+        else: st.success("同期が完了しました！")
 
     if st.session_state.actual_res:
         res = st.session_state.actual_res
-        st.markdown(f"**Period: {res['period']}**")
+        st.markdown(f"**分析期間: {res['period']}**")
         mc1, mc2, mc3 = st.columns(3)
-        with mc1: custom_metric("Total Trials", f"{res['total']:,}")
-        with mc2: custom_metric("Total Success", f"{res['success']:,}")
-        with mc3: custom_metric("Avg Success Rate", f"{res['rate']:.3f}%")
+        with mc1: custom_metric("総試行数", f"{res['total']:,}")
+        with mc2: custom_metric("成功数", f"{res['success']:,}")
+        with mc3: custom_metric("平均成功率", f"{res['rate']:.3f}%")
         
-        st.markdown("### Performance Trend")
+        st.markdown("### 掲載結果の推移")
         fig = px.area(res['daily'], x='date', y='試行数', color_discrete_sequence=['#0088ff'])
         fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#666", 
                           xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor="#111"))
         st.plotly_chart(fig, use_container_width=True)
         
-        st.markdown("### Campaign Performance Ranking")
+        st.markdown("### キャンペーン別ランキング")
         df_p = res['summary'].sort_values('成功率', ascending=False)
         df_p['成功率'] = df_p['成功率'].map('{:.3f}%'.format)
         df_p['運用比率'] = df_p['運用比率'].map('{:.3f}%'.format)
         st.dataframe(df_p, use_container_width=True, hide_index=True)
 
 with tab_sim:
-    st.markdown("## Rotation Strategy Deep-dive")
-    st.info(f"Avg Rotation Cycle: {avg_cycle:.2f} Days")
-    st.plotly_chart(px.pie(names=["Success-Keep", "Success-Reset", "Fail-Keep", "Fail-Reset"], 
+    st.markdown("## 回転戦略の深掘り")
+    st.info(f"平均回転サイクル: {avg_cycle:.2f} 日")
+    st.plotly_chart(px.pie(names=["成功・キープ", "成功・リセット", "失敗・キープ", "失敗・リセット"], 
                            values=[success_p*keep_s, success_p*(1-keep_s), (1-success_p)*keep_f, (1-success_p)*(1-keep_f)],
                            hole=0.5, color_discrete_sequence=px.colors.sequential.Greens_r), use_container_width=True)
 
 with tab_config:
-    st.markdown("## Settings & Reward Management")
+    st.markdown("## 報酬・種別設定")
     st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True)
     st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, num_rows="dynamic", use_container_width=True)
     st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True)
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Midnight Pro v6.1 | Clean & Stable")
+st.sidebar.caption("Midnight Pro v6.2 | 日本語完全対応")
