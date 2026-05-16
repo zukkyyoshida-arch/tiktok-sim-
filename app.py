@@ -134,6 +134,7 @@ w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
 
 # 動画報酬 (運用比率に基づいて期待値を計算)
 c_vid = st.session_state.video_rewards_df.fillna(0)
+if "運用比率(%)" not in c_vid.columns: c_vid["運用比率(%)"] = 0.0
 expected_video_reward = sum(c_vid["報酬額"] * c_vid["運用比率(%)"] / 100)
 
 # チェックイン報酬
