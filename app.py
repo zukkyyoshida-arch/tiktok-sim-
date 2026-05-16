@@ -250,36 +250,39 @@ with tab_analytics:
         )
         st.plotly_chart(fig_success, use_container_width=True)
 
-        # 日次トレンドグラフを表示
+        # 統合トレンドグラフを表示 (成功数と成功率の2軸)
         if "daily_trend" in res:
-            st.markdown("### 📈 日次成功率トレンド")
+            st.markdown("### 📈 日次パフォーマンス・トレンド (成功数 × 成功率)")
             d_df = res['daily_trend']
-            fig_trend = px.line(
-                d_df, x='date', y='成功率',
-                markers=True, line_shape='spline',
-                color_discrete_sequence=['#00ff88'],
-                labels={'date': '日付', '成功率': '成功率 (%)'}
-            )
-            fig_trend.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                font_color="#e0e0e0", height=350,
-                xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#222')
-            )
-            st.plotly_chart(fig_trend, use_container_width=True)
+            
+            from plotly.subplots import make_subplots
+            fig_comb = make_subplots(specs=[[{"secondary_y": True}]])
 
-            # 日次成功数グラフを表示 (ボリューム)
-            st.markdown("### 📊 日次成功端末数トレンド")
-            fig_vol = px.bar(
-                d_df, x='date', y='成功数',
-                color='成功数', color_continuous_scale='Blues',
-                labels={'date': '日付', '成功数': '成功端末数'}
+            # 成功数 (棒グラフ - 左軸)
+            fig_comb.add_trace(
+                go.Bar(x=d_df['date'], y=d_df['成功数'], name="成功数 (台)", 
+                       marker_color='rgba(0,136,255,0.6)', offsetgroup=1),
+                secondary_y=False,
             )
-            fig_vol.update_layout(
+
+            # 成功率 (折れ線グラフ - 右軸)
+            fig_comb.add_trace(
+                go.Scatter(x=d_df['date'], y=d_df['成功率'], name="成功率 (%)", 
+                           line=dict(color='#00ff88', width=3), marker=dict(size=8),
+                           mode='lines+markers'),
+                secondary_y=True,
+            )
+
+            fig_comb.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                font_color="#e0e0e0", height=350,
-                xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#222')
+                font_color="#e0e0e0", height=450,
+                xaxis=dict(showgrid=False),
+                yaxis=dict(title="成功端末数 (台)", showgrid=True, gridcolor='#222'),
+                yaxis2=dict(title="成功率 (%)", showgrid=False, overlaying='y', side='right', range=[0, 100]),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                margin=dict(l=0, r=0, t=50, b=0)
             )
-            st.plotly_chart(fig_vol, use_container_width=True)
+            st.plotly_chart(fig_comb, use_container_width=True)
 
 with tab_device:
     st.markdown("## 📱 機種別パフォーマンス")
