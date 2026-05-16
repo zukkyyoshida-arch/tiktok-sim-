@@ -81,16 +81,37 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         # カラムインデックス: 5:成功/失敗, 9:機種, 11:日付, 13:親機, 16:キャンペーン
         f_idx, j_idx, l_idx, n_idx, q_idx = 5, 9, 11, 13, 16
         
-        def parse_date(date_str):
-            if not date_str or not isinstance(date_str, str): return pd.NaT
-            clean = re.sub(r'\(.*?\)', '', date_str).strip()
-            try:
-                dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
-                if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
-                return dt
+        def parse_date(val):
+            if not val or val == "" or val == "#REF!": return pd.NaT
+            # ISO形式 (2025-11-16T...) の場合
+            if isinstance(val, str) and "T" in val:
+                try: return pd.to_datetime(val).tz_localize(None)
+                except: pass
+            
+            # 文字列 (5/16 (土)) の場合
+            if isinstance(val, str):
+                clean = re.sub(r'\(.*?\)', '', val).strip()
+                try:
+                    # 形式が "12月" のみの場合は日付として扱わない
+                    if "月" in clean and "/" not in clean: return pd.NaT
+                    dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
+                    if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
+                    return dt
+                except: pass
+            
+            # 数値やDateオブジェクトの場合
+            try: return pd.to_datetime(val).tz_localize(None)
             except: return pd.NaT
 
-        df['date'] = df[l_idx].apply(parse_date)
+        # L列(11)とM列(12)の両方を日付候補としてチェックし、有効な方を採用
+        def get_valid_date(row):
+            d1 = parse_date(row[11])
+            if pd.notnull(d1) and d1.year > 1900: return d1
+            d2 = parse_date(row[12])
+            if pd.notnull(d2) and d2.year > 1900: return d2
+            return pd.NaT
+
+        df['date'] = df.apply(get_valid_date, axis=1)
         df['is_success'] = df[f_idx].astype(str).str.contains("成功")
         df['model'] = df[j_idx].fillna("不明")
         
