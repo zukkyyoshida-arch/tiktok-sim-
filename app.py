@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Lite Strategy Simulator v2.3",
+    page_title="TikTok Lite Strategy Simulator v2.4",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -27,19 +27,18 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📱 TikTok Lite 運用戦略シミュレーター v2.3")
-st.markdown("1800台体制での招待・回転・収益を最適化するための参謀ツール")
+st.title("📱 TikTok Lite 運用戦略シミュレーター v2.4")
 
 # --- セッション状態の初期化 ---
-if 'invite_types' not in st.session_state:
-    st.session_state.invite_types = [
-        {"name": "ブタ5000", "immediate": 5000, "task": 0, "ratio": 100},
-        {"name": "ブタ2500", "immediate": 2500, "task": 2500, "ratio": 0},
-        {"name": "QRコード招待", "immediate": 3000, "task": 0, "ratio": 0},
-        {"name": "通常招待", "immediate": 0, "task": 5500, "ratio": 0},
-        {"name": "ヒットチャレンジ", "immediate": 5500, "task": 0, "ratio": 0},
-        {"name": "即招待", "immediate": 2800, "task": 0, "ratio": 0}
-    ]
+if 'invite_types_df' not in st.session_state:
+    st.session_state.invite_types_df = pd.DataFrame([
+        {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100},
+        {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0},
+        {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0},
+        {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0},
+        {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0},
+        {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0}
+    ])
 
 if 'checkin_rewards' not in st.session_state:
     st.session_state.checkin_rewards = {
@@ -47,12 +46,6 @@ if 'checkin_rewards' not in st.session_state:
         "tier2": {"amount": 2700, "prob": 40},
         "tier3": {"amount": 6750, "prob": 20}
     }
-
-if 'video_rewards' not in st.session_state:
-    st.session_state.video_rewards = [
-        {"name": "通常動画再生", "amount": 1000, "active": True},
-        {"name": "ボーナス動画", "amount": 2000, "active": False}
-    ]
 
 # --- サイドバー：基本設定 ---
 with st.sidebar:
@@ -68,7 +61,6 @@ with st.sidebar:
         parent_rest_days = st.number_input("親の休息日 (中N日)", value=5)
         prep_hours = st.number_input("子の準備時間 (時間)", value=300)
         checkin_days = st.number_input("チェックイン期間 (日)", value=14)
-        
         prep_days = prep_hours / 24
         parent_cycle = parent_rest_days + 1
 
@@ -77,52 +69,53 @@ with st.sidebar:
         high_reward_on_fail = st.slider("失敗時の高報酬(キープ)率 (%)", 0, 100, 30) / 100
 
 # --- ロジック計算 ---
-
-# 子端末の平均サイクル計算
 full_cycle = prep_days + checkin_days
 full_ratio = success_rate + (1 - success_rate) * high_reward_on_fail
 reset_cycle = prep_days + 1
 reset_ratio = (1 - success_rate) * (1 - high_reward_on_fail)
 avg_child_cycle = (full_cycle * full_ratio) + (reset_cycle * reset_ratio)
 
-# 1日あたりのキャパシティ
 daily_parent_cap = parent_count / parent_cycle
 daily_child_cap = child_count / avg_child_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
-# タブ構成
-tab1, tab2, tab3 = st.tabs(["📊 ダッシュボード", "🔄 稼働シミュレーション", "💰 招待種別・報酬設定"])
+# --- タブ構成 ---
+tab1, tab2, tab3 = st.tabs(["📊 ダッシュボード", "🔄 稼働シミュレーション", "💰 報酬・種別管理"])
 
 with tab3:
-    st.subheader("💼 招待種別ポートフォリオ")
-    st.write("運用する招待種別の配分を設定してください（合計100%に調整）。")
+    st.subheader("💼 招待種別の管理（追加・削除・編集）")
+    st.info("表を直接クリックして編集できます。下の空行に入力して新しい種別を追加、行を選択してDeleteキーで削除できます。")
     
-    updated_types = []
-    total_ratio = 0
-    cols = st.columns(len(st.session_state.invite_types))
+    # データエディタの表示
+    edited_df = st.data_editor(
+        st.session_state.invite_types_df,
+        num_rows="dynamic",
+        column_config={
+            "運用比率(%)": st.column_config.NumberColumn(min_value=0, max_value=100, format="%d%%"),
+            "即時報酬": st.column_config.NumberColumn(format="¥%d"),
+            "完走報酬": st.column_config.NumberColumn(format="¥%d"),
+        },
+        use_container_width=True,
+        key="invite_editor"
+    )
     
-    for i, itype in enumerate(st.session_state.invite_types):
-        with st.expander(f"{itype['name']}", expanded=True):
-            ratio = st.number_input(f"配分 (%)", min_value=0, max_value=100, value=itype['ratio'], key=f"ratio_{i}")
-            imm = st.number_input(f"即時報酬", value=itype['immediate'], key=f"imm_{i}")
-            task = st.number_input(f"完走報酬", value=itype['task'], key=f"task_{i}")
-            updated_types.append({"name": itype['name'], "immediate": imm, "task": task, "ratio": ratio})
-            total_ratio += ratio
-
+    # 合計比率のチェック
+    total_ratio = edited_df["運用比率(%)"].sum()
     if total_ratio != 100:
-        st.error(f"配分の合計を100%にしてください（現在: {total_ratio}%）")
-    
-    st.session_state.invite_types = updated_types
+        st.error(f"「運用比率(%)」の合計を100%にしてください（現在: {total_ratio}%）")
+    else:
+        st.success("比率設定OK")
+        st.session_state.invite_types_df = edited_df
 
     # 加重平均の算出
-    w_immediate = sum(t['immediate'] * t['ratio'] / 100 for t in updated_types)
-    w_task = sum(t['task'] * t['ratio'] / 100 for t in updated_types)
+    w_immediate = sum(edited_df["即時報酬"] * edited_df["運用比率(%)"] / 100)
+    w_task = sum(edited_df["完走報酬"] * edited_df["運用比率(%)"] / 100)
 
     st.divider()
-    st.subheader("💰 追加報酬設定")
-    c_b, c_v = st.columns(2)
-    with c_b:
-        st.markdown("### チェックイン追加報酬")
+    
+    col_b, col_v = st.columns(2)
+    with col_b:
+        st.markdown("### 🎁 チェックイン追加報酬")
         p1 = st.slider("1350円の確率 (%)", 0, 100, st.session_state.checkin_rewards["tier1"]["prob"])
         p2 = st.slider("2700円の確率 (%)", 0, 100 - p1, st.session_state.checkin_rewards["tier2"]["prob"])
         p3 = 100 - p1 - p2
@@ -130,17 +123,14 @@ with tab3:
         expected_checkin = (1350 * p1/100) + (2700 * p2/100) + (6750 * p3/100)
         st.write(f"**期待値: ¥{int(expected_checkin):,}**")
 
-    with c_v:
-        st.markdown("### 動画再生追加報酬")
-        selected_video = 0
-        for i, p in enumerate(st.session_state.video_rewards):
-            if st.checkbox(f"{p['name']} (¥{p['amount']:,})", value=p['active'], key=f"video_{i}"):
-                selected_video += p['amount']
-        st.write(f"**合計: ¥{selected_video:,}**")
+    with col_v:
+        st.markdown("### 📺 動画再生追加報酬")
+        video_amount = st.number_input("動画再生報酬 (¥)", value=1000, step=100)
+        video_active = st.toggle("動画再生報酬を有効にする", value=True)
+        final_video = video_amount if video_active else 0
 
     # 最終的な1招待あたりの期待収益
-    # 即時報酬は成功時のみ、後続報酬(Task + Checkin + Video)は成功およびキープ端末から
-    per_invite_revenue = (w_immediate * success_rate) + ((w_task + expected_checkin + selected_video) * full_ratio)
+    per_invite_revenue = (w_immediate * success_rate) + ((w_task + expected_checkin + final_video) * full_ratio)
 
 with tab1:
     col1, col2, col3, col4 = st.columns(4)
@@ -159,7 +149,7 @@ with tab1:
     st.subheader("📊 収益の内訳")
     reward_breakdown = pd.DataFrame({
         "ソース": ["即時報酬 (成功分)", "完走・追加報酬 (キープ分)"],
-        "金額": [w_immediate * success_rate, (w_task + expected_checkin + selected_video) * full_ratio]
+        "金額": [w_immediate * success_rate, (w_task + expected_checkin + final_video) * full_ratio]
     })
     fig_pie = px.pie(reward_breakdown, values='金額', names='ソース', hole=0.4)
     fig_pie.update_layout(template="plotly_dark")
@@ -187,4 +177,4 @@ with tab2:
         st.error(f"### 失敗(リセット)\n割合: {reset_ratio*100:.0f}%\nサイクル: {reset_cycle:.1f}日")
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Created by Antigravity Assistant v2.3")
+st.sidebar.caption("Created by Antigravity Assistant v2.4")
