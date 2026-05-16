@@ -219,9 +219,14 @@ with tab4:
             else: st.success("同期完了！")
     if st.session_state.actual_summary is not None:
         s = st.session_state.actual_summary
-        st.metric("実績Success率", f"{st.session_state.overall_success_rate*100:.1f}%")
+        st.metric("実績Success率", f"{st.session_state.overall_success_rate:.3f}%")
         st.plotly_chart(px.bar(s, x='成功率', y=s.columns[0], orientation='h', color='成功率'), use_container_width=True)
-        st.dataframe(s, use_container_width=True)
+        
+        # 表示用に%を付与したDFを作成
+        display_df = s.copy()
+        display_df['成功率'] = display_df['成功率'].map('{:.3f}%'.format)
+        display_df['運用比率'] = display_df['運用比率'].map('{:.3f}%'.format)
+        st.dataframe(display_df.sort_values('成功数', ascending=False), use_container_width=True)
 
 with tab2:
     st.subheader("🔄 回転戦略の詳細")
