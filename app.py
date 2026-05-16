@@ -177,9 +177,15 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
         model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         model_df['成功率'] = model_df['成功率']*100
+        # 日次トレンドの計算
+        daily_df = rdf.groupby('date').agg(成功率=('is_success','mean')).reset_index()
+        daily_df['成功率'] = daily_df['成功率'] * 100
+        daily_df = daily_df.sort_values('date')
+
         st.session_state.actual_res = {
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
-            "brand": brand_df, "model_rank": model_df, "total": len(rdf), "success": rdf['is_success'].sum(),
+            "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
+            "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
         }
         return None
@@ -240,6 +246,23 @@ with tab_analytics:
             margin=dict(l=0, r=0, t=20, b=0)
         )
         st.plotly_chart(fig_success, use_container_width=True)
+
+        # 日次トレンドグラフを表示
+        if "daily_trend" in res:
+            st.markdown("### 📈 日次成功率トレンド")
+            d_df = res['daily_trend']
+            fig_trend = px.line(
+                d_df, x='date', y='成功率',
+                markers=True, line_shape='spline',
+                color_discrete_sequence=['#00ff88'],
+                labels={'date': '日付', '成功率': '成功率 (%)'}
+            )
+            fig_trend.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                font_color="#e0e0e0", height=350,
+                xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#222')
+            )
+            st.plotly_chart(fig_trend, use_container_width=True)
 
 with tab_device:
     st.markdown("## 📱 機種別パフォーマンス")
