@@ -24,7 +24,99 @@ if st.session_state.get('version') != CURRENT_VERSION:
 # --- スプレッドシート連携 (GAS API) ロジック ---
 GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
 
-def save_settings_to_sheet():
+@st.cache_data(ttl=600)
+def fetch_api_data():
+    try:
+        response = requests.get(f"{GAS_URL}?action=get_analytics")
+        if response.status_code != 200: return None
+        return response.json()
+    except: return None
+
+def fetch_data(f_mode, l_days=None, t_month=None):
+    try:
+        payload = fetch_api_data()
+        if not payload or "analytics" not in payload: return "Invalid API Response"
+        
+        raw_data = payload['analytics']
+        if not raw_data: return "No Data"
+        
+        df = pd.DataFrame(raw_data)
+        f_idx, j_idx, l_idx, n_idx, q_idx = 5, 9, 11, 13, 16
+        
+        def parse_date(date_str):
+            if not date_str or not isinstance(date_str, str): return pd.NaT
+            clean = re.sub(r'\(.*?\)', '', date_str).strip()
+            try:
+                dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
+                if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
+                return dt
+            except: return pd.NaT
+
+        df['date'] = df[l_idx].apply(parse_date)
+        df['is_success'] = df[f_idx].astype(str).str.contains("成功")
+        df['model'] = df[j_idx].fillna("不明")
+        
+        d_raw = payload.get('terminals', [])
+        d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
+        
+        rdf = df.copy()
+        if f_mode == "直近28日間": 
+            rdf = rdf[rdf['date'] >= (datetime.now() - timedelta(days=l_days))].copy()
+        else:
+            target_dt = datetime.strptime(t_month, "%Y/%m")
+            rdf = rdf[(rdf['date'].dt.year == target_dt.year) & (rdf['date'].dt.month == target_dt.month)].copy()
+        
+        if len(rdf) == 0: return "No Data for this period"
+
+        rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
+        rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
+
+        def get_brand(model_name):
+            m = str(model_name).upper()
+            if "XPERIA" in m: return "Xperia"
+            if "AQUOS" in m or "SH-" in m: return "AQUOS"
+            if "PIXEL" in m: return "Pixel"
+            if "GALAXY" in m or "SC-" in m or "SM-" in m: return "Galaxy"
+            if "IPHONE" in m: return "iPhone"
+            if "OPPO" in m or "CPH" in m: return "OPPO"
+            if "XIAOMI" in m or "REDMI" in m: return "Xiaomi"
+            if "BASIO" in m or "KYV" in m: return "BASIO"
+            if "HUAWEI" in m or "HW-" in m or "POT-" in m or "MAR-" in m: return "HUAWEI"
+            return "その他"
+        
+        rdf['brand'] = rdf['model'].apply(get_brand)
+        rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
+
+        sum_df = rdf.groupby(q_idx).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
+        
+        parent_df = rdf.groupby('parent_id').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        parent_df['成功率'] = np.ceil(parent_df['成功率']*100*1000)/1000
+        parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False)
+
+        p_model_df = rdf.groupby('parent_model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        p_model_df['成功率'] = np.ceil(p_model_df['成功率']*100*1000)/1000
+        p_model_df = p_model_df.sort_values('成功率', ascending=False)
+
+        brand_df = rdf.groupby('brand').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
+        
+        model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        model_df['成功率'] = model_df['成功率']*100
+        
+        daily_df = rdf.groupby('date').agg(成功率=('is_success','mean'), 成功数=('is_success','sum')).reset_index()
+        daily_df['成功率'] = daily_df['成功率'] * 100
+        daily_df = daily_df.sort_values('date')
+
+        st.session_state.actual_res = {
+            "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
+            "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
+            "parent_rank": parent_df, "parent_model_rank": p_model_df,
+            "total": len(rdf), "success": rdf['is_success'].sum(),
+            "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
+        }
+        return None
+    except Exception as e: return str(e)
     try:
         settings = {
             "invite_types": st.session_state.invite_types_df.to_json(orient='records'),
@@ -151,100 +243,6 @@ daily_parent_cap = parent_dev / p_cycle
 daily_child_cap = child_dev / avg_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
-GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
-
-@st.cache_data(ttl=600)
-def fetch_api_data():
-    response = requests.get(f"{GAS_URL}?action=get_analytics")
-    if response.status_code != 200: return None
-    return response.json()
-
-def fetch_data(f_mode, l_days=None, t_month=None):
-    try:
-        # キャッシュされたデータを取得
-        payload = fetch_api_data()
-        if not payload or "analytics" not in payload: return "Invalid API Response"
-        
-        raw_data = payload['analytics']
-        if not raw_data: return "No Data"
-        
-        df = pd.DataFrame(raw_data)
-        f_idx, j_idx, l_idx, n_idx, q_idx = 5, 9, 11, 13, 16
-        
-        def parse_date(date_str):
-            if not date_str or not isinstance(date_str, str): return pd.NaT
-            clean = re.sub(r'\(.*?\)', '', date_str).strip()
-            try:
-                dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
-                if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
-                return dt
-            except: return pd.NaT
-
-        df['date'] = df[l_idx].apply(parse_date)
-        df['is_success'] = df[f_idx].astype(str).str.contains("成功")
-        df['model'] = df[j_idx].fillna("不明")
-        
-        d_raw = payload.get('terminals', [])
-        d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
-        
-        rdf = df.copy()
-        if f_mode == "直近28日間": 
-            rdf = rdf[rdf['date'] >= (datetime.now() - timedelta(days=l_days))].copy()
-        else:
-            target_dt = datetime.strptime(t_month, "%Y/%m")
-            rdf = rdf[(rdf['date'].dt.year == target_dt.year) & (rdf['date'].dt.month == target_dt.month)].copy()
-        
-        if len(rdf) == 0: return "No Data for this period"
-
-        rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
-        rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
-
-        def get_brand(model_name):
-            m = str(model_name).upper()
-            if "XPERIA" in m: return "Xperia"
-            if "AQUOS" in m or "SH-" in m: return "AQUOS"
-            if "PIXEL" in m: return "Pixel"
-            if "GALAXY" in m or "SC-" in m or "SM-" in m: return "Galaxy"
-            if "IPHONE" in m: return "iPhone"
-            if "OPPO" in m or "CPH" in m: return "OPPO"
-            if "XIAOMI" in m or "REDMI" in m: return "Xiaomi"
-            if "BASIO" in m or "KYV" in m: return "BASIO"
-            if "HUAWEI" in m or "HW-" in m or "POT-" in m or "MAR-" in m: return "HUAWEI"
-            return "その他"
-        
-        rdf['brand'] = rdf['model'].apply(get_brand)
-        rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
-
-        sum_df = rdf.groupby(q_idx).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
-        sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
-        
-        parent_df = rdf.groupby('parent_id').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
-        parent_df['成功率'] = np.ceil(parent_df['成功率']*100*1000)/1000
-        parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False)
-
-        p_model_df = rdf.groupby('parent_model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
-        p_model_df['成功率'] = np.ceil(p_model_df['成功率']*100*1000)/1000
-        p_model_df = p_model_df.sort_values('成功率', ascending=False)
-
-        brand_df = rdf.groupby('brand').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
-        brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
-        
-        model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
-        model_df['成功率'] = model_df['成功率']*100
-        
-        daily_df = rdf.groupby('date').agg(成功率=('is_success','mean'), 成功数=('is_success','sum')).reset_index()
-        daily_df['成功率'] = daily_df['成功率'] * 100
-        daily_df = daily_df.sort_values('date')
-
-        st.session_state.actual_res = {
-            "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
-            "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
-            "parent_rank": parent_df, "parent_model_rank": p_model_df,
-            "total": len(rdf), "success": rdf['is_success'].sum(),
-            "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
-        }
-        return None
-    except Exception as e: return str(e)
 
 if 'initialized' not in st.session_state:
     st.session_state.invite_types_df = pd.DataFrame([
