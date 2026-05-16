@@ -177,8 +177,11 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
         model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         model_df['成功率'] = model_df['成功率']*100
-        # 日次トレンドの計算
-        daily_df = rdf.groupby('date').agg(成功率=('is_success','mean')).reset_index()
+        # 日次トレンドの計算 (成功率と成功数の両方を取得)
+        daily_df = rdf.groupby('date').agg(
+            成功率=('is_success','mean'),
+            成功数=('is_success','sum')
+        ).reset_index()
         daily_df['成功率'] = daily_df['成功率'] * 100
         daily_df = daily_df.sort_values('date')
 
@@ -263,6 +266,20 @@ with tab_analytics:
                 xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#222')
             )
             st.plotly_chart(fig_trend, use_container_width=True)
+
+            # 日次成功数グラフを表示 (ボリューム)
+            st.markdown("### 📊 日次成功端末数トレンド")
+            fig_vol = px.bar(
+                d_df, x='date', y='成功数',
+                color='成功数', color_continuous_scale='Blues',
+                labels={'date': '日付', '成功数': '成功端末数'}
+            )
+            fig_vol.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                font_color="#e0e0e0", height=350,
+                xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='#222')
+            )
+            st.plotly_chart(fig_vol, use_container_width=True)
 
 with tab_device:
     st.markdown("## 📱 機種別パフォーマンス")
