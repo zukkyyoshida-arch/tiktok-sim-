@@ -4,10 +4,11 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import re
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Lite Strategy Simulator v2.8",
+    page_title="TikTok Lite Strategy Simulator v2.9",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -28,7 +29,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📱 TikTok Lite 運用戦略シミュレーター v2.8")
+st.title("📱 TikTok Lite 運用戦略シミュレーター v2.9")
 
 # --- セッション状態の初期化 ---
 if 'invite_types_df' not in st.session_state:
@@ -44,34 +45,49 @@ if 'invite_types_df' not in st.session_state:
 if 'actual_stats' not in st.session_state:
     st.session_state.actual_stats = None
 
-# --- スプレッドシート取得関数 ---
+# --- 高度なスプレッドシート解析関数 ---
 def fetch_actual_data():
     sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
     gid = "937207441"
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
     
     try:
-        df = pd.read_csv(url)
-        # F列: 成功/失敗, L列: Tik開始日
-        # 列名が動的な場合を考慮して位置指定も検討するが、まずは名前で試行
-        # 列名を確認（1行目がヘッダーと仮定）
-        cols = df.columns.tolist()
+        # 5行目がヘッダーなので header=4
+        df = pd.read_csv(url, header=4)
         
-        # F列(5)とL列(11)を特定
-        f_col = cols[5]
-        l_col = cols[11]
+        # 列名を取得
+        f_col = df.columns[5]   # F列: 状態
+        l_col = df.columns[11]  # L列: Tik開始
         
-        # 日付変換
-        df[l_col] = pd.to_datetime(df[l_col], errors='coerce')
+        # 特殊な日付形式「5/4(月)」を解析する関数
+        def parse_date_with_weekday(date_str):
+            if pd.isna(date_str) or not isinstance(date_str, str):
+                return pd.NaT
+            # 「(月)」などの曜日部分を削除
+            clean_date = re.sub(r'\(.*?\)', '', date_str).strip()
+            try:
+                # 現在の年を補完
+                current_year = datetime.now().year
+                dt = datetime.strptime(f"{current_year}/{clean_date}", "%Y/%m/%d")
+                # もし解析結果が未来すぎる（例：1月なのに12月のデータ）場合は、前年とみなす
+                if dt > datetime.now() + timedelta(days=1):
+                    dt = dt.replace(year=current_year - 1)
+                return dt
+            except:
+                return pd.NaT
+
+        df['parsed_date'] = df[l_col].apply(parse_date_with_weekday)
         
         # 直近1ヶ月に絞り込み
         one_month_ago = datetime.now() - timedelta(days=30)
-        recent_df = df[df[l_col] >= one_month_ago].copy()
+        recent_df = df[df['parsed_date'] >= one_month_ago].copy()
         
         if len(recent_df) == 0:
-            return "直近1ヶ月のデータが見つかりませんでした。"
+            # デバッグ用：最新のデータの日付を表示
+            last_date = df['parsed_date'].max()
+            return f"直近1ヶ月のデータが見つかりませんでした。最新の日付: {last_date}"
         
-        # 成功率計算（「成功」という文字列が含まれているか）
+        # 成功率計算
         success_count = recent_df[f_col].astype(str).str.contains("成功").sum()
         total_count = len(recent_df)
         success_rate = success_count / total_count
@@ -80,51 +96,49 @@ def fetch_actual_data():
             "success_rate": success_rate,
             "total_count": total_count,
             "success_count": success_count,
-            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M")
+            "last_updated": datetime.now().strftime("%H:%M:%S")
         }
         return None
     except Exception as e:
-        return f"エラーが発生しました: {e}"
+        return f"解析エラー: {e}"
 
 # --- サイドバー：基本設定 ---
 with st.sidebar:
     st.header("⚙️ 基本パラメーター")
     
-    # 実績同期ボタン
-    if st.button("🔄 スプレッドシートから実績同期"):
-        with st.spinner("データ取得中..."):
+    if st.button("🔄 実績データを同期（Tik管理_）"):
+        with st.spinner("スプレッドシートを解析中..."):
             err = fetch_actual_data()
             if err:
                 st.error(err)
             else:
-                st.success("同期完了！")
+                st.success("同期成功！")
 
     if st.session_state.actual_stats:
-        st.info(f"📊 実績Success率: {st.session_state.actual_stats['success_rate']*100:.1f}%\n(直近{st.session_state.actual_stats['total_count']}件)")
+        s = st.session_state.actual_stats
+        st.info(f"📊 直近実績データ\n- 成功率: {s['success_rate']*100:.1f}%\n- 試行数: {s['total_count']}件\n- 更新: {s['last_updated']}")
 
     with st.expander("👥 端末構成", expanded=True):
         total_devices = st.number_input("総端末数", value=1800, step=10)
         parent_count = st.number_input("親端末数 (固定)", value=300, step=10)
         child_count = total_devices - parent_count
 
-    with st.expander("⏳ サイクル設定", expanded=True):
-        parent_rest_days = st.number_input("親の休息日 (中N日)", value=5)
-        prep_hours = st.number_input("子の準備時間 (時間)", value=300)
-        checkin_days = st.number_input("チェックイン期間 (日)", value=14)
-        prep_days = prep_hours / 24
-        parent_cycle = parent_rest_days + 1
-
     with st.expander("🎯 成功・歩留まり戦略", expanded=True):
-        # 実績があればデフォルト値を上書き
         default_success = 80.0
         if st.session_state.actual_stats:
-            default_success = st.session_state.actual_stats['success_rate'] * 100
-            
+            default_success = float(st.session_state.actual_stats['success_rate'] * 100)
+        
         success_rate = st.slider("招待成功率 (%)", 0.0, 100.0, default_success) / 100
         keep_rate_success = st.slider("成功時の高報酬(キープ)率 (%)", 0, 100, 100) / 100
         keep_rate_fail = st.slider("失敗時の高報酬(キープ)率 (%)", 0, 100, 30) / 100
 
-# --- ロジック計算 ---
+# (以下、ロジック計算とUIは前回と同様)
+prep_hours = 300 # デフォルト
+checkin_days = 14 # デフォルト
+prep_days = prep_hours / 24
+parent_rest_days = 5 # デフォルト
+parent_cycle = parent_rest_days + 1
+
 ratio_s_keep = success_rate * keep_rate_success
 ratio_s_reset = success_rate * (1 - keep_rate_success)
 ratio_f_keep = (1 - success_rate) * keep_rate_fail
@@ -138,18 +152,14 @@ daily_parent_cap = parent_count / parent_cycle
 daily_child_cap = child_count / avg_child_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
-# --- タブ構成 ---
 tab1, tab2, tab3 = st.tabs(["📊 ダッシュボード", "🔄 稼働シミュレーション", "💰 報酬・種別管理"])
 
-# (報酬計算ロジックは前回同様)
 edited_df = st.session_state.invite_types_df
 w_immediate = sum(edited_df["即時報酬"] * edited_df["運用比率(%)"] / 100)
 w_task = sum(edited_df["完走報酬"] * edited_df["運用比率(%)"] / 100)
-expected_checkin = 2500 # 簡易化
-final_video = 1000 # 簡易化
-rev_immediate = w_immediate * success_rate
-rev_additional = (w_task + expected_checkin + final_video) * (ratio_s_keep + ratio_f_keep)
-per_invite_revenue = rev_immediate + rev_additional
+expected_checkin = 2500
+final_video = 1000
+per_invite_revenue = (w_immediate * success_rate) + ((w_task + expected_checkin + final_video) * (ratio_s_keep + ratio_f_keep))
 
 with tab1:
     st.subheader("📍 本日のスポット・シミュレーション")
@@ -163,19 +173,14 @@ with tab1:
         st.metric("本日の見込み収益", f"¥{int(today_invites * per_invite_revenue):,}")
 
     st.divider()
-    st.subheader("📈 長期予測（実績連動）")
-    if st.session_state.actual_stats:
-        st.caption(f"最終同期: {st.session_state.actual_stats['last_updated']} (直近1ヶ月実績Success率: {st.session_state.actual_stats['success_rate']*100:.1f}%)")
-    
+    st.subheader("📈 長期予測")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("1日あたりの招待(試行)数", f"{actual_daily_invites:.1f} 件")
     with col2:
-        monthly_revenue = actual_daily_invites * 30 * per_invite_revenue
-        st.metric("月間予測収益", f"¥{int(monthly_revenue):,}")
+        st.metric("月間予測収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}")
     with col3:
-        annual_revenue = monthly_revenue * 12
-        st.metric("年間予測収益", f"¥{int(annual_revenue):,}")
+        st.metric("年間予測収益", f"¥{int(actual_daily_invites * 365 * per_invite_revenue):,}")
     with col4:
         bottleneck = "親端末" if daily_parent_cap < daily_child_cap else "子端末"
         st.metric("ボトルネック", bottleneck)
@@ -185,4 +190,4 @@ with tab3:
     st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True)
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Created by Antigravity Assistant v2.8")
+st.sidebar.caption("Created by Antigravity Assistant v2.9")
