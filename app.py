@@ -8,16 +8,17 @@ import re
 import json
 import requests
 from streamlit_autorefresh import st_autorefresh
+from plotly.subplots import make_subplots
 
 # ==========================================
 # 1. 定数・設定
 # ==========================================
-CURRENT_VERSION = "11.0.0"
+CURRENT_VERSION = "11.0.4"
 GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
 
 # ページ設定
 st.set_page_config(
-    page_title="Midnight Analytics v11.0",
+    page_title="Midnight Analytics Platinum v11.0",
     page_icon="🕶️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -58,7 +59,6 @@ def custom_metric(label, value, sub=""):
 @st.cache_data(ttl=600)
 def fetch_api_data_raw(force_key=None):
     try:
-        # force_key が指定されている場合は、URLにタイムスタンプを付与してネットワークキャッシュを回避
         url = f"{GAS_URL}?action=get_analytics"
         if force_key:
             url += f"&t={force_key}"
@@ -69,7 +69,6 @@ def fetch_api_data_raw(force_key=None):
 
 def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
     try:
-        # 同期ボタンからの呼び出し時は、現在の時刻をキーにしてキャッシュを回避
         f_key = str(datetime.now().timestamp()) if force else None
         payload = fetch_api_data_raw(force_key=f_key)
         if not payload or "analytics" not in payload: return "Invalid API Response"
@@ -78,32 +77,25 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         if not raw_data: return "No Data"
         
         df = pd.DataFrame(raw_data)
-        # カラムインデックス: 5:成功/失敗, 9:機種, 11:日付, 13:親機, 16:キャンペーン
-        f_idx, j_idx, l_idx, n_idx, q_idx = 5, 9, 11, 13, 16
+        # カラムインデックス: 5:状態, 9:機種, 11:日付1, 12:日付2, 13:親, 16:招待種類
+        f_idx, j_idx, n_idx, q_idx = 5, 9, 13, 16
         
         def parse_date(val):
             if not val or val == "" or val == "#REF!": return pd.NaT
-            # ISO形式 (2025-11-16T...) の場合
             if isinstance(val, str) and "T" in val:
                 try: return pd.to_datetime(val).tz_localize(None)
                 except: pass
-            
-            # 文字列 (5/16 (土)) の場合
             if isinstance(val, str):
                 clean = re.sub(r'\(.*?\)', '', val).strip()
                 try:
-                    # 形式が "12月" のみの場合は日付として扱わない
                     if "月" in clean and "/" not in clean: return pd.NaT
                     dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
                     if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
                     return dt
                 except: pass
-            
-            # 数値やDateオブジェクトの場合
             try: return pd.to_datetime(val).tz_localize(None)
             except: return pd.NaT
 
-        # L列(11)とM列(12)の両方を日付候補としてチェックし、有効な方を採用
         def get_valid_date(row):
             d1 = parse_date(row[11])
             if pd.notnull(d1) and d1.year > 1900: return d1
@@ -115,7 +107,6 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         df['is_success'] = df[f_idx].astype(str).str.contains("成功")
         df['model'] = df[j_idx].fillna("不明")
         
-        # 端末マスタ
         d_raw = payload.get('terminals', [])
         d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
         
@@ -131,7 +122,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
         rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
 
-        def get_brand_local(model_name):
+        def get_brand(model_name):
             m = str(model_name).upper()
             if "XPERIA" in m: return "Xperia"
             if "AQUOS" in m or "SH-" in m: return "AQUOS"
@@ -144,7 +135,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
             if "HUAWEI" in m or "HW-" in m or "POT-" in m or "MAR-" in m: return "HUAWEI"
             return "その他"
         
-        rdf['brand'] = rdf['model'].apply(get_brand_local)
+        rdf['brand'] = rdf['model'].apply(get_brand)
         rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
 
         # 集計
@@ -169,7 +160,6 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         daily_df['成功率'] = daily_df['成功率'] * 100
         daily_df = daily_df.sort_values('date')
 
-        # 結果をセッションに格納
         st.session_state.actual_res = {
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
@@ -235,12 +225,12 @@ def load_settings_api():
 # 4. メイン・オーケストレーター
 # ==========================================
 def main():
-    # --- 記憶のリセット（バージョン管理） ---
+    # --- バージョン管理 ---
     if st.session_state.get('version') != CURRENT_VERSION:
         st.session_state.clear()
         st.session_state.version = CURRENT_VERSION
 
-    # --- 道具の準備（初期化） ---
+    # --- 初期化 ---
     if 'invite_types_df' not in st.session_state:
         st.session_state.invite_types_df = pd.DataFrame([
             {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
@@ -261,24 +251,19 @@ def main():
             {"チェックイン追加報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
             {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
         ])
-        # スライダー等のデフォルト値
         for k, v in {"total_dev_val": 1800, "parent_dev_val": 300, "success_rate_val": 80, "keep_success_val": 100, "keep_failure_val": 30}.items():
             if k not in st.session_state: st.session_state[k] = v
-        
-        # 初回ロード
         load_settings_api()
         fetch_data_logic("直近28日間", l_days=28)
         st.session_state.initialized = True
 
-    # --- 門番 ---
     if not st.session_state.get('initialized'):
         st.markdown("<h3 style='text-align:center; margin-top:100px;'>🕶️ Midnight Analytics 起動中...</h3>", unsafe_allow_html=True)
         st.stop()
 
-    # --- UIデザイン適用 ---
     apply_custom_styles()
 
-    # --- サイドバー表示 ---
+    # --- サイドバー ---
     with st.sidebar:
         st.markdown("<h2 style='color:#0088ff;'>設定パネル</h2>", unsafe_allow_html=True)
         total_dev = st.number_input("総デバイス数", value=st.session_state.total_dev_val, key="total_dev")
@@ -290,7 +275,7 @@ def main():
         if st.sidebar.button("💾 クラウド保存", use_container_width=True):
             if save_settings_api(): st.sidebar.success("保存完了！")
 
-    # --- 情報の整理（計算） ---
+    # --- 計算ロジック ---
     child_dev = total_dev - parent_dev
     prep_d, check_d, p_cycle = 12.5, 14, 6
     r_keep = (success_p * keep_s) + ((1-success_p) * keep_f)
@@ -299,7 +284,6 @@ def main():
     daily_child_cap = child_dev / avg_cycle
     actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
-    # 報酬計算
     c_inv = st.session_state.invite_types_df.fillna(0)
     w_imm = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
     w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
@@ -309,13 +293,12 @@ def main():
     w_check = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
     per_invite_revenue = (w_imm * success_p) + ((w_task + w_check + w_vid) * r_keep)
 
-    # --- 画面描画（タブ） ---
+    # --- タブ表示 ---
     tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
-    # ダッシュボード
+    # 1. ダッシュボード
     with tabs[0]:
         st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
-        # 20時レポート
         if datetime.now().hour >= 20:
             st.info("🌙 **20:00を過ぎました。本日の運用データが確定しています。**")
             res = st.session_state.get('actual_res')
@@ -336,21 +319,41 @@ def main():
         st.markdown("---")
         st.markdown("### 📊 運用コンサルタントの定量アドバイス")
         advice = []
+        # 基本ボトルネック
         if daily_parent_cap < daily_child_cap:
-            req_p = int(np.ceil(daily_child_cap * p_cycle))
-            advice.append(f"🔴 **親端末の不足**: あと **{req_p - parent_dev} 台** 追加で収益 **¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}** 増")
+            req_p = int(np.ceil(daily_child_cap * p_cycle)); advice.append(f"🔴 **親端末の不足**: あと **{req_p - parent_dev} 台** 追加で収益 **¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}** 増")
         else:
-            req_c = int(np.ceil(daily_parent_cap * avg_cycle))
-            advice.append(f"🔵 **子端末の不足**: あと **{req_c - child_dev} 台** 追加で収益 **¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}** 増")
+            req_c = int(np.ceil(daily_parent_cap * avg_cycle)); advice.append(f"🔵 **子端末の不足**: あと **{req_c - child_dev} 台** 追加で収益 **¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}** 増")
         
+        # 高度な分析 (実績ベース)
         if st.session_state.get('actual_res'):
             res = st.session_state.actual_res
-            yield_val = int(rev / total_dev)
-            advice.append(f"💰 **収益効率 (Yield)**: 端末1台あたり月間 **¥{yield_val:,}** を稼ぎ出しています。")
-        
-        st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 戦略アクション</div><div class='advice-text'>{'<br><br>'.join(advice)}</div></div>", unsafe_allow_html=True)
+            actual_s_rate = res['rate'] / 100
+            gap = actual_s_rate - success_p
+            if abs(gap) > 0.03:
+                loss_gain = int(actual_daily_invites * 30 * gap * per_invite_revenue)
+                if gap < 0: advice.append(f"⚠️ **成功率の下振れ注意**: 実績({actual_s_rate*100:.1f}%)が想定を下回っています。月間収益が予測より **¥{abs(loss_gain):,}** 減少するリスクがあります。")
+                else: advice.append(f"✨ **想定以上のパフォーマンス**: 実績が想定を上回っています！ **¥{loss_gain:,}** のポジティブな上振れが期待できます。")
+            
+            if len(res['brand']) > 1:
+                best_b, worst_b = res['brand'].loc[res['brand']['成功率'].idxmax()], res['brand'].loc[res['brand']['成功率'].idxmin()]
+                if (best_b['成功率'] - worst_b['成功率']) > 5:
+                    potential = int(actual_daily_invites * 30 * (best_b['成功率'] - worst_b['成功率'])/100 * per_invite_revenue * (worst_b['試行数']/res['total']))
+                    advice.append(f"📱 **端末の最適化**: {worst_b['brand']} の成功率が低迷。{best_b['brand']} 並みに改善することで月間 **¥{potential:,}** の増収余地。")
+            
+            s_df = res['summary'].copy()
+            if len(s_df) > 1:
+                s_df['EV'] = (s_df['成功率']/100) * per_invite_revenue
+                best_c = s_df.loc[s_df['EV'].idxmax()]
+                if best_c['EV'] > (actual_s_rate * per_invite_revenue) * 1.05:
+                    boost = int(actual_daily_invites * 30 * (best_c['EV'] - (actual_s_rate * per_invite_revenue)))
+                    advice.append(f"🎯 **戦略の転換推奨**: 現在 **{best_c.iloc[0]}** が最も効率的。シフトにより月間 **¥{boost:,}** 底上げ可能。")
 
-    # 実績分析
+            yield_val = int(rev / total_dev); advice.append(f"💰 **収益効率 (Yield)**: 端末1台あたり月間 **¥{yield_val:,}** を稼ぎ出しています。")
+        
+        st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 定量アクションプラン</div><div class='advice-text'>{'<br><br>'.join(advice)}</div></div>", unsafe_allow_html=True)
+
+    # 2. 実績分析 (折れ線グラフ復元)
     with tabs[1]:
         st.markdown("## リアルタイム実績分析")
         ac1, ac2, ac3 = st.columns([2,2,1])
@@ -362,25 +365,29 @@ def main():
         if sync:
             with st.spinner("最新データを取得中..."):
                 err = fetch_data_logic(fm, l_days=ld, t_month=tm, force=True)
-                if err:
-                    st.error(f"同期失敗: {err}")
-                else:
-                    st.success("最新データの同期に成功しました！")
-                    st.rerun()
+                if err: st.error(f"同期失敗: {err}")
+                else: st.success("同期成功！"); st.rerun()
         
         res = st.session_state.get('actual_res')
         if res:
-            c1, c2, c3 = st.columns(3)
-            with c1: custom_metric("総試行", f"{res['total']:,}")
-            with c2: custom_metric("成功数", f"{res['success']:,}")
-            with c3: custom_metric("成功率", f"{res['rate']:.2f}%")
+            c1, c2, c3 = st.columns(3); with c1: custom_metric("総試行", f"{res['total']:,}"); with c2: custom_metric("成功数", f"{res['success']:,}"); with c3: custom_metric("成功率", f"{res['rate']:.3f}%")
             
+            st.markdown("### 📈 キャンペーン別 成功率ランキング")
             s_df = res['summary'].sort_values('成功率', ascending=False)
             fig = px.bar(s_df, x='成功率', y=s_df.columns[0], orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.2f')
-            fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400)
+            fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=max(300, len(s_df)*40))
             st.plotly_chart(fig, use_container_width=True)
 
-    # 機種別
+            if "daily_trend" in res:
+                st.markdown("### 📈 日次パフォーマンス・トレンド (成功数 × 成功率)")
+                d_df = res['daily_trend']
+                fig_comb = make_subplots(specs=[[{"secondary_y": True}]])
+                fig_comb.add_trace(go.Bar(x=d_df['date'], y=d_df['成功数'], name="成功数 (台)", marker_color='rgba(0,136,255,0.6)'), secondary_y=False)
+                fig_comb.add_trace(go.Scatter(x=d_df['date'], y=d_df['成功率'], name="成功率 (%)", line=dict(color='#00ff88', width=3), mode='lines+markers'), secondary_y=True)
+                fig_comb.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=450, yaxis2=dict(range=[0, 100]))
+                st.plotly_chart(fig_comb, use_container_width=True)
+
+    # 3. 機種別分析 (テーブル復元)
     with tabs[2]:
         st.markdown("## 📱 機種別パフォーマンス")
         res = st.session_state.get('actual_res')
@@ -389,8 +396,12 @@ def main():
             fig = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
             fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
             st.plotly_chart(fig, use_container_width=True)
+            if "model_rank" in res:
+                m_df = res['model_rank'].sort_values('成功率', ascending=False).copy()
+                m_df['成功率'] = m_df['成功率'].map('{:.2f}%'.format)
+                st.dataframe(m_df, use_container_width=True, hide_index=True)
 
-    # 親機
+    # 4. 親機分析 (アドバイス復元)
     with tabs[3]:
         st.markdown("## 👑 親機パフォーマンス分析")
         res = st.session_state.get('actual_res')
@@ -399,34 +410,40 @@ def main():
             with c1:
                 st.markdown("### 🏆 個体別 (TOP10)")
                 fig = px.bar(res['parent_rank'].head(10), x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400); st.plotly_chart(fig, use_container_width=True)
             with c2:
                 st.markdown("### 📱 機種別")
                 fig = px.bar(res['parent_model_rank'], x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400); st.plotly_chart(fig, use_container_width=True)
+            
+            st.markdown("---")
+            best_pm, worst_pm = res['parent_model_rank'].iloc[0], res['parent_model_rank'].iloc[-1]
+            p_adv = f"- **最強の親機**: 現在 **{best_pm['parent_model']}** が成功率 **{best_pm['成功率']:.1f}%** でトップ。<br>- **要警戒**: **{worst_pm['parent_model']}** は成功率 **{worst_pm['成功率']:.1f}%** に留まる傾向。"
+            st.markdown(f"<div class='advice-card' style='border-color: #ffd700;'><div class='advice-title'>💡 親機戦略のアドバイス</div><div class='advice-text'>{p_adv}</div></div>", unsafe_allow_html=True)
 
-    # シミュレーション
+    # 5. シミュレーション (内訳復元)
     with tabs[4]:
         st.markdown("## 🔄 稼働シミュレーション")
         st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:5px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
-        c1, c2, c3 = st.columns(3)
-        with c1: custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}")
-        with c2: custom_metric("親の1日処理能力", f"{daily_parent_cap:.1f} 件")
-        with c3: custom_metric("子の1日回転数", f"{daily_child_cap:.1f} 件")
+        c1, c2, c3 = st.columns(3); with c1: custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}"); with c2: custom_metric("親の1日能力", f"{daily_parent_cap:.1f} 件"); with c3: custom_metric("子の1日回転", f"{daily_child_cap:.1f} 件")
+        st.markdown("---")
+        st.markdown("### ⚙️ 回転戦略の詳細内訳")
+        sc1, sc2 = st.columns(2)
+        with sc1: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>✅ 成功時</b><br>確率: {success_p*100:.1f}%<br>拘束: {prep_d+check_d:.1f}日</div>", unsafe_allow_html=True)
+        with sc2: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>❌ 失敗時</b><br>確率: {(1-success_p)*100:.1f}%<br>拘束: {(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f}日</div>", unsafe_allow_html=True)
 
-    # 設定
+    # 6. 設定 (SelectboxColumn復元)
     with tabs[5]:
-        st.markdown("## ⚙️ 設定 (比率のみ編集可能)")
-        st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, use_container_width=True, disabled=["キャンペーン名", "即時報酬", "完走報酬"], key="ed_inv")
-        st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, use_container_width=True, disabled=["動画パターン名", "報酬額"], key="ed_vid")
-        st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, use_container_width=True, disabled=["チェックイン追加報酬名", "報酬額"], key="ed_chk")
-        if st.button("🚀 クラウドに保存", use_container_width=True, key="btn_save_full"):
-            if save_settings_api(): st.success("保存完了！")
+        st.markdown("## ⚙️ 設定 (運用比率のみ編集可能)")
+        col_cfg = {"運用比率(%)": st.column_config.SelectboxColumn("運用比率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}
+        st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, use_container_width=True, disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
+        st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, use_container_width=True, disabled=["動画パターン名", "報酬額"], column_config=col_cfg, key="ed_vid")
+        st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, use_container_width=True, disabled=["チェックイン追加報酬名", "報酬額"], column_config={"出現確率(%)": st.column_config.SelectboxColumn("出現確率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}, key="ed_chk")
+        if st.button("🚀 クラウドに保存", use_container_width=True):
+            if save_settings_api(): st.success("スプレッドシートへ完全に同期しました！")
 
     st.sidebar.markdown("---")
-    st.sidebar.caption(f"Midnight Platinum v{CURRENT_VERSION} | Real-time Engine")
+    st.sidebar.caption(f"Midnight Platinum v{CURRENT_VERSION} | Fully Restored")
 
 if __name__ == "__main__":
     main()
