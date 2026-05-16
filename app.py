@@ -195,10 +195,18 @@ with tab_analytics:
 
 with tab_sim:
     st.markdown("## 回転戦略の深掘り")
-    st.info(f"平均回転サイクル: {avg_cycle:.2f} 日")
-    st.plotly_chart(px.pie(names=["成功・キープ", "成功・リセット", "失敗・キープ", "失敗・リセット"], 
-                           values=[success_p*keep_s, success_p*(1-keep_s), (1-success_p)*keep_f, (1-success_p)*(1-keep_f)],
-                           hole=0.5, color_discrete_sequence=px.colors.sequential.Greens_r), use_container_width=True)
+    st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:4px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("#### ✅ 成功時の挙動")
+        custom_metric("成功・キープ", f"{success_p*keep_s*100:.1f}%", f"拘束期間: {prep_d + check_d:.1f} 日")
+        custom_metric("成功・リセット", f"{success_p*(1-keep_s)*100:.1f}%", f"拘束期間: {prep_d + 1:.1f} 日")
+    with c2:
+        st.markdown("#### ❌ 失敗時の挙動")
+        custom_metric("失敗・キープ", f"{(1-success_p)*keep_f*100:.1f}%", f"拘束期間: {prep_d + check_d:.1f} 日")
+        custom_metric("失敗・リセット", f"{(1-success_p)*(1-keep_f)*100:.1f}%", f"拘束期間: {prep_d + 1:.1f} 日")
 
 with tab_config:
     st.markdown("## 報酬・種別設定")
