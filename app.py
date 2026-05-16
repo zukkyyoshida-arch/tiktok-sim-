@@ -160,23 +160,57 @@ expected_checkin_reward = sum(c_check["報酬額"] * c_check["出現確率(%)"] 
 # 1招待あたりの期待収益計算 (ハードコードを排除)
 per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + expected_video_reward) * r_keep)
 
+GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
+
 def fetch_data(f_mode, l_days=None, t_month=None):
-    sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
-    gid = "937207441"
-    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
     try:
-        df = pd.read_csv(url, header=4)
-        f_col, l_col, q_col, j_col = df.columns[5], df.columns[11], df.columns[16], df.columns[9]
+        # API経由でリアルタイムデータを取得
+        response = requests.get(f"{GAS_URL}?action=get_analytics")
+        if response.status_code != 200: return f"API Error: {response.status_code}"
+        
+        payload = response.json()
+        if "analytics" not in payload: return "Invalid API Response"
+        
+        # メイン実績データの変換
+        # payload['analytics'] は 5行目からの純粋なデータ配列
+        # カラムインデックス: 5:成功/失敗, 9:機種, 11:日付, 13:親機, 16:キャンペーン
+        raw_data = payload['analytics']
+        if not raw_data: return "No Data"
+        
+        df = pd.DataFrame(raw_data)
+        f_idx, j_idx, l_idx, n_idx, q_idx = 5, 9, 11, 13, 16
+        
         def parse_date(date_str):
-            if pd.isna(date_str) or not isinstance(date_str, str): return pd.NaT
+            if not date_str or not isinstance(date_str, str): return pd.NaT
             clean = re.sub(r'\(.*?\)', '', date_str).strip()
             try:
                 dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
                 if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
                 return dt
             except: return pd.NaT
-        df['date'] = df[l_col].apply(parse_date); df['is_success'] = df[f_col].astype(str).str.contains("成功")
-        df['model'] = df[j_col].fillna("不明")
+
+        df['date'] = df[l_idx].apply(parse_date)
+        df['is_success'] = df[f_idx].astype(str).str.contains("成功")
+        df['model'] = df[j_idx].fillna("不明")
+        
+        # 端末マスタの紐付け
+        d_raw = payload.get('terminals', [])
+        d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
+        
+        rdf = df.copy()
+        if f_mode == "直近28日間": 
+            rdf = rdf[rdf['date'] >= (datetime.now() - timedelta(days=l_days))].copy()
+        else:
+            target_dt = datetime.strptime(t_month, "%Y/%m")
+            rdf = rdf[(rdf['date'].dt.year == target_dt.year) & (rdf['date'].dt.month == target_dt.month)].copy()
+        
+        if len(rdf) == 0: return "No Data for this period"
+
+        # 親機情報の紐付け
+        rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
+        rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
+
+        # 分析ロジック
         def get_brand(model_name):
             m = str(model_name).upper()
             if "XPERIA" in m: return "Xperia"
@@ -189,30 +223,17 @@ def fetch_data(f_mode, l_days=None, t_month=None):
             if "BASIO" in m or "KYV" in m: return "BASIO"
             if "HUAWEI" in m or "HW-" in m or "POT-" in m or "MAR-" in m: return "HUAWEI"
             return "その他"
-        df['brand'] = df['model'].apply(get_brand)
-        df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
-        if f_mode == "直近28日間": rdf = df[df['date'] >= (datetime.now() - timedelta(days=l_days))].copy()
-        else:
-            target_dt = datetime.strptime(t_month, "%Y/%m")
-            rdf = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
-        # 端末マスタの読み込み (gid: 34315297)
-        d_gid = "34315297"
-        d_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={d_gid}"
-        d_master = pd.read_csv(d_url)
-        # D列(index 3): 端末番号, F列(index 5): 機種
-        d_map = dict(zip(d_master.iloc[:, 3].astype(str), d_master.iloc[:, 5].astype(str)))
         
-        # メインデータに親機情報を紐付け
-        rdf['parent_id'] = rdf.iloc[:, 13].fillna("未指定").astype(str) # N列
-        rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
+        rdf['brand'] = rdf['model'].apply(get_brand)
+        # 不要なデータの除外
+        rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
 
-        sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        sum_df = rdf.groupby(q_idx).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         
-        # 親機別の統計
         parent_df = rdf.groupby('parent_id').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         parent_df['成功率'] = np.ceil(parent_df['成功率']*100*1000)/1000
-        parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False) # 3回以上試行したもの
+        parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False)
 
         p_model_df = rdf.groupby('parent_model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         p_model_df['成功率'] = np.ceil(p_model_df['成功率']*100*1000)/1000
@@ -224,11 +245,7 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         model_df['成功率'] = model_df['成功率']*100
         
-        # 日次トレンドの計算 (成功率と成功数の両方を取得)
-        daily_df = rdf.groupby('date').agg(
-            成功率=('is_success','mean'),
-            成功数=('is_success','sum')
-        ).reset_index()
+        daily_df = rdf.groupby('date').agg(成功率=('is_success','mean'), 成功数=('is_success','sum')).reset_index()
         daily_df['成功率'] = daily_df['成功率'] * 100
         daily_df = daily_df.sort_values('date')
 
