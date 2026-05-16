@@ -334,7 +334,10 @@ def main():
         with ac3: st.write(""); sync = st.button("同期", use_container_width=True)
         if sync:
             with st.spinner("同期中..."):
+                # キャッシュをクリアして最新データを強制取得
+                st.cache_data.clear()
                 fetch_data_logic(fm, l_days=ld, t_month=tm)
+                st.rerun()
         
         res = st.session_state.get('actual_res')
         if res:
