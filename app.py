@@ -180,7 +180,10 @@ def save_settings_api():
             "parent_dev": str(st.session_state.get("parent_dev", 300)),
             "success_rate": str(st.session_state.get("success_rate_val", 80)),
             "keep_success": str(st.session_state.get("keep_success_val", 100)),
-            "keep_failure": str(st.session_state.get("keep_failure_val", 30))
+            "keep_failure": str(st.session_state.get("keep_failure_val", 30)),
+            "prep_hours": str(st.session_state.get("prep_hours", 300)),
+            "p_gap_days": str(st.session_state.get("p_gap_days", 5)),
+            "checkin_days": str(st.session_state.get("checkin_days", 14))
         }
         requests.post(GAS_URL, data=json.dumps(settings), timeout=15)
         return True
@@ -217,6 +220,9 @@ def load_settings_api():
             st.session_state.success_rate_val = int(settings.get("success_rate", 80))
             st.session_state.keep_success_val = int(settings.get("keep_success", 100))
             st.session_state.keep_failure_val = int(settings.get("keep_failure", 30))
+            st.session_state.prep_hours_val = int(settings.get("prep_hours", 300))
+            st.session_state.p_gap_days_val = int(settings.get("p_gap_days", 5))
+            st.session_state.checkin_days_val = int(settings.get("checkin_days", 14))
             return True
     except: return False
     return False
@@ -251,7 +257,11 @@ def main():
             {"チェックイン追加報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
             {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
         ])
-        for k, v in {"total_dev_val": 1800, "parent_dev_val": 300, "success_rate_val": 80, "keep_success_val": 100, "keep_failure_val": 30}.items():
+        for k, v in {
+            "total_dev_val": 1800, "parent_dev_val": 300, "success_rate_val": 80, 
+            "keep_success_val": 100, "keep_failure_val": 30,
+            "prep_hours_val": 300, "p_gap_days_val": 5, "checkin_days_val": 14
+        }.items():
             if k not in st.session_state: st.session_state[k] = v
         load_settings_api()
         fetch_data_logic("直近28日間", l_days=28)
@@ -272,12 +282,21 @@ def main():
         success_p = st.slider("想定成功率 (%)", 0, 100, st.session_state.success_rate_val, step=1, key="success_rate_val") / 100
         keep_s = st.slider("成功時キープ率 (%)", 0, 100, st.session_state.keep_success_val, key="keep_success_val") / 100
         keep_f = st.slider("失敗時キープ率 (%)", 0, 100, st.session_state.keep_failure_val, key="keep_failure_val") / 100
+        
+        with st.expander("📝 稼働前提の詳細設定"):
+            prep_hours = st.number_input("子端末 稼働準備時間 (h)", value=st.session_state.prep_hours_val, step=24, key="prep_hours")
+            p_gap_days = st.number_input("親端末 使用間隔 (中n日)", value=st.session_state.p_gap_days_val, step=1, key="p_gap_days")
+            checkin_days = st.number_input("チェックイン期間 (日間)", value=st.session_state.checkin_days_val, step=1, key="checkin_days")
+
         if st.sidebar.button("💾 クラウド保存", use_container_width=True):
             if save_settings_api(): st.sidebar.success("保存完了！")
 
     # --- 計算ロジック ---
     child_dev = total_dev - parent_dev
-    prep_d, check_d, p_cycle = 12.5, 14, 6
+    prep_d = prep_hours / 24
+    check_d = checkin_days
+    p_cycle = p_gap_days + 1
+    
     r_keep = (success_p * keep_s) + ((1-success_p) * keep_f)
     avg_cycle = ((prep_d + check_d) * r_keep) + ((prep_d + 1) * (1-r_keep))
     daily_parent_cap = parent_dev / p_cycle
