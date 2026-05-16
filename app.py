@@ -233,9 +233,25 @@ with tab_sim:
 
 with tab_config:
     st.markdown("## 報酬・種別設定")
-    st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True)
-    st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, num_rows="dynamic", use_container_width=True)
-    st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True)
+    # キーを追加することで、編集内容がリセットされるのを防ぎます
+    st.session_state.invite_types_df = st.data_editor(
+        st.session_state.invite_types_df, 
+        num_rows="dynamic", 
+        use_container_width=True,
+        key="editor_invite_types"
+    )
+    st.session_state.video_rewards_df = st.data_editor(
+        st.session_state.video_rewards_df, 
+        num_rows="dynamic", 
+        use_container_width=True,
+        key="editor_video_rewards"
+    )
+    st.session_state.checkin_rewards_df = st.data_editor(
+        st.session_state.checkin_rewards_df, 
+        num_rows="dynamic", 
+        use_container_width=True,
+        key="editor_checkin_rewards"
+    )
 
 st.sidebar.markdown("---")
 st.sidebar.caption("Midnight Pro v8.1 | Quantitative Strategy")
