@@ -163,6 +163,10 @@ def fetch_data(f_mode, l_days=None, t_month=None):
             if "XPERIA" in m: return "Xperia"
             if "AQUOS" in m or "SH-" in m: return "AQUOS"
             if "PIXEL" in m: return "Pixel"
+            if "GALAXY" in m or "SC-" in m or "SM-" in m: return "Galaxy"
+            if "IPHONE" in m: return "iPhone"
+            if "OPPO" in m or "CPH" in m: return "OPPO"
+            if "XIAOMI" in m or "REDMI" in m: return "Xiaomi"
             return "その他"
         df['brand'] = df['model'].apply(get_brand)
         df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
