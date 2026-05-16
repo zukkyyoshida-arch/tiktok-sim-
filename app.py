@@ -50,9 +50,20 @@ def load_settings():
 # --- 初期化 ---
 if 'initialized' not in st.session_state:
     if not load_settings():
-        st.session_state.invite_types_df = pd.DataFrame([{"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0}])
+        st.session_state.invite_types_df = pd.DataFrame([
+            {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
+            {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0.0},
+            {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0.0},
+            {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0.0},
+            {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0.0},
+            {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0.0}
+        ])
         st.session_state.video_rewards_df = pd.DataFrame([{"動画パターン名": "通常再生報酬", "報酬額": 1000, "有効": True}])
-        st.session_state.checkin_rewards_df = pd.DataFrame([{"報酬名": "ティア1", "報酬額": 1350, "出現確率(%)": 100.0}])
+        st.session_state.checkin_rewards_df = pd.DataFrame([
+            {"報酬名": "ティア1", "報酬額": 1350, "出現確率(%)": 40.0},
+            {"報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
+            {"報酬名": "ティア3", "報酬額": 6750, "出現確率(%)": 20.0}
+        ])
         st.session_state.total_dev_val = 1800
         st.session_state.parent_dev_val = 300
     st.session_state.initialized = True
