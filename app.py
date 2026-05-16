@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Lite Strategy Simulator v2.6",
+    page_title="TikTok Lite Strategy Simulator v2.7",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -27,7 +27,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📱 TikTok Lite 運用戦略シミュレーター v2.6")
+st.title("📱 TikTok Lite 運用戦略シミュレーター v2.7")
 
 # --- セッション状態の初期化 ---
 if 'invite_types_df' not in st.session_state:
@@ -38,6 +38,12 @@ if 'invite_types_df' not in st.session_state:
         {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0},
         {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0},
         {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0}
+    ])
+
+if 'video_rewards_df' not in st.session_state:
+    st.session_state.video_rewards_df = pd.DataFrame([
+        {"動画パターン名": "通常再生報酬", "報酬額": 1000, "有効": True},
+        {"動画パターン名": "特別ボーナス", "報酬額": 1500, "有効": False}
     ])
 
 if 'checkin_rewards' not in st.session_state:
@@ -95,29 +101,28 @@ with tab3:
     w_task = sum(edited_df["完走報酬"] * edited_df["運用比率(%)"] / 100)
 
     st.divider()
-    col_b, col_v = st.columns(2)
-    with col_b:
-        st.markdown("### 🎁 チェックイン追加報酬")
-        p1 = st.slider("1350円の確率 (%)", 0, 100, st.session_state.checkin_rewards["tier1"]["prob"])
-        p2 = st.slider("2700円の確率 (%)", 0, 100 - p1, st.session_state.checkin_rewards["tier2"]["prob"])
-        p3 = 100 - p1 - p2
-        expected_checkin = (1350 * p1/100) + (2700 * p2/100) + (6750 * p3/100)
+    
+    st.subheader("📺 動画再生報酬の管理")
+    edited_video_df = st.data_editor(st.session_state.video_rewards_df, num_rows="dynamic", use_container_width=True)
+    st.session_state.video_rewards_df = edited_video_df
+    final_video = edited_video_df[edited_video_df["有効"]]["報酬額"].sum()
+    st.write(f"現在の動画報酬合計: **¥{final_video:,}**")
 
-    with col_v:
-        st.markdown("### 📺 動画再生追加報酬")
-        video_amount = st.number_input("動画再生報酬 (¥)", value=1000, step=100)
-        video_active = st.toggle("動画再生報酬を有効にする", value=True)
-        final_video = video_amount if video_active else 0
+    st.divider()
+    
+    st.subheader("🎁 チェックイン追加報酬")
+    p1 = st.slider("1350円の確率 (%)", 0, 100, st.session_state.checkin_rewards["tier1"]["prob"])
+    p2 = st.slider("2700円の確率 (%)", 0, 100 - p1, st.session_state.checkin_rewards["tier2"]["prob"])
+    p3 = 100 - p1 - p2
+    expected_checkin = (1350 * p1/100) + (2700 * p2/100) + (6750 * p3/100)
+    st.write(f"期待値: ¥{int(expected_checkin):,}")
 
     rev_immediate = w_immediate * success_rate
     rev_additional = (w_task + expected_checkin + final_video) * (ratio_s_keep + ratio_f_keep)
     per_invite_revenue = rev_immediate + rev_additional
 
 with tab1:
-    # 📍 本日のスポット・シミュレーション
     st.subheader("📍 本日のスポット・シミュレーション")
-    st.markdown("サイクルとは別に、本日招待可能な具体的な台数から収益を計算します。")
-    
     c_spot1, c_spot2, c_spot3 = st.columns(3)
     with c_spot1:
         today_ready_children = st.number_input("本日招待可能な子端末 (台)", value=50)
@@ -126,13 +131,7 @@ with tab1:
     with c_spot3:
         today_invites = min(today_ready_children, today_ready_parents)
         today_profit = today_invites * per_invite_revenue
-        st.metric("本日の最大招待可能数", f"{today_invites} 件")
         st.metric("本日の見込み収益", f"¥{int(today_profit):,}")
-
-    if today_ready_children > today_ready_parents:
-        st.warning(f"親端末が不足しています。あと {today_ready_children - today_ready_parents} 台の親端末があれば、すべての子端末を使い切れます。")
-    elif today_ready_children < today_ready_parents:
-        st.info(f"親端末に余裕があります。あと {today_ready_parents - today_ready_children} 台の子端末を準備できれば、親の枠をフル活用できます。")
 
     st.divider()
 
@@ -150,7 +149,6 @@ with tab1:
         bottleneck = "親端末" if daily_parent_cap < daily_child_cap else "子端末"
         st.metric("ボトルネック", bottleneck)
 
-    # 具体的な金額内訳の表示
     st.subheader("💰 1招待あたりの収益内訳（平均）")
     detail_df = pd.DataFrame([
         {"項目": "即時報酬 (成功分)", "金額": f"¥{int(rev_immediate):,}"},
@@ -159,7 +157,6 @@ with tab1:
     ])
     st.table(detail_df)
 
-    # 収益推移グラフ
     st.subheader("📈 収益推移シミュレーション")
     sim_days = st.slider("シミュレーション期間 (日)", 1, 365, 30)
     dates = pd.date_range(start="2024-01-01", periods=sim_days)
@@ -184,4 +181,4 @@ with tab2:
         st.error(f"### 失敗・リセット\n{ratio_f_reset*100:.1f}%\n{cycle_reset:.1f}日")
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Created by Antigravity Assistant v2.6")
+st.sidebar.caption("Created by Antigravity Assistant v2.7")
