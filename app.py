@@ -8,7 +8,7 @@ import re
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Studio Midnight v6.1",
+    page_title="TikTok Studio Midnight v6.4",
     page_icon="🕶️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -75,8 +75,7 @@ with st.sidebar:
     keep_s = st.slider("成功時キープ率 (%)", 0, 100, 100) / 100
     keep_f = st.slider("失敗時キープ率 (%)", 0, 100, 30) / 100
 
-# --- グローバル計算ロジック (全てのタブの前に実行) ---
-# 1. 子端末の計算
+# --- グローバル計算ロジック ---
 child_dev = total_dev - parent_dev
 prep_d = 12.5; check_d = 14; p_cycle = 6
 r_keep = (success_p * keep_s) + ((1-success_p) * keep_f)
@@ -85,7 +84,6 @@ daily_parent_cap = parent_dev / p_cycle
 daily_child_cap = child_dev / avg_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
-# 2. 報酬期待値の計算
 c_inv = st.session_state.invite_types_df.fillna(0)
 w_immediate = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
 w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
@@ -125,7 +123,7 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         else:
             target_dt = datetime.strptime(t_month, "%Y/%m")
             rdf = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
-        if len(rdf) == 0: return "No data found."
+        if len(rdf) == 0: return "指定期間にデータが見つかりませんでした。"
         sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         sum_df['運用比率'] = np.ceil((sum_df['試行数']/len(rdf))*100*1000)/1000
@@ -140,19 +138,19 @@ def fetch_data(f_mode, l_days=None, t_month=None):
     except Exception as e: return str(e)
 
 # --- タブ表示 ---
-tab_dash, tab_analytics, tab_sim, tab_config = st.tabs(["Dashboard", "Analytics", "Operations", "Settings"])
+tab_dash, tab_analytics, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
 with tab_dash:
-    st.markdown("## Overall Predicted Performance")
+    st.markdown("## 運用パフォーマンス予測")
     c1, c2, c3 = st.columns(3)
-    with c1: custom_metric("Monthly Expected Revenue", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", "Based on current settings")
-    with c2: custom_metric("Daily Avg Invitations", f"{actual_daily_invites:.1f}", f"Bottleneck: {'Parent' if daily_parent_cap < daily_child_cap else 'Child'}")
-    with c3: custom_metric("Resource Efficiency", f"{r_keep*100:.1f}%", "Device utilization rate")
+    with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", "現在の設定に基づく概算")
+    with c2: custom_metric("1日あたり招待予測", f"{actual_daily_invites:.1f} 件", f"ボトルネック: {'親端末' if daily_parent_cap < daily_child_cap else '子端末'}")
+    with c3: custom_metric("リソース効率", f"{r_keep*100:.1f}%", "端末の平均稼働率")
     
-    st.markdown("<br><h3>⚡ Quick Spot Simulation</h3>", unsafe_allow_html=True)
+    st.markdown("<br><h3>⚡ 本日のスポット計算</h3>", unsafe_allow_html=True)
     qc1, qc2, qc3 = st.columns(3)
-    with qc1: s_c = st.number_input("Available Child Devices", value=50)
-    with qc2: s_p = st.number_input("Available Parent Devices", value=int(daily_parent_cap))
+    with qc1: s_c = st.number_input("利用可能な子端末", value=50)
+    with qc2: s_p = st.number_input("利用可能な親端末", value=int(daily_parent_cap))
     with qc3:
         s_inv = min(s_c, s_p)
         st.markdown(f"<div style='background:#111; padding:24px; border-radius:12px; border:1px solid #00ff88;'>本日見込み収益: <span style='color:#00ff88; font-size:1.8rem; font-weight:700;'>¥{int(s_inv * per_invite_revenue):,}</span></div>", unsafe_allow_html=True)
@@ -215,4 +213,4 @@ with tab_config:
     st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True)
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Midnight Pro v6.2 | 日本語完全対応")
+st.sidebar.caption("Midnight Pro v6.4 | 日本語完全対応")
