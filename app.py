@@ -55,6 +55,17 @@ def load_settings_from_sheet():
     except: return False
     return False
 
+# --- 初期化 (セーフティ・イニシャライザ) ---
+for key, default in {
+    "success_rate_val": 80,
+    "keep_success_val": 100,
+    "keep_failure_val": 30,
+    "total_dev_val": 1800,
+    "parent_dev_val": 300
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
+
 # --- 初期化 (カラム名を厳密に定義) ---
 if 'initialized' not in st.session_state:
     st.session_state.invite_types_df = pd.DataFrame([
