@@ -219,9 +219,27 @@ with tab_analytics:
     if st.session_state.actual_res:
         res = st.session_state.actual_res
         mc1, mc2, mc3 = st.columns(3)
-        with mc1: custom_metric("総試行数", f"{res['total']:,}")
-        with mc2: custom_metric("成功数", f"{res['success']:,}")
-        with mc3: custom_metric("成功率", f"{res['rate']:.3f}%")
+        with mc1:
+            custom_metric("総試行数", f"{res['total']:,}")
+        with mc2:
+            custom_metric("成功数", f"{res['success']:,}")
+        with mc3:
+            custom_metric("成功率", f"{res['rate']:.3f}%")
+        
+        # 成功率のグラフを表示 (キャンペーン別)
+        st.markdown("### 📈 キャンペーン別 成功率ランキング")
+        s_df = res['summary'].sort_values('成功率', ascending=False)
+        fig_success = px.bar(
+            s_df, x='成功率', y=s_df.columns[0], orientation='h',
+            color='成功率', color_continuous_scale='RdYlGn',
+            text_auto='.2f', labels={'成功率': '成功率 (%)', s_df.columns[0]: 'タイプ'}
+        )
+        fig_success.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            font_color="#e0e0e0", height=max(300, len(s_df)*40),
+            margin=dict(l=0, r=0, t=20, b=0)
+        )
+        st.plotly_chart(fig_success, use_container_width=True)
 
 with tab_device:
     st.markdown("## 📱 機種別パフォーマンス")
