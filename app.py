@@ -38,14 +38,30 @@ def load_settings_from_sheet():
         if response.status_code == 200:
             settings = response.json()
             if not settings: return False
-            # 読み込み時は名前の不一致を防ぐため慎重に処理
-            if "invite_types" in settings: 
-                st.session_state.invite_types_df = pd.read_json(settings["invite_types"])
-            if "video_rewards" in settings: 
-                st.session_state.video_rewards_df = pd.read_json(settings["video_rewards"])
-            if "checkin_rewards" in settings: 
-                st.session_state.checkin_rewards_df = pd.read_json(settings["checkin_rewards"])
             
+            # 運用比率のみをマスターリストに適用するロジック
+            def sync_ratio(df, cloud_json, key_col):
+                if not cloud_json: return df
+                cloud_df = pd.read_json(cloud_json)
+                if key_col not in cloud_df.columns or "運用比率(%)" not in cloud_df.columns: return df
+                # 比率データをマッピング
+                ratios = dict(zip(cloud_df[key_col], cloud_df["運用比率(%)"]))
+                df["運用比率(%)"] = df[key_col].map(ratios).fillna(0.0)
+                return df
+
+            if "invite_types" in settings:
+                st.session_state.invite_types_df = sync_ratio(st.session_state.invite_types_df, settings["invite_types"], "キャンペーン名")
+            if "video_rewards" in settings:
+                st.session_state.video_rewards_df = sync_ratio(st.session_state.video_rewards_df, settings["video_rewards"], "動画パターン名")
+            if "checkin_rewards" in settings:
+                cloud_checkin = pd.read_json(settings["checkin_rewards"])
+                # チェックインは名前が変更されたため特殊処理
+                if not cloud_checkin.empty:
+                    # 以前の「報酬名」または新しい「チェックイン追加報酬名」でマッチング
+                    key = "チェックイン追加報酬名" if "チェックイン追加報酬名" in cloud_checkin.columns else "報酬名"
+                    ratios = dict(zip(cloud_checkin[key], cloud_checkin["出現確率(%)"]))
+                    st.session_state.checkin_rewards_df["出現確率(%)"] = st.session_state.checkin_rewards_df["チェックイン追加報酬名"].map(ratios).fillna(0.0)
+
             st.session_state.total_dev_val = int(settings.get("total_dev", 1800))
             st.session_state.parent_dev_val = int(settings.get("parent_dev", 300))
             st.session_state.success_rate_val = int(settings.get("success_rate", 80))
