@@ -333,6 +333,10 @@ def main():
 
     # 1. ダッシュボード
     with tabs[0]:
+        res = st.session_state.get('actual_res')
+        if res:
+            st.caption(f"📊 分析対象期間: {res['period']}")
+        
         st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
         if datetime.now().hour >= 20:
             st.info("🌙 **20:00を過ぎました。本日の運用データが確定しています。**")
@@ -391,6 +395,10 @@ def main():
 
     # 2. 実績分析 (折れ線グラフ復元)
     with tabs[1]:
+        res = st.session_state.get('actual_res')
+        if res:
+            st.caption(f"📊 分析対象期間: {res['period']}")
+            
         st.markdown("## リアルタイム実績分析")
         ac1, ac2, ac3 = st.columns([2,2,1])
         with ac1: fm = st.radio("期間", ["直近28日間", "月指定"], horizontal=True)
@@ -428,6 +436,10 @@ def main():
 
     # 3. 機種別分析 (テーブル復元)
     with tabs[2]:
+        res = st.session_state.get('actual_res')
+        if res:
+            st.caption(f"📊 分析対象期間: {res['period']}")
+            
         st.markdown("## 📱 機種別パフォーマンス")
         res = st.session_state.get('actual_res')
         if res and 'brand' in res:
@@ -442,6 +454,10 @@ def main():
 
     # 4. 親機分析 (アドバイス復元)
     with tabs[3]:
+        res = st.session_state.get('actual_res')
+        if res:
+            st.caption(f"📊 分析対象期間: {res['period']}")
+            
         st.markdown("## 👑 親機パフォーマンス分析")
         res = st.session_state.get('actual_res')
         if res and 'parent_rank' in res:
