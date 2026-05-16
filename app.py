@@ -423,7 +423,8 @@ with tab_parent:
     if st.session_state.actual_res:
         res = st.session_state.actual_res
         
-        col_p1, col_p2 = st.columns(2)
+        if "parent_rank" in res and "parent_model_rank" in res:
+            col_p1, col_p2 = st.columns(2)
         
         with col_p1:
             st.markdown("### 🏆 親機個体別ランキング (TOP10)")
