@@ -9,7 +9,7 @@ import json
 import requests
 
 # ページ設定
-st.set_page_config(page_title="TikTok Studio Midnight v10.4", page_icon="🕶️", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="TikTok Studio Midnight v10.5", page_icon="🕶️", layout="wide", initial_sidebar_state="expanded")
 
 # --- スプレッドシート連携 (GAS API) ロジック ---
 GAS_URL = "https://script.google.com/macros/s/AKfycbwQuf80VDu7cqIaF2lM9CzIR1vFoDcFzxZzLU1rQakbgIgK6VW7c0EXtyQ8baZtaL3bzg/exec"
@@ -70,19 +70,20 @@ if 'actual_res' not in st.session_state: st.session_state.actual_res = None
 st.markdown("""
     <style>
     .main { background-color: #000000; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .metric-container { background-color: #0a0a0a; padding: 24px; border-radius: 12px; border: 1px solid #1a1a1a; margin-bottom: 20px; }
+    .metric-container { background-color: #0a0a0a; padding: 24px; border-radius: 12px; border: 1px solid #1a1a1a; margin-bottom: 20px; text-align: left; }
     .metric-label { color: #888888; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
-    .metric-value { color: #ffffff; font-size: 2.2rem; font-weight: 700; line-height: 1.2; }
+    .metric-value { color: #ffffff; font-size: 2.5rem; font-weight: 700; line-height: 1.1; }
+    .metric-sub { color: #00ff88; font-size: 0.8rem; margin-top: 4px; font-weight: 500; }
     .advice-card { background-color: #050a15; padding: 24px; border-radius: 12px; border: 1px solid #0044ff; margin-bottom: 30px; }
-    .advice-title { color: #0088ff; font-weight: 700; font-size: 1.2rem; margin-bottom: 12px; }
-    .stTabs [data-baseweb="tab-list"] { gap: 20px; background-color: #000000; border-bottom: 1px solid #111111; }
-    .stTabs [data-baseweb="tab"] { color: #666666; font-weight: 600; }
+    .advice-title { color: #0088ff; font-weight: 700; font-size: 1.2rem; margin-bottom: 12px; display: flex; align-items: center; }
+    .stTabs [data-baseweb="tab-list"] { gap: 24px; background-color: #000000; border-bottom: 1px solid #111111; }
+    .stTabs [data-baseweb="tab"] { color: #666666; font-weight: 600; font-size: 1rem; border: none; }
     .stTabs [aria-selected="true"] { color: #0088ff !important; border-bottom: 2px solid #0088ff !important; }
     </style>
     """, unsafe_allow_html=True)
 
 def custom_metric(label, value, sub=""):
-    st.markdown(f"<div class='metric-container'><div class='metric-label'>{label}</div><div class='metric-value'>{value}</div><div style='color:#00ff88;font-size:0.8rem;margin-top:4px;'>{sub}</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='metric-container'><div class='metric-label'>{label}</div><div class='metric-value'>{value}</div><div class='metric-sub'>{sub}</div></div>", unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown("<h2 style='color:#0088ff;'>設定パネル</h2>", unsafe_allow_html=True)
@@ -97,7 +98,7 @@ with st.sidebar:
     if st.sidebar.button("💾 クラウド保存", use_container_width=True):
         if save_settings_to_sheet(): st.sidebar.success("保存完了！")
 
-# --- 計算ロジック ---
+# --- 計算 ---
 child_dev = total_dev - parent_dev
 prep_d = 12.5; check_d = 14; p_cycle = 6
 r_keep = (success_p * keep_s) + ((1-success_p) * keep_f)
@@ -112,6 +113,7 @@ c_check = st.session_state.checkin_rewards_df.fillna(0)
 expected_checkin_reward = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
 per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + 1000) * r_keep)
 
+# (fetch_data などの関数は維持)
 def fetch_data(f_mode, l_days=None, t_month=None):
     sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
     gid = "937207441"
@@ -161,19 +163,31 @@ def fetch_data(f_mode, l_days=None, t_month=None):
 tab_dash, tab_analytics, tab_device, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
 with tab_dash:
+    st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
+    c1, c2, c3 = st.columns(3)
+    with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", f"前月比: +{int(per_invite_revenue):,} /招待")
+    with c2: custom_metric("1日あたりの招待予測", f"{actual_daily_invites:.1f}", f"最大成功: {actual_daily_invites*success_p:.1f}/日")
+    with c3: custom_metric("リソース稼働率", f"{r_keep*100:.1f}%", "端末回転の健全性")
+    
+    # YouTube Analytics 風グラフ
+    st.markdown("### 収益の推移予測 (今後30日間)")
+    days_range = list(range(1, 31))
+    revenue_forecast = [int(actual_daily_invites * d * per_invite_revenue) for d in days_range]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=days_range, y=revenue_forecast, mode='lines', line=dict(color='#0088ff', width=4), fill='tozeroy', fillcolor='rgba(0,136,255,0.1)'))
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=20, b=0), height=300, xaxis=dict(showgrid=False, title="日数"), yaxis=dict(showgrid=True, gridcolor='#222', title="累積収益 (¥)"))
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
     st.markdown("### 📊 運用コンサルタントの定量アドバイス")
     advice_content = []
     if daily_parent_cap < daily_child_cap:
-        req_parent = int(np.ceil(daily_child_cap * p_cycle))
-        advice_content.append(f"🔴 <b>親端末の不足 (ボトルネック)</b>: <b>あと {req_parent - parent_dev} 台</b> の親を追加すれば、月間収益は約 <b>¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}</b> 増加します。")
+        req_p = int(np.ceil(daily_child_cap * p_cycle))
+        advice_content.append(f"🔴 <b>親端末の不足 (ボトルネック)</b>: <b>あと {req_p - parent_dev} 台</b> の親を追加すれば、月間収益は約 <b>¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}</b> 増加します。")
     else:
-        req_child = int(np.ceil(daily_parent_cap * avg_cycle))
-        advice_content.append(f"🔵 <b>子端末の不足</b>: <b>あと {req_child - child_dev} 台</b> の子を追加すれば、月間収益を約 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 上乗せできます。")
+        req_c = int(np.ceil(daily_parent_cap * avg_cycle))
+        advice_content.append(f"🔵 <b>子端末の不足</b>: <b>あと {req_c - child_dev} 台</b> の子を追加すれば、月間収益を約 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 上乗せできます。")
     st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 定量アクションプラン</div><div class='advice-text'>{'<br><br>'.join(advice_content)}</div></div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", f"1招待: ¥{int(per_invite_revenue):,}")
-    with c2: custom_metric("1日招待予測", f"{actual_daily_invites:.1f} 件")
-    with c3: custom_metric("リソース効率", f"{r_keep*100:.1f}%")
 
 with tab_analytics:
     st.markdown("## リアルタイム実績分析")
@@ -196,27 +210,20 @@ with tab_device:
         if "brand" in res:
             b_df = res['brand'].sort_values('成功率', ascending=False)
             fig_brand = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
-            fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
-            st.plotly_chart(fig_brand, use_container_width=True)
+            fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0"); st.plotly_chart(fig_brand, use_container_width=True)
             if "model_rank" in res:
-                m_df = res['model_rank'].sort_values('成功率', ascending=False); m_df = m_df[m_df['試行数'] >= 1] 
-                display_m = m_df.copy(); display_m['成功率'] = display_m['成功率'].map('{:.3f}%'.format)
-                st.dataframe(display_m, use_container_width=True, hide_index=True)
+                m_df = res['model_rank'].sort_values('成功率', ascending=False); display_m = m_df[m_df['試行数'] >= 1].copy(); display_m['成功率'] = display_m['成功率'].map('{:.3f}%'.format); st.dataframe(display_m, use_container_width=True, hide_index=True)
 
 with tab_sim:
     st.markdown("## 🔄 稼働シミュレーション・インサイト")
-    st.markdown(f"<div style='background:#111; padding:24px; border-radius:12px; border-left:5px solid #0088ff; margin-bottom:30px;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b><br><small>現在の成功率とキープ戦略に基づく、1台の子端末が次に招待可能になるまでの平均日数です。</small></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='background:#111; padding:24px; border-radius:12px; border-left:5px solid #0088ff; margin-bottom:30px;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    with c1: custom_metric("1招待あたりの期待収益", f"¥{int(per_invite_revenue):,}", "即時+完走+再生+ﾁｪｯｸｲﾝ")
-    with c2: custom_metric("親端末の1日処理能力", f"{daily_parent_cap:.1f} 件", f"{parent_dev}台 / {p_cycle}日サイクル")
-    with c3: custom_metric("子端末の1日回転数", f"{daily_child_cap:.1f} 件", f"{child_dev}台 / {avg_cycle:.1f}日サイクル")
+    with c1: custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}"); with c2: custom_metric("親の1日処理能力", f"{daily_parent_cap:.1f} 件"); with c3: custom_metric("子の1日回転数", f"{daily_child_cap:.1f} 件")
     st.markdown("---")
     st.markdown("### ⚙️ 回転戦略の詳細内訳")
     sc1, sc2 = st.columns(2)
-    with sc1:
-        st.markdown("<div style='background:#0a0a0a; padding:20px; border-radius:10px; border:1px solid #1a1a1a;'><b>✅ 成功時の挙動</b><br>発生確率: "+f"{success_p*100:.1f}%<br>キープ率: "+f"{keep_s*100:.1f}%<br>拘束期間: "+f"{prep_d + check_d:.1f} 日</div>", unsafe_allow_html=True)
-    with sc2:
-        st.markdown("<div style='background:#0a0a0a; padding:20px; border-radius:10px; border:1px solid #1a1a1a;'><b>❌ 失敗時の挙動</b><br>発生確率: "+f"{(1-success_p)*100:.1f}%<br>キープ率: "+f"{keep_f*100:.1f}%<br>拘束期間: "+f"{(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f} 日</div>", unsafe_allow_html=True)
+    with sc1: st.markdown("<div style='background:#0a0a0a; padding:20px; border-radius:10px; border:1px solid #1a1a1a;'><b>✅ 成功時の挙動</b><br>発生確率: "+f"{success_p*100:.1f}%<br>キープ率: "+f"{keep_s*100:.1f}%<br>拘束期間: "+f"{prep_d + check_d:.1f} 日</div>", unsafe_allow_html=True)
+    with sc2: st.markdown("<div style='background:#0a0a0a; padding:20px; border-radius:10px; border:1px solid #1a1a1a;'><b>❌ 失敗時の挙動</b><br>発生確率: "+f"{(1-success_p)*100:.1f}%<br>キープ率: "+f"{keep_f*100:.1f}%<br>拘束期間: "+f"{(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f} 日</div>", unsafe_allow_html=True)
 
 with tab_config:
     st.markdown("## 報酬・種別設定")
@@ -227,3 +234,6 @@ with tab_config:
         st.session_state.invite_types_df = new_invite_df; st.session_state.video_rewards_df = new_video_df; st.session_state.checkin_rewards_df = new_checkin_df
     if st.button("🚀 スプレッドシートに同期・保存", use_container_width=True):
         if save_settings_to_sheet(): st.success("同期完了！")
+
+st.sidebar.markdown("---")
+st.sidebar.caption("Midnight Pro v10.5 | YT Analytics Premium")
