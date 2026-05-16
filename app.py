@@ -15,8 +15,14 @@ st.set_page_config(page_title="TikTok Studio Midnight v10.8", page_icon="🕶️
 # 10分ごとに自動更新 (600,000ミリ秒)
 st_autorefresh(interval=600000, key="datarefresh")
 
+# --- バージョン管理とセッションリセット ---
+CURRENT_VERSION = "10.36"
+if st.session_state.get('version') != CURRENT_VERSION:
+    st.session_state.clear()
+    st.session_state.version = CURRENT_VERSION
+
 # --- スプレッドシート連携 (GAS API) ロジック ---
-GAS_URL = "https://script.google.com/macros/s/AKfycbwQuf80VDu7cqIaF2lM9CzIR1vFoDcFzxZzLU1rQakbgIgK6VW7c0EXtyQ8baZtaL3bzg/exec"
+GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
 
 def save_settings_to_sheet():
     try:
@@ -75,21 +81,39 @@ def load_settings_from_sheet():
     except: return False
     return False
 
-# --- 初期化 (セーフティ・イニシャライザ) ---
-for key, default in {
-    "success_rate_val": 80,
-    "keep_success_val": 100,
-    "keep_failure_val": 30,
-    "total_dev_val": 1800,
-    "parent_dev_val": 300
-}.items():
+def init_session_state(key, default):
     if key not in st.session_state:
         st.session_state[key] = default
 
-# --- 初期化 (カラム名を厳密に定義) ---
+# --- 初期化 (データの存在を厳密に担保) ---
+if 'invite_types_df' not in st.session_state:
+    st.session_state.invite_types_df = pd.DataFrame([
+        {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
+        {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0.0},
+        {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0.0},
+        {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0.0},
+        {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0.0},
+        {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0.0}
+    ])
+    st.session_state.video_rewards_df = pd.DataFrame([
+        {"動画パターン名": "なし", "報酬額": 0, "運用比率(%)": 0.0},
+        {"動画パターン名": "特別1350", "報酬額": 1350, "運用比率(%)": 100.0},
+        {"動画パターン名": "特別2700", "報酬額": 2700, "運用比率(%)": 0.0},
+        {"動画パターン名": "特別6000", "報酬額": 6000, "運用比率(%)": 0.0}
+    ])
+    st.session_state.checkin_rewards_df = pd.DataFrame([
+        {"チェックイン追加報酬名": "ティア1", "報酬額": 1350, "出現確率(%)": 40.0},
+        {"チェックイン追加報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
+        {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
+    ])
+    init_session_state("total_dev_val", 1800)
+    init_session_state("parent_dev_val", 300)
+    init_session_state("success_rate_val", 80)
+    init_session_state("keep_success_val", 100)
+    init_session_state("keep_failure_val", 30)
     load_settings_from_sheet()
+    fetch_data("直近28日間", l_days=28)
     st.session_state.initialized = True
-if 'actual_res' not in st.session_state: st.session_state.actual_res = None
 
 # --- UI デザイン ---
 st.markdown("""
