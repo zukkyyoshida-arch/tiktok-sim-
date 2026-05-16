@@ -8,7 +8,7 @@ import re
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Studio Midnight v8.0",
+    page_title="TikTok Studio Midnight v8.1",
     page_icon="🕶️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,7 +29,6 @@ st.markdown("""
     .metric-value { color: #ffffff; font-size: 2.2rem; font-weight: 700; line-height: 1.2; }
     .metric-sub { color: #00ff88; font-size: 0.8rem; margin-top: 4px; }
     
-    /* アドバイス・カード */
     .advice-card {
         background-color: #050a15; padding: 24px; border-radius: 12px; border: 1px solid #0044ff;
         margin-bottom: 30px; line-height: 1.6;
@@ -54,9 +53,7 @@ def custom_metric(label, value, sub_text=""):
 # --- セッション状態 ---
 if 'invite_types_df' not in st.session_state:
     st.session_state.invite_types_df = pd.DataFrame([
-        {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
-        {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0.0},
-        {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0.0}
+        {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0}
     ])
 if 'video_rewards_df' not in st.session_state:
     st.session_state.video_rewards_df = pd.DataFrame([{"動画パターン名": "通常再生報酬", "報酬額": 1000, "有効": True}])
@@ -114,10 +111,8 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         def get_brand(model_name):
             m = str(model_name).upper()
             if "XPERIA" in m: return "Xperia"
-            if "AQUOS" in m or "SH-" in m: return "AQUOS"
+            if "AQUOS" in m: return "AQUOS"
             if "PIXEL" in m: return "Pixel"
-            if "GALAXY" in m: return "Galaxy"
-            if "IPHONE" in m: return "iPhone"
             return "その他"
         df['brand'] = df['model'].apply(get_brand)
         df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
@@ -127,7 +122,7 @@ def fetch_data(f_mode, l_days=None, t_month=None):
             rdf = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
         if len(rdf) == 0: return "No Data"
         
-        sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
+        sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         brand_df = rdf.groupby('brand').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
@@ -144,31 +139,40 @@ def fetch_data(f_mode, l_days=None, t_month=None):
 tab_dash, tab_analytics, tab_device, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
 with tab_dash:
-    # --- AI総評 & アドバイスセクション ---
-    st.markdown("### 📊 運用コンサルタントの総評 & アドバイス")
+    st.markdown("### 📊 運用コンサルタントの定量アドバイス")
     
     advice_content = []
-    # ボトルネック判定
+    # 1. ボトルネックの定量的改善案
     if daily_parent_cap < daily_child_cap:
-        advice_content.append("⚠️ **親端末が不足しています**: 現在、親端末の回転が全体のボトルネックとなり、収益機会を逃しています。親端末を増やすか、休息日を1日減らすことを推奨します。")
+        # 親が足りない場合：親を何台増やせば子に追いつくか
+        # 必要親台数 = daily_child_cap * p_cycle
+        req_parent = int(np.ceil(daily_child_cap * p_cycle))
+        shortage = req_parent - parent_dev
+        advice_content.append(f"🔴 **親端末の不足 (ボトルネック)**: 現在の子端末の回転を最大限活かすには、**あと {shortage} 台** の親端末が必要です。これを追加することで、月間収益は約 **¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}** 増加します。")
     else:
-        advice_content.append("⚠️ **子端末が余剰気味です**: 親端末の数に対して、子端末の回転が追いついていません。子端末の準備時間を短縮するか、全体の招待数を増やすために親を追加してください。")
+        # 子が足りない場合：子を何台増やせば親に追いつくか
+        # 必要子台数 = daily_parent_cap * avg_cycle
+        req_child = int(np.ceil(daily_parent_cap * avg_cycle))
+        shortage = req_child - child_dev
+        advice_content.append(f"🔵 **子端末の不足**: 親端末の招待能力に余裕があります。**あと {shortage} 台** の子端末を追加調達すれば、現在の親端末をフル稼働させ、月間収益を約 **¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}** 上乗せできます。")
     
-    # 成功率判定
+    # 2. 成功率低下による損失計算
     if st.session_state.actual_res:
         act_rate = st.session_state.actual_res['rate']
-        if act_rate < 70:
-            advice_content.append(f"🚨 **成功率の低下**: 実績成功率が{act_rate:.1f}%と低迷しています。「機種別分析」を確認し、不調な機種（Xperia等）を一時的に除外する等の対策が必要です。")
-        elif act_rate > 85:
-            advice_content.append(f"✨ **極めて良好な成功率**: 実績成功率{act_rate:.1f}%を維持しています。現在のキャンペーン種別と端末の組み合わせは最強です。このままスケールを検討しましょう。")
+        if act_rate < 80:
+            # 理想(80%)との比較
+            loss_per_day = actual_daily_invites * (0.8 - act_rate/100) * per_invite_revenue
+            advice_content.append(f"🚨 **収益漏れ警告**: 現在の成功率は {act_rate:.1f}% です。これを標準的な 80% まで改善するだけで、月間 **¥{int(loss_per_day * 30):,}** の利益が積み増せます。不調な機種の特定を急いでください。")
+        elif act_rate >= 80:
+            advice_content.append(f"✨ **高効率運用中**: 成功率 {act_rate:.1f}% を維持できています。このクオリティを保ったまま、端末台数を 1.2倍〜1.5倍にスケールさせることを推奨します。")
             
-    # 収益性アドバイス
-    if per_invite_revenue < 7000:
-        advice_content.append("💡 **単価改善の余地**: 1招待あたりの期待収益が¥7,000を切っています。比率の高いキャンペーンを見直し、高単価なもの（5000円系）へ寄せることを検討してください。")
+    # 3. 単価改善
+    if per_invite_revenue < 8000:
+        advice_content.append(f"💡 **単価改善案**: 1招待期待値が ¥{int(per_invite_revenue):,} です。完走報酬が高いキャンペーン（例：5500円系）の比率を 20% 高めるだけで、月間収益は ¥{int(actual_daily_invites * 30 * 500):,} 増加する見込みです。")
 
     st.markdown(f"""
         <div class="advice-card">
-            <div class="advice-title">💎 本日の戦略サマリー</div>
+            <div class="advice-title">💎 定量アクションプラン</div>
             <div class="advice-text">
                 {'<br><br>'.join(advice_content)}
             </div>
@@ -179,7 +183,7 @@ with tab_dash:
     c1, c2, c3 = st.columns(3)
     with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", f"1招待単価: ¥{int(per_invite_revenue):,}")
     with c2: custom_metric("1日あたり招待予測", f"{actual_daily_invites:.1f} 件", f"最大効率: {actual_daily_invites*success_p:.1f} 成功/日")
-    with c3: custom_metric("稼働のボトルネック", "親端末" if daily_parent_cap < daily_child_cap else "子端末", "ここを改善すると収益が伸びます")
+    with c3: custom_metric("リソース効率", f"{r_keep*100:.1f}%", "端末の平均稼働率")
     
     st.markdown("<br><h3>⚡ 本日のスポット計算</h3>", unsafe_allow_html=True)
     qc1, qc2, qc3 = st.columns(3)
@@ -189,7 +193,7 @@ with tab_dash:
         s_inv = min(s_c, s_p)
         st.markdown(f"<div style='background:#111; padding:24px; border-radius:12px; border:1px solid #00ff88;'>本日見込み収益: <span style='color:#00ff88; font-size:1.8rem; font-weight:700;'>¥{int(s_inv * per_invite_revenue):,}</span></div>", unsafe_allow_html=True)
 
-# (実績分析、機種別分析、シミュレーション、設定タブの中身はv7.1を維持)
+# (実績分析、機種別分析、シミュレーション、設定タブの中身は維持)
 with tab_analytics:
     st.markdown("## リアルタイム実績分析")
     ac1, ac2, ac3 = st.columns([2,2,1])
@@ -200,10 +204,7 @@ with tab_analytics:
             months = [(datetime.now() - timedelta(days=30*i)).strftime("%Y/%m") for i in range(12)]
             t_m = st.selectbox("対象月", months, key="an_month"); l_d = None
     with ac3: st.write(""); st.write(""); btn_s = st.button("データを同期", use_container_width=True, key="an_sync")
-    if btn_s: 
-        err = fetch_data(f_m, l_days=l_d, t_month=t_m)
-        if err: st.error(err)
-        else: st.success("同期完了！")
+    if btn_s: fetch_data(f_m, l_days=l_d, t_month=t_m)
     if st.session_state.actual_res:
         res = st.session_state.actual_res
         st.markdown(f"**分析期間: {res['period']}**")
@@ -211,14 +212,12 @@ with tab_analytics:
         with mc1: custom_metric("総試行数", f"{res['total']:,}")
         with mc2: custom_metric("成功数", f"{res['success']:,}")
         with mc3: custom_metric("平均成功率", f"{res['rate']:.3f}%")
-        st.dataframe(res['summary'].sort_values('成功率', ascending=False), use_container_width=True, hide_index=True)
 
 with tab_device:
-    st.markdown("## 📱 機種別パフォーマンス・インサイト")
+    st.markdown("## 📱 機種別パフォーマンス")
     if st.session_state.actual_res:
         res = st.session_state.actual_res
         if "brand" in res:
-            st.markdown("### 🏢 メーカー別成功率")
             b_df = res['brand'].sort_values('成功率', ascending=False)
             fig_brand = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
             fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
@@ -242,4 +241,4 @@ with tab_config:
     st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True)
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Midnight Pro v8.0 | Strategy Consultant Edition")
+st.sidebar.caption("Midnight Pro v8.1 | Quantitative Strategy")
