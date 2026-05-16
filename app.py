@@ -396,6 +396,13 @@ with tab_config:
         st.session_state.invite_types_df, 
         use_container_width=True, 
         disabled=["キャンペーン名", "即時報酬", "完走報酬"],
+        column_config={
+            "運用比率(%)": st.column_config.SelectboxColumn(
+                "運用比率(%)",
+                options=[float(i) for i in range(0, 110, 10)],
+                required=True,
+            )
+        },
         key="editor_invite_types"
     )
     
@@ -404,6 +411,13 @@ with tab_config:
         st.session_state.video_rewards_df, 
         use_container_width=True, 
         disabled=["動画パターン名", "報酬額"],
+        column_config={
+            "運用比率(%)": st.column_config.SelectboxColumn(
+                "運用比率(%)",
+                options=[float(i) for i in range(0, 110, 10)],
+                required=True,
+            )
+        },
         key="editor_video_rewards"
     )
     
@@ -412,6 +426,13 @@ with tab_config:
         st.session_state.checkin_rewards_df, 
         use_container_width=True, 
         disabled=["チェックイン追加報酬名", "報酬額"],
+        column_config={
+            "出現確率(%)": st.column_config.SelectboxColumn(
+                "出現確率(%)",
+                options=[float(i) for i in range(0, 110, 10)],
+                required=True,
+            )
+        },
         key="editor_checkin_rewards"
     )
     
