@@ -57,7 +57,7 @@ if 'actual_summary' not in st.session_state:
     st.session_state.actual_summary = None
 
 # --- 解析・補正関数 ---
-def fetch_actual_data():
+def fetch_actual_data(filter_mode, lookback_days=None, target_month=None):
     sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
     gid = "937207441"
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
@@ -76,15 +76,26 @@ def fetch_actual_data():
         df['is_success'] = df[f_col].astype(str).str.contains("成功")
         # 4桁数字除外
         df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
-        one_month_ago = datetime.now() - timedelta(days=30)
-        recent_df = df[df['date'] >= one_month_ago].copy()
-        if len(recent_df) == 0: return "データが見つかりませんでした。"
+        
+        # フィルタリング
+        if filter_mode == "直近N日間":
+            start_date = datetime.now() - timedelta(days=lookback_days)
+            recent_df = df[df['date'] >= start_date].copy()
+        else:
+            # 月指定 (YYYY/MM)
+            target_dt = datetime.strptime(target_month, "%Y/%m")
+            recent_df = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
+
+        if len(recent_df) == 0: return "指定された期間のデータが見つかりませんでした。"
+        
         summary = recent_df.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
         summary['成功率'] = np.ceil(summary['成功率'] * 100 * 1000) / 1000
         summary['運用比率'] = (summary['試行数'] / summary['試行数'].sum()) * 100
         summary['運用比率'] = np.ceil(summary['運用比率'] * 1000) / 1000
+        
         st.session_state.actual_summary = summary
         st.session_state.overall_success_rate = np.ceil(recent_df['is_success'].mean() * 100 * 1000) / 1000
+        st.session_state.analysis_period_info = f"{recent_df['date'].min().strftime('%Y/%m/%d')} 〜 {recent_df['date'].max().strftime('%Y/%m/%d')}"
         return None
     except Exception as e: return f"解析エラー: {e}"
 
@@ -203,15 +214,33 @@ with tab1:
 
 with tab4:
     st.subheader("📈 実績分析（Tik管理_）")
-    if st.button("🔄 データを同期"):
+    
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        f_mode = st.radio("集計モード", ["直近N日間", "月指定"], horizontal=True)
+    with col_p2:
+        if f_mode == "直近N日間":
+            l_days = st.number_input("遡る日数", value=30, min_value=1)
+            t_month = None
+        else:
+            now = datetime.now()
+            # 過去12ヶ月のリストを作成
+            months = [(now - timedelta(days=30*i)).strftime("%Y/%m") for i in range(12)]
+            t_month = st.selectbox("対象月を選択", months)
+            l_days = None
+
+    if st.button("🔄 データを同期分析"):
         with st.spinner("同期中..."):
-            err = fetch_actual_data()
+            err = fetch_actual_data(f_mode, lookback_days=l_days, target_month=t_month)
             if err: st.error(err)
             else: st.success("同期完了！")
+    
     if st.session_state.actual_summary is not None:
+        st.info(f"📅 分析対象期間: {st.session_state.get('analysis_period_info', '不明')}")
         s = st.session_state.actual_summary
         st.metric("実績Success率", f"{st.session_state.overall_success_rate:.3f}%")
         st.plotly_chart(px.bar(s, x='成功率', y=s.columns[0], orientation='h', color='成功率'), use_container_width=True)
+        
         display_df = s.copy()
         display_df['成功率'] = display_df['成功率'].map('{:.3f}%'.format)
         display_df['運用比率'] = display_df['運用比率'].map('{:.3f}%'.format)
