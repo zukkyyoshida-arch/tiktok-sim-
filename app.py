@@ -74,14 +74,30 @@ def fetch_actual_data():
             except: return pd.NaT
         df['date'] = df[l_col].apply(parse_date)
         df['is_success'] = df[f_col].astype(str).str.contains("成功")
+        
+        # 4桁の数字のみの招待種別を除外
+        df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
+        
         one_month_ago = datetime.now() - timedelta(days=30)
         recent_df = df[df['date'] >= one_month_ago].copy()
+        
         if len(recent_df) == 0: return "データが見つかりませんでした。"
-        summary = recent_df.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
-        summary['成功率'] *= 100
+        
+        # 種別ごとの集計
+        summary = recent_df.groupby(q_col).agg(
+            試行数=('is_success','count'), 
+            成功数=('is_success','sum'), 
+            成功率=('is_success','mean')
+        ).reset_index()
+        
+        # 小数点第3位切り上げ処理 (100倍してパーセントにし、第3位で切り上げ)
+        summary['成功率'] = np.ceil(summary['成功率'] * 100 * 1000) / 1000
         summary['運用比率'] = (summary['試行数'] / summary['試行数'].sum()) * 100
+        summary['運用比率'] = np.ceil(summary['運用比率'] * 1000) / 1000
+        
         st.session_state.actual_summary = summary
-        st.session_state.overall_success_rate = recent_df['is_success'].mean()
+        # 全体成功率も切り上げ
+        st.session_state.overall_success_rate = np.ceil(recent_df['is_success'].mean() * 100 * 1000) / 1000
         return None
     except Exception as e: return f"解析エラー: {e}"
 
