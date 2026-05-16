@@ -1,38 +1,43 @@
 import streamlit as st
 import pandas as pd
 
-st.title("TikTok Lite ポイ活シミュレーター")
+st.title("TikTok Lite 運用シミュレーター")
 
-# 1. 招待種別マスタの初期値
-if 'master_data' not in st.session_state:
-    st.session_state.master_data = pd.DataFrame({
-        '招待種別':['ブタ2500', 'ブタ5000', '相互即招待', 'QRコード招待', 'チェックイン5000'],
-        '単価':[2500, 5000, 3000, 1000, 5000]
-    })
+# 設定セクション
+st.sidebar.header("共通パラメータ")
+total_devices = st.sidebar.number_input("全稼働子端末数", value=1800)
+success_rate = st.sidebar.slider("1日あたりの招待成功率 (%)", 0, 100, 5) / 100
 
-# 2. 複数の招待パターンの管理UI
-if 'rows' not in st.session_state:
-    st.session_state.rows =[{'種類': 'ブタ2500', '単価': 2500, '台数': 100, '成功率': 0.8}]
+st.sidebar.subheader("報酬設定")
+r1 = st.sidebar.number_input("報酬パターンA (円)", value=1350)
+r2 = st.sidebar.number_input("報酬パターンB (円)", value=2700)
+r3 = st.sidebar.number_input("報酬パターンC (円)", value=6750)
 
-if st.button("パターンを追加"):
-    st.session_state.rows.append({'種類': 'ブタ2500', '単価': 2500, '台数': 0, '成功率': 0.8})
+# タブの作成
+tab1, tab2 = st.tabs(["📊 1日の運用", "📅 1ヶ月の運用"])
 
-# 3. 入力フォームの描画
-total_profit = 0
-for i, row in enumerate(st.session_state.rows):
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        row['種類'] = st.selectbox(f"種類 {i+1}", st.session_state.master_data['招待種別'], key=f"type_{i}")
-    with col2:
-        row['単価'] = st.number_input(f"単価 {i+1}", value=int(st.session_state.master_data[st.session_state.master_data['招待種別']==row['種類']]['単価'].values[0]), key=f"price_{i}")
-    with col3:
-        row['台数'] = st.number_input(f"台数 {i+1}", value=row['台数'], key=f"count_{i}")
-    with col4:
-        row['成功率'] = st.slider(f"成功率 {i+1}", 0.0, 1.0, row['成功率'], key=f"rate_{i}")
+# --- タブ1: 1日の運用 ---
+with tab1:
+    st.subheader("本日の運用見込み")
+    daily_success = total_devices * success_rate
+    daily_revenue = daily_success * ((r1 + r2 + r3) / 3) # 平均単価で算出
     
-    # 計算
-    row['利益'] = row['単価'] * row['台数'] * row['成功率']
-    total_profit += row['利益']
+    st.metric("本日の招待成功数", f"{int(daily_success)} 台")
+    st.metric("本日の予測売上", f"{int(daily_revenue):,} 円")
 
-st.write("---")
-st.subheader(f"合計予測利益: {total_profit:,.0f} 円")
+# --- タブ2: 1ヶ月の運用 ---
+with tab2:
+    st.subheader("1ヶ月の累積収益")
+    monthly_revenue = daily_revenue * 30
+    
+    proxy_cost = st.number_input("月間プロキシ・通信費", value=50000)
+    device_cost = st.number_input("月間端末維持費", value=30000)
+    
+    net_profit = monthly_revenue - proxy_cost - device_cost
+    
+    st.metric("1ヶ月の総予測売上", f"{int(monthly_revenue):,} 円")
+    st.metric("1ヶ月の純利益", f"{int(net_profit):,} 円")
+    
+    # グラフの表示（簡易的）
+    df = pd.DataFrame({'日': range(1, 31), '累積売上': [daily_revenue * i for i in range(1, 31)]})
+    st.line_chart(df.set_index('日'))
