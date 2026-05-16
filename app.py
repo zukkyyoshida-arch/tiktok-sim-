@@ -349,7 +349,8 @@ def main():
                     boost = int(actual_daily_invites * 30 * (best_c['EV'] - (actual_s_rate * per_invite_revenue)))
                     advice.append(f"🎯 **戦略の転換推奨**: 現在 **{best_c.iloc[0]}** が最も効率的。シフトにより月間 **¥{boost:,}** 底上げ可能。")
 
-            yield_val = int(rev / total_dev); advice.append(f"💰 **収益効率 (Yield)**: 端末1台あたり月間 **¥{yield_val:,}** を稼ぎ出しています。")
+            yield_val = int(rev / total_dev)
+            advice.append(f"💰 **収益効率 (Yield)**: 端末1台あたり月間 **¥{yield_val:,}** を稼ぎ出しています。")
         
         st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 定量アクションプラン</div><div class='advice-text'>{'<br><br>'.join(advice)}</div></div>", unsafe_allow_html=True)
 
@@ -370,7 +371,10 @@ def main():
         
         res = st.session_state.get('actual_res')
         if res:
-            c1, c2, c3 = st.columns(3); with c1: custom_metric("総試行", f"{res['total']:,}"); with c2: custom_metric("成功数", f"{res['success']:,}"); with c3: custom_metric("成功率", f"{res['rate']:.3f}%")
+            c1, c2, c3 = st.columns(3)
+            with c1: custom_metric("総試行", f"{res['total']:,}")
+            with c2: custom_metric("成功数", f"{res['success']:,}")
+            with c3: custom_metric("成功率", f"{res['rate']:.3f}%")
             
             st.markdown("### 📈 キャンペーン別 成功率ランキング")
             s_df = res['summary'].sort_values('成功率', ascending=False)
@@ -410,11 +414,13 @@ def main():
             with c1:
                 st.markdown("### 🏆 個体別 (TOP10)")
                 fig = px.bar(res['parent_rank'].head(10), x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400); st.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
+                st.plotly_chart(fig, use_container_width=True)
             with c2:
                 st.markdown("### 📱 機種別")
                 fig = px.bar(res['parent_model_rank'], x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
-                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400); st.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
+                st.plotly_chart(fig, use_container_width=True)
             
             st.markdown("---")
             best_pm, worst_pm = res['parent_model_rank'].iloc[0], res['parent_model_rank'].iloc[-1]
@@ -425,7 +431,10 @@ def main():
     with tabs[4]:
         st.markdown("## 🔄 稼働シミュレーション")
         st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:5px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
-        c1, c2, c3 = st.columns(3); with c1: custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}"); with c2: custom_metric("親の1日能力", f"{daily_parent_cap:.1f} 件"); with c3: custom_metric("子の1日回転", f"{daily_child_cap:.1f} 件")
+        c1, c2, c3 = st.columns(3)
+        with c1: custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}")
+        with c2: custom_metric("親の1日能力", f"{daily_parent_cap:.1f} 件")
+        with c3: custom_metric("子の1日回転", f"{daily_child_cap:.1f} 件")
         st.markdown("---")
         st.markdown("### ⚙️ 回転戦略の詳細内訳")
         sc1, sc2 = st.columns(2)
