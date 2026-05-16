@@ -226,7 +226,12 @@ with tab_sim:
     st.markdown("## 🔄 稼働シミュレーション・インサイト")
     st.markdown(f"<div style='background:#111; padding:24px; border-radius:12px; border-left:5px solid #0088ff; margin-bottom:30px;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
-    with c1: custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}"); with c2: custom_metric("親の1日処理能力", f"{daily_parent_cap:.1f} 件"); with c3: custom_metric("子の1日回転数", f"{daily_child_cap:.1f} 件")
+    with c1:
+        custom_metric("1招待期待収益", f"¥{int(per_invite_revenue):,}")
+    with c2:
+        custom_metric("親の1日処理能力", f"{daily_parent_cap:.1f} 件")
+    with c3:
+        custom_metric("子の1日回転数", f"{daily_child_cap:.1f} 件")
     st.markdown("---")
     st.markdown("### ⚙️ 回転戦略の詳細内訳")
     sc1, sc2 = st.columns(2)
