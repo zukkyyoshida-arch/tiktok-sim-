@@ -21,7 +21,10 @@ def save_settings_to_sheet():
             "video_rewards": st.session_state.video_rewards_df.to_json(orient='records'),
             "checkin_rewards": st.session_state.checkin_rewards_df.to_json(orient='records'),
             "total_dev": str(st.session_state.get("total_dev", 1800)),
-            "parent_dev": str(st.session_state.get("parent_dev", 300))
+            "parent_dev": str(st.session_state.get("parent_dev", 300)),
+            "success_rate": str(st.session_state.get("success_rate_val", 80)),
+            "keep_success": str(st.session_state.get("keep_success_val", 100)),
+            "keep_failure": str(st.session_state.get("keep_failure_val", 30))
         }
         requests.post(GAS_URL, data=json.dumps(settings))
         return True
@@ -45,6 +48,9 @@ def load_settings_from_sheet():
             
             st.session_state.total_dev_val = int(settings.get("total_dev", 1800))
             st.session_state.parent_dev_val = int(settings.get("parent_dev", 300))
+            st.session_state.success_rate_val = int(settings.get("success_rate", 80))
+            st.session_state.keep_success_val = int(settings.get("keep_success", 100))
+            st.session_state.keep_failure_val = int(settings.get("keep_failure", 30))
             return True
     except: return False
     return False
@@ -65,6 +71,9 @@ if 'initialized' not in st.session_state:
     ])
     st.session_state.total_dev_val = 1800
     st.session_state.parent_dev_val = 300
+    st.session_state.success_rate_val = 80
+    st.session_state.keep_success_val = 100
+    st.session_state.keep_failure_val = 30
     load_settings_from_sheet()
     st.session_state.initialized = True
 if 'actual_res' not in st.session_state: st.session_state.actual_res = None
@@ -90,11 +99,9 @@ with st.sidebar:
     total_dev = st.number_input("総デバイス数", value=st.session_state.total_dev_val, key="total_dev")
     parent_dev = st.number_input("親デバイス数", value=st.session_state.parent_dev_val, key="parent_dev")
     st.markdown("---")
-    default_s = 80.0
-    if st.session_state.actual_res: default_s = st.session_state.actual_res['rate']
-    success_p = st.slider("想定成功率 (%)", 0, 100, int(round(default_s)), step=1) / 100
-    keep_s = st.slider("成功時キープ率 (%)", 0, 100, 100) / 100
-    keep_f = st.slider("失敗時キープ率 (%)", 0, 100, 30) / 100
+    success_p = st.slider("想定成功率 (%)", 0, 100, st.session_state.success_rate_val, step=1, key="success_rate_val") / 100
+    keep_s = st.slider("成功時キープ率 (%)", 0, 100, st.session_state.keep_success_val, key="keep_success_val") / 100
+    keep_f = st.slider("失敗時キープ率 (%)", 0, 100, st.session_state.keep_failure_val, key="keep_failure_val") / 100
     if st.sidebar.button("💾 クラウド保存", use_container_width=True):
         if save_settings_to_sheet(): st.sidebar.success("保存完了！")
 
