@@ -118,7 +118,7 @@ with st.sidebar:
     if st.sidebar.button("💾 クラウド保存", use_container_width=True):
         if save_settings_to_sheet(): st.sidebar.success("保存完了！")
 
-# --- 計算ロジック (ここを修正) ---
+# --- 共通計算ロジック (Sidebarの値を使用) ---
 child_dev = total_dev - parent_dev
 prep_d = 12.5; check_d = 14; p_cycle = 6
 r_keep = (success_p * keep_s) + ((1-success_p) * keep_f)
@@ -127,37 +127,20 @@ daily_parent_cap = parent_dev / p_cycle
 daily_child_cap = child_dev / avg_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
 
-# 各種報酬の合計をテーブルから動的に取得
-c_inv = st.session_state.invite_types_df.fillna(0)
-w_immediate = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
-w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
-
-# 動画報酬 (運用比率に基づいて期待値を計算)
-c_vid = st.session_state.video_rewards_df.fillna(0)
-if "運用比率(%)" not in c_vid.columns: c_vid["運用比率(%)"] = 0.0
-expected_video_reward = sum(c_vid["報酬額"] * c_vid["運用比率(%)"] / 100)
-
-# チェックイン報酬
-c_check = st.session_state.checkin_rewards_df.fillna(0)
-expected_checkin_reward = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
-
-# 1招待あたりの期待収益計算 (ハードコードを排除)
-per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + expected_video_reward) * r_keep)
-
 GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
+
+@st.cache_data(ttl=600)
+def fetch_api_data():
+    response = requests.get(f"{GAS_URL}?action=get_analytics")
+    if response.status_code != 200: return None
+    return response.json()
 
 def fetch_data(f_mode, l_days=None, t_month=None):
     try:
-        # API経由でリアルタイムデータを取得
-        response = requests.get(f"{GAS_URL}?action=get_analytics")
-        if response.status_code != 200: return f"API Error: {response.status_code}"
+        # キャッシュされたデータを取得
+        payload = fetch_api_data()
+        if not payload or "analytics" not in payload: return "Invalid API Response"
         
-        payload = response.json()
-        if "analytics" not in payload: return "Invalid API Response"
-        
-        # メイン実績データの変換
-        # payload['analytics'] は 5行目からの純粋なデータ配列
-        # カラムインデックス: 5:成功/失敗, 9:機種, 11:日付, 13:親機, 16:キャンペーン
         raw_data = payload['analytics']
         if not raw_data: return "No Data"
         
@@ -177,7 +160,6 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         df['is_success'] = df[f_idx].astype(str).str.contains("成功")
         df['model'] = df[j_idx].fillna("不明")
         
-        # 端末マスタの紐付け
         d_raw = payload.get('terminals', [])
         d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
         
@@ -190,11 +172,9 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         
         if len(rdf) == 0: return "No Data for this period"
 
-        # 親機情報の紐付け
         rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
         rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
 
-        # 分析ロジック
         def get_brand(model_name):
             m = str(model_name).upper()
             if "XPERIA" in m: return "Xperia"
@@ -209,7 +189,6 @@ def fetch_data(f_mode, l_days=None, t_month=None):
             return "その他"
         
         rdf['brand'] = rdf['model'].apply(get_brand)
-        # 不要なデータの除外
         rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
 
         sum_df = rdf.groupby(q_idx).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
@@ -264,9 +243,24 @@ if 'initialized' not in st.session_state:
         {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
     ])
     load_settings_from_sheet()
-    # 起動時に自動でデータを取得 (リアルタイムAPI)
     fetch_data("直近28日間", l_days=28)
     st.session_state.initialized = True
+
+# --- 共通計算ロジック (初期化後に実行) ---
+# ※初期化前でもエラーにならないようガード
+if 'invite_types_df' in st.session_state:
+    c_inv = st.session_state.invite_types_df.fillna(0)
+    w_immediate = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
+    w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
+    c_vid = st.session_state.video_rewards_df.fillna(0)
+    if "運用比率(%)" not in c_vid.columns: c_vid["運用比率(%)"] = 0.0
+    expected_video_reward = sum(c_vid["報酬額"] * c_vid["運用比率(%)"] / 100)
+    c_check = st.session_state.checkin_rewards_df.fillna(0)
+    expected_checkin_reward = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
+    per_invite_revenue = (w_immediate * success_p) + ((w_task + expected_checkin_reward + expected_video_reward) * r_keep)
+else:
+    w_immediate = w_task = expected_video_reward = expected_checkin_reward = 0
+    per_invite_revenue = 1000 # フォールバック
 
 tab_dash, tab_analytics, tab_device, tab_parent, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
