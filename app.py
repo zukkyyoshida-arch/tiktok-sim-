@@ -206,20 +206,22 @@ with tab_device:
     st.markdown("## 📱 機種別パフォーマンス・インサイト")
     if st.session_state.actual_res:
         res = st.session_state.actual_res
-        st.markdown("### 🏢 メーカー別（ブランド別）成功率ランキング")
-        b_df = res['brand'].sort_values('成功率', ascending=False)
-        fig_brand = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
-        fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
-        st.plotly_chart(fig_brand, use_container_width=True)
-        
-        st.markdown("---")
-        st.markdown("### 🔍 詳細機種別（型番別）成功率ランキング")
-        m_df = res['model_rank'].sort_values('成功率', ascending=False)
-        # 試行数が少なすぎるものは除外（ノイズ対策）
-        m_df = m_df[m_df['試行数'] >= 1] 
-        display_m = m_df.copy()
-        display_m['成功率'] = display_m['成功率'].map('{:.3f}%'.format)
-        st.dataframe(display_m, use_container_width=True, hide_index=True)
+        if "brand" in res:
+            st.markdown("### 🏢 メーカー別（ブランド別）成功率ランキング")
+            b_df = res['brand'].sort_values('成功率', ascending=False)
+            fig_brand = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
+            fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
+            st.plotly_chart(fig_brand, use_container_width=True)
+            
+            st.markdown("---")
+            st.markdown("### 🔍 詳細機種別（型番別）成功率ランキング")
+            m_df = res['model_rank'].sort_values('成功率', ascending=False)
+            m_df = m_df[m_df['試行数'] >= 1] 
+            display_m = m_df.copy()
+            display_m['成功率'] = display_m['成功率'].map('{:.3f}%'.format)
+            st.dataframe(display_m, use_container_width=True, hide_index=True)
+        else:
+            st.warning("機種分析データが古いか、存在しません。「実績分析」タブでもう一度「データを同期」してください。")
     else:
         st.info("「実績分析」タブでデータを同期すると、機種別の詳細分析が表示されます。")
 
