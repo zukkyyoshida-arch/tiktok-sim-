@@ -8,7 +8,7 @@ import re
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Lite Strategy Simulator v3.7",
+    page_title="TikTok Lite Strategy Simulator v4.0",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -27,17 +27,17 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📱 TikTok Lite 運用戦略シミュレーター v3.7")
+st.title("📱 TikTok Lite 運用戦略シミュレーター v4.0")
 
 # --- セッション状態の初期化 ---
 if 'invite_types_df' not in st.session_state:
     st.session_state.invite_types_df = pd.DataFrame([
-        {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100},
-        {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0},
-        {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0},
-        {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0},
-        {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0},
-        {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0}
+        {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
+        {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0.0},
+        {"キャンペーン名": "QRコード招待", "即時報酬": 3000, "完走報酬": 0, "運用比率(%)": 0.0},
+        {"キャンペーン名": "通常招待", "即時報酬": 0, "完走報酬": 5500, "運用比率(%)": 0.0},
+        {"キャンペーン名": "ヒットチャレンジ", "即時報酬": 5500, "完走報酬": 0, "運用比率(%)": 0.0},
+        {"キャンペーン名": "即招待", "即時報酬": 2800, "完走報酬": 0, "運用比率(%)": 0.0}
     ])
 
 if 'video_rewards_df' not in st.session_state:
@@ -56,7 +56,7 @@ if 'checkin_rewards_df' not in st.session_state:
 if 'actual_summary' not in st.session_state:
     st.session_state.actual_summary = None
 
-# --- 解析関数群 ---
+# --- 解析・補正関数 ---
 def fetch_actual_data():
     sheet_id = "1R0PmlqcwTwQLuv_sDJ7UiMkpLBbBDdLzhV-hSUJllUQ"
     gid = "937207441"
@@ -74,56 +74,31 @@ def fetch_actual_data():
             except: return pd.NaT
         df['date'] = df[l_col].apply(parse_date)
         df['is_success'] = df[f_col].astype(str).str.contains("成功")
-        
-        # 4桁の数字のみの招待種別を除外
+        # 4桁数字除外
         df = df[~df[q_col].astype(str).str.match(r'^\d{4}$')].copy()
-        
         one_month_ago = datetime.now() - timedelta(days=30)
         recent_df = df[df['date'] >= one_month_ago].copy()
-        
         if len(recent_df) == 0: return "データが見つかりませんでした。"
-        
-        # 種別ごとの集計
-        summary = recent_df.groupby(q_col).agg(
-            試行数=('is_success','count'), 
-            成功数=('is_success','sum'), 
-            成功率=('is_success','mean')
-        ).reset_index()
-        
-        # 小数点第3位切り上げ処理 (100倍してパーセントにし、第3位で切り上げ)
+        summary = recent_df.groupby(q_col).agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
         summary['成功率'] = np.ceil(summary['成功率'] * 100 * 1000) / 1000
         summary['運用比率'] = (summary['試行数'] / summary['試行数'].sum()) * 100
         summary['運用比率'] = np.ceil(summary['運用比率'] * 1000) / 1000
-        
         st.session_state.actual_summary = summary
-        # 全体成功率も切り上げ
         st.session_state.overall_success_rate = np.ceil(recent_df['is_success'].mean() * 100 * 1000) / 1000
         return None
     except Exception as e: return f"解析エラー: {e}"
 
-def balance_probabilities(df, edited_rows):
-    if not edited_rows: return df
-    idx = list(edited_rows.keys())[-1]
-    row_data = edited_rows.get(idx) or edited_rows.get(str(idx))
-    if not row_data or "出現確率(%)" not in row_data: return df
-    new_val = max(0, min(100, float(row_data["出現確率(%)"])))
-    idx_int = int(idx)
-    other_indices = [i for i in range(len(df)) if i != idx_int]
-    if not other_indices:
-        df.iloc[idx_int, df.columns.get_loc("出現確率(%)")] = 100.0
-        return df
-    other_sum = df.iloc[other_indices]["出現確率(%)"].sum()
-    remaining = 100.0 - new_val
-    if other_sum > 0:
-        df.iloc[other_indices, df.columns.get_loc("出現確率(%)")] = (df.iloc[other_indices]["出現確率(%)"] / other_sum) * remaining
+def normalize_ratios(df, col_name):
+    total = df[col_name].sum()
+    if total == 0:
+        df[col_name] = 100.0 / len(df)
     else:
-        df.iloc[other_indices, df.columns.get_loc("出現確率(%)")] = remaining / len(other_indices)
-    df.iloc[idx_int, df.columns.get_loc("出現確率(%)")] = new_val
+        df[col_name] = (df[col_name] / total) * 100.0
     return df
 
 # --- サイドバー ---
 with st.sidebar:
-    st.header("⚙️ 設定")
+    st.header("⚙️ パラメーター")
     total_devices = st.number_input("総端末数", value=1800)
     parent_count = st.number_input("親端末数", value=300)
     child_count = total_devices - parent_count
@@ -138,23 +113,18 @@ with st.sidebar:
     with st.expander("🎯 歩留まり戦略", expanded=True):
         default_s = 80.0
         if 'overall_success_rate' in st.session_state:
-            default_s = float(st.session_state.overall_success_rate * 100)
+            default_s = float(st.session_state.overall_success_rate)
         success_rate = st.slider("招待成功率 (%)", 0.0, 100.0, default_s) / 100
         keep_rate_success = st.slider("成功キープ率 (%)", 0, 100, 100) / 100
         keep_rate_fail = st.slider("失敗キープ率 (%)", 0, 100, 30) / 100
 
 # --- ロジック ---
 ratio_s_keep = success_rate * keep_rate_success
-ratio_s_reset = success_rate * (1 - keep_rate_success)
 ratio_f_keep = (1 - success_rate) * keep_rate_fail
-ratio_f_reset = (1 - success_rate) * (1 - keep_rate_fail)
-
 cycle_full = prep_days + checkin_days
 cycle_reset = prep_days + 1
-avg_child_cycle = (cycle_full * (ratio_s_keep + ratio_f_keep)) + (cycle_reset * (ratio_s_reset + ratio_f_reset))
-daily_parent_cap = parent_count / parent_cycle
-daily_child_cap = child_count / avg_child_cycle
-actual_daily_invites = min(daily_parent_cap, daily_child_cap)
+avg_child_cycle = (cycle_full * (ratio_s_keep + ratio_f_keep)) + (cycle_reset * (1 - (ratio_s_keep + ratio_f_keep)))
+actual_daily_invites = min(parent_count/parent_cycle, child_count/avg_child_cycle)
 
 # --- タブ ---
 tab1, tab2, tab3, tab4 = st.tabs(["📊 ダッシュボード", "🔄 稼働分析", "💰 報酬・種別管理", "📈 実績分析"])
@@ -163,6 +133,18 @@ with tab3:
     st.subheader("💼 招待種別の管理")
     st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True)
     c_inv = st.session_state.invite_types_df.fillna(0)
+    total_inv_ratio = c_inv["運用比率(%)"].sum()
+    
+    col_i1, col_i2 = st.columns([3, 1])
+    with col_i1:
+        if abs(total_inv_ratio - 100) > 0.1:
+            st.warning(f"運用比率の合計が100%ではありません（現在: {total_inv_ratio:.1f}%）")
+        else: st.success("比率合計: 100%")
+    with col_i2:
+        if st.button("比率を100%に補正", key="fix_inv"):
+            st.session_state.invite_types_df = normalize_ratios(st.session_state.invite_types_df, "運用比率(%)")
+            st.rerun()
+
     w_immediate = sum(c_inv["即時報酬"] * c_inv["運用比率(%)"] / 100)
     w_task = sum(c_inv["完走報酬"] * c_inv["運用比率(%)"] / 100)
 
@@ -176,24 +158,29 @@ with tab3:
     else: final_video = 0
 
     st.divider()
-    st.subheader("🎁 チェックイン追加報酬の管理（🪄 自動バランス調整）")
-    edited_checkin = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True, key="checkin_editor")
-    if st.session_state.get("checkin_editor") and st.session_state.checkin_editor.get("edited_rows"):
-        try:
-            st.session_state.checkin_rewards_df = balance_probabilities(edited_checkin.copy(), st.session_state.checkin_editor["edited_rows"])
-            st.rerun()
-        except: pass
-    else: st.session_state.checkin_rewards_df = edited_checkin
+    st.subheader("🎁 チェックイン追加報酬の管理")
+    st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, num_rows="dynamic", use_container_width=True)
     c_check = st.session_state.checkin_rewards_df.fillna(0)
-    expected_checkin = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
+    total_check_prob = c_check["出現確率(%)"].sum()
+    
+    col_c1, col_c2 = st.columns([3, 1])
+    with col_c1:
+        if abs(total_check_prob - 100) > 0.1:
+            st.warning(f"出現確率の合計が100%ではありません（現在: {total_check_prob:.1f}%）")
+        else: st.success("確率合計: 100%")
+    with col_c2:
+        if st.button("確率を100%に補正", key="fix_check"):
+            st.session_state.checkin_rewards_df = normalize_ratios(st.session_state.checkin_rewards_df, "出現確率(%)")
+            st.rerun()
 
+    expected_checkin = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
     per_invite_revenue = (w_immediate * success_rate) + ((w_task + expected_checkin + final_video) * (ratio_s_keep + ratio_f_keep))
 
 with tab1:
     st.subheader("📍 本日のスポット")
     cs1, cs2, cs3 = st.columns(3)
     with cs1: t_child = st.number_input("本日招待可能な子端末", value=50)
-    with cs2: t_parent = st.number_input("本日稼働可能な親端末", value=int(daily_parent_cap))
+    with cs2: t_parent = st.number_input("本日稼働可能な親端末", value=int(parent_count/parent_cycle))
     with cs3:
         t_inv = min(t_child, t_parent)
         st.metric("見込み収益", f"¥{int(t_inv * per_invite_revenue):,}")
@@ -214,15 +201,13 @@ with tab4:
     st.subheader("📈 実績分析（Tik管理_）")
     if st.button("🔄 データを同期"):
         with st.spinner("同期中..."):
-            err = fetch_actual_data(); 
+            err = fetch_actual_data()
             if err: st.error(err)
             else: st.success("同期完了！")
     if st.session_state.actual_summary is not None:
         s = st.session_state.actual_summary
         st.metric("実績Success率", f"{st.session_state.overall_success_rate:.3f}%")
         st.plotly_chart(px.bar(s, x='成功率', y=s.columns[0], orientation='h', color='成功率'), use_container_width=True)
-        
-        # 表示用に%を付与したDFを作成
         display_df = s.copy()
         display_df['成功率'] = display_df['成功率'].map('{:.3f}%'.format)
         display_df['運用比率'] = display_df['運用比率'].map('{:.3f}%'.format)
@@ -233,9 +218,9 @@ with tab2:
     st.write(f"平均子端末サイクル: **{avg_child_cycle:.2f} 日**")
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.success(f"成功・キープ\n{ratio_s_keep*100:.1f}%\n{cycle_full:.1f}日")
-    with c2: st.info(f"成功・リセット\n{ratio_s_reset*100:.1f}%\n{cycle_reset:.1f}日")
+    with c2: st.info(f"成功・即リセット\n{(success_rate - ratio_s_keep)*100:.1f}%\n{cycle_reset:.1f}日")
     with c3: st.warning(f"失敗・キープ\n{ratio_f_keep*100:.1f}%\n{cycle_full:.1f}日")
-    with c4: st.error(f"失敗・リセット\n{ratio_f_reset*100:.1f}%\n{cycle_reset:.1f}日")
+    with c4: st.error(f"失敗・即リセット\n{(1-success_rate-ratio_f_keep)*100:.1f}%\n{cycle_reset:.1f}日")
 
 st.sidebar.markdown("---")
-st.sidebar.caption("TikTok Lite Strategy Simulator v3.7")
+st.sidebar.caption("TikTok Lite Strategy Simulator v4.0")
