@@ -56,16 +56,22 @@ def custom_metric(label, value, sub=""):
 # 3. バックエンド通信ロジック
 # ==========================================
 @st.cache_data(ttl=600)
-def fetch_api_data_raw():
+def fetch_api_data_raw(force_key=None):
     try:
-        response = requests.get(f"{GAS_URL}?action=get_analytics", timeout=15)
+        # force_key が指定されている場合は、URLにタイムスタンプを付与してネットワークキャッシュを回避
+        url = f"{GAS_URL}?action=get_analytics"
+        if force_key:
+            url += f"&t={force_key}"
+        response = requests.get(url, timeout=15)
         if response.status_code != 200: return None
         return response.json()
     except: return None
 
-def fetch_data_logic(f_mode, l_days=None, t_month=None):
+def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
     try:
-        payload = fetch_api_data_raw()
+        # 同期ボタンからの呼び出し時は、現在の時刻をキーにしてキャッシュを回避
+        f_key = str(datetime.now().timestamp()) if force else None
+        payload = fetch_api_data_raw(force_key=f_key)
         if not payload or "analytics" not in payload: return "Invalid API Response"
         
         raw_data = payload['analytics']
@@ -333,11 +339,13 @@ def main():
             else: tm = st.selectbox("対象月", [(datetime.now() - timedelta(days=30*i)).strftime("%Y/%m") for i in range(12)]); ld = None
         with ac3: st.write(""); sync = st.button("同期", use_container_width=True)
         if sync:
-            with st.spinner("同期中..."):
-                # キャッシュをクリアして最新データを強制取得
-                st.cache_data.clear()
-                fetch_data_logic(fm, l_days=ld, t_month=tm)
-                st.rerun()
+            with st.spinner("最新データを取得中..."):
+                err = fetch_data_logic(fm, l_days=ld, t_month=tm, force=True)
+                if err:
+                    st.error(f"同期失敗: {err}")
+                else:
+                    st.success("最新データの同期に成功しました！")
+                    st.rerun()
         
         res = st.session_state.get('actual_res')
         if res:
