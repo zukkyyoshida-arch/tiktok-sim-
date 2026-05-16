@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 # ==========================================
 # 1. 定数・設定
 # ==========================================
-CURRENT_VERSION = "11.0.4"
+CURRENT_VERSION = "11.0.6"
 GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
 
 # ページ設定
@@ -237,6 +237,15 @@ def main():
         st.session_state.version = CURRENT_VERSION
 
     # --- 初期化 ---
+    # 常に必要な変数を定義
+    default_vals = {
+        "total_dev_val": 1800, "parent_dev_val": 300, "success_rate_val": 80, 
+        "keep_success_val": 100, "keep_failure_val": 30,
+        "prep_hours_val": 300, "p_gap_days_val": 5, "checkin_days_val": 14
+    }
+    for k, v in default_vals.items():
+        if k not in st.session_state: st.session_state[k] = v
+
     if 'invite_types_df' not in st.session_state:
         st.session_state.invite_types_df = pd.DataFrame([
             {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
@@ -257,12 +266,6 @@ def main():
             {"チェックイン追加報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
             {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
         ])
-        for k, v in {
-            "total_dev_val": 1800, "parent_dev_val": 300, "success_rate_val": 80, 
-            "keep_success_val": 100, "keep_failure_val": 30,
-            "prep_hours_val": 300, "p_gap_days_val": 5, "checkin_days_val": 14
-        }.items():
-            if k not in st.session_state: st.session_state[k] = v
         load_settings_api()
         fetch_data_logic("直近28日間", l_days=28)
         st.session_state.initialized = True
