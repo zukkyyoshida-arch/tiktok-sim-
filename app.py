@@ -446,10 +446,20 @@ def main():
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
                 st.plotly_chart(fig, use_container_width=True)
             with c2:
-                st.markdown("### 📱 機種別")
+                st.markdown("### 📱 機種別パフォーマンス (全体)")
                 fig = px.bar(res['parent_model_rank'], x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
                 st.plotly_chart(fig, use_container_width=True)
+            
+            st.markdown("---")
+            st.markdown("### ⚠️ 要警戒：低パフォーマンス親機 (ワースト10)")
+            # 試行数3回以上の機種に絞って、成功率が低い順にソート
+            low_p_df = res['parent_model_rank'][res['parent_model_rank']['試行数'] >= 3].sort_values('成功率', ascending=True).head(10).copy()
+            if not low_p_df.empty:
+                low_p_df['成功率'] = low_p_df['成功率'].map('{:.1f}%'.format)
+                st.dataframe(low_p_df, use_container_width=True, hide_index=True)
+            else:
+                st.info("十分な試行数（3回以上）を持つ親機データがまだありません。")
             
             st.markdown("---")
             best_pm, worst_pm = res['parent_model_rank'].iloc[0], res['parent_model_rank'].iloc[-1]
