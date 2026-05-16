@@ -195,13 +195,35 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         else:
             target_dt = datetime.strptime(t_month, "%Y/%m")
             rdf = df[(df['date'].dt.year == target_dt.year) & (df['date'].dt.month == target_dt.month)].copy()
-        if len(rdf) == 0: return "No Data"
+        # 端末マスタの読み込み (gid: 34315297)
+        d_gid = "34315297"
+        d_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={d_gid}"
+        d_master = pd.read_csv(d_url)
+        # D列(index 3): 端末番号, F列(index 5): 機種
+        d_map = dict(zip(d_master.iloc[:, 3].astype(str), d_master.iloc[:, 5].astype(str)))
+        
+        # メインデータに親機情報を紐付け
+        rdf['parent_id'] = rdf.iloc[:, 13].fillna("未指定").astype(str) # N列
+        rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
+
         sum_df = rdf.groupby(q_col).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
+        
+        # 親機別の統計
+        parent_df = rdf.groupby('parent_id').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        parent_df['成功率'] = np.ceil(parent_df['成功率']*100*1000)/1000
+        parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False) # 3回以上試行したもの
+
+        p_model_df = rdf.groupby('parent_model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        p_model_df['成功率'] = np.ceil(p_model_df['成功率']*100*1000)/1000
+        p_model_df = p_model_df.sort_values('成功率', ascending=False)
+
         brand_df = rdf.groupby('brand').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         brand_df['成功率'] = np.ceil(brand_df['成功率']*100*1000)/1000
+        
         model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         model_df['成功率'] = model_df['成功率']*100
+        
         # 日次トレンドの計算 (成功率と成功数の両方を取得)
         daily_df = rdf.groupby('date').agg(
             成功率=('is_success','mean'),
@@ -213,13 +235,14 @@ def fetch_data(f_mode, l_days=None, t_month=None):
         st.session_state.actual_res = {
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
+            "parent_rank": parent_df, "parent_model_rank": p_model_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
         }
         return None
     except Exception as e: return str(e)
 
-tab_dash, tab_analytics, tab_device, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
+tab_dash, tab_analytics, tab_device, tab_parent, tab_sim, tab_config = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
 with tab_dash:
     st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
@@ -394,6 +417,42 @@ with tab_device:
             fig_brand.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0"); st.plotly_chart(fig_brand, use_container_width=True)
             if "model_rank" in res:
                 m_df = res['model_rank'].sort_values('成功率', ascending=False); display_m = m_df[m_df['試行数'] >= 1].copy(); display_m['成功率'] = display_m['成功率'].map('{:.3f}%'.format); st.dataframe(display_m, use_container_width=True, hide_index=True)
+
+with tab_parent:
+    st.markdown("## 👑 親機パフォーマンス分析")
+    if st.session_state.actual_res:
+        res = st.session_state.actual_res
+        
+        col_p1, col_p2 = st.columns(2)
+        
+        with col_p1:
+            st.markdown("### 🏆 親機個体別ランキング (TOP10)")
+            p_df = res['parent_rank'].head(10)
+            fig_p = px.bar(p_df, x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
+            fig_p.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400, margin=dict(l=0, r=0, t=30, b=0))
+            st.plotly_chart(fig_p, use_container_width=True)
+
+        with col_p2:
+            st.markdown("### 📱 親機機種別パフォーマンス")
+            pm_df = res['parent_model_rank']
+            fig_pm = px.bar(pm_df, x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
+            fig_pm.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400, margin=dict(l=0, r=0, t=30, b=0))
+            st.plotly_chart(fig_pm, use_container_width=True)
+
+        # 親機のアドバイス
+        st.markdown("---")
+        st.markdown("### 💡 親機戦略のアドバイス")
+        best_p_model = res['parent_model_rank'].iloc[0]
+        worst_p_model = res['parent_model_rank'].iloc[-1]
+        
+        p_advice = f"""
+        - **最強の親機機種**: 現在、親機として <b>{best_p_model['parent_model']}</b> を使用した際の成功率が <b>{best_p_model['成功率']:.1f}%</b> と最も高いです。
+        - **要警戒の親機機種**: 逆に <b>{worst_p_model['parent_model']}</b> を親機にすると成功率が <b>{worst_p_model['成功率']:.1f}%</b> まで落ちる傾向があります。
+        - **推奨アクション**: 親機には優先的に <b>{best_p_model['parent_model']}</b> を割り当て、成功率の底上げを図りましょう。
+        """
+        st.markdown(f"<div class='advice-card' style='background: #050505; border-color: #ffd700;'><div class='advice-text'>{p_advice}</div></div>", unsafe_allow_html=True)
+    else:
+        st.info("「実績分析」タブでデータを同期すると、親機の詳細なパフォーマンスが表示されます。")
 
 with tab_sim:
     st.markdown("## 🔄 稼働シミュレーション・インサイト")
