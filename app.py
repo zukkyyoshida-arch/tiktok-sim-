@@ -223,8 +223,9 @@ tab_dash, tab_analytics, tab_device, tab_sim, tab_config = st.tabs(["🏠 ダッ
 
 with tab_dash:
     st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
+    monthly_revenue = actual_daily_invites * 30 * per_invite_revenue
     c1, c2, c3 = st.columns(3)
-    with c1: custom_metric("予測月間収益", f"¥{int(actual_daily_invites * 30 * per_invite_revenue):,}", f"1招待期待: ¥{int(per_invite_revenue):,}")
+    with c1: custom_metric("予測月間収益", f"¥{int(monthly_revenue):,}", f"1招待期待: ¥{int(per_invite_revenue):,}")
     with c2: custom_metric("1日あたりの招待予測", f"{actual_daily_invites:.1f}", f"最大成功: {actual_daily_invites*success_p:.1f}/日")
     with c3: custom_metric("リソース稼働率", f"{r_keep*100:.1f}%", "端末回転の健全性")
     
