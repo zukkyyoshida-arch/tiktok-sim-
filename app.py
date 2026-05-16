@@ -269,6 +269,26 @@ with tab_dash:
                     potential = int(actual_daily_invites * 30 * diff_p * per_invite_revenue / len(b_df))
                     advice_content.append(f"📱 <b>端末の最適化</b>: {worst_b['brand']} の成功率が低迷しています。これを {best_b['brand']} 並みに改善（またはリプレイス）することで、月間約 <b>¥{potential:,}</b> の増収が見込めます。")
 
+        # 5. キャンペーン期待値のガチンコ比較 (ROI分析)
+        s_df = res['summary']
+        if len(s_df) > 1:
+            # 各タイプの期待値を計算 (成功率/100 * 1招待あたりの収益)
+            s_df['期待値'] = (s_df['成功率'] / 100) * per_invite_revenue
+            best_c = s_df.loc[s_df['期待値'].idxmax()]
+            if best_c['期待値'] > (actual_s_rate * per_invite_revenue) * 1.05: # 5%以上の改善が見込める場合
+                boost = int(actual_daily_invites * 30 * (best_c['期待値'] - (actual_s_rate * per_invite_revenue)))
+                advice_content.append(f"🎯 <b>戦略の転換推奨</b>: 実績データでは <b>{best_c.iloc[0]}</b> が最も効率的です。こちらにシフトすることで、月間収益をさらに <b>¥{boost:,}</b> 底上げできる可能性があります。")
+
+        # 6. キープ失敗による「逃した魚」の可視化
+        if keep_s < 1.0:
+            lost_keep = int(actual_daily_invites * 30 * actual_s_rate * (1 - keep_s) * w_task)
+            if lost_keep > 1000:
+                advice_content.append(f"🎣 <b>脱落による機会損失</b>: 成功後の「完走」が <b>{keep_s*100:.0f}%</b> に留まっています。脱落をゼロにするだけで、月間 <b>¥{lost_keep:,}</b> の利益が上乗せされます。")
+
+    # 7. 1台あたりの収益効率 (Yield)
+    yield_per_dev = int(monthly_revenue / total_dev)
+    advice_content.append(f"💰 <b>収益効率 (Yield)</b>: 現在、スマホ1台あたり月間 <b>¥{yield_per_dev:,}</b> を稼ぎ出しています。この数値を引き上げることが、スケールアウトの鍵です。")
+
     # 4. 総デバイス数固定での最適配分アドバイス (黄金比)
     p_opt = int(total_dev * p_cycle / (avg_cycle + p_cycle))
     c_opt = total_dev - p_opt
