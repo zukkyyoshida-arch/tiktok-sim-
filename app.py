@@ -313,7 +313,14 @@ def main():
     w_vid = sum(c_vid["報酬額"] * c_vid.get("運用比率(%)", 0) / 100)
     c_check = st.session_state.checkin_rewards_df.fillna(0)
     w_check = sum(c_check["報酬額"] * c_check["出現確率(%)"] / 100)
-    per_invite_revenue = (w_imm * success_p) + ((w_task + w_check + w_vid) * r_keep)
+    
+    # 期待収益の精密計算
+    # 成功ルート: 即時報酬 + (成功キープ率 * (完走報酬 + チェックイン + 動画))
+    success_rev = w_imm + (keep_s * (w_task + w_check + w_vid))
+    # 失敗ルート: 失敗キープ率 * (チェックイン + 動画) ※招待報酬は入らない
+    failure_rev = keep_f * (w_check + w_vid)
+    
+    per_invite_revenue = (success_p * success_rev) + ((1 - success_p) * failure_rev)
 
     # --- タブ表示 ---
     tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
