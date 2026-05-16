@@ -442,20 +442,20 @@ with tab_parent:
         
         if "parent_rank" in res and "parent_model_rank" in res:
             col_p1, col_p2 = st.columns(2)
-        
-        with col_p1:
-            st.markdown("### 🏆 親機個体別ランキング (TOP10)")
-            p_df = res['parent_rank'].head(10)
-            fig_p = px.bar(p_df, x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
-            fig_p.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400, margin=dict(l=0, r=0, t=30, b=0))
-            st.plotly_chart(fig_p, use_container_width=True)
+            
+            with col_p1:
+                st.markdown("### 🏆 親機個体別ランキング (TOP10)")
+                p_df = res['parent_rank'].head(10)
+                fig_p = px.bar(p_df, x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
+                fig_p.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400, margin=dict(l=0, r=0, t=30, b=0))
+                st.plotly_chart(fig_p, use_container_width=True)
 
-        with col_p2:
-            st.markdown("### 📱 親機機種別パフォーマンス")
-            pm_df = res['parent_model_rank']
-            fig_pm = px.bar(pm_df, x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
-            fig_pm.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400, margin=dict(l=0, r=0, t=30, b=0))
-            st.plotly_chart(fig_pm, use_container_width=True)
+            with col_p2:
+                st.markdown("### 📱 親機機種別パフォーマンス")
+                pm_df = res['parent_model_rank']
+                fig_pm = px.bar(pm_df, x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
+                fig_pm.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=400, margin=dict(l=0, r=0, t=30, b=0))
+                st.plotly_chart(fig_pm, use_container_width=True)
 
         # 親機のアドバイス
         st.markdown("---")
