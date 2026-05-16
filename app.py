@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 # ==========================================
 # 1. 定数・設定
 # ==========================================
-CURRENT_VERSION = "11.0.6"
+CURRENT_VERSION = "11.0.12"
 GAS_URL = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
 
 # ページ設定
@@ -137,6 +137,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         
         rdf['brand'] = rdf['model'].apply(get_brand)
         rdf['parent_brand'] = rdf['parent_model'].apply(get_brand)
+        rdf['child_id'] = rdf[8].fillna("未指定").astype(str) # 端末番号を子IDとして定義
         rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
 
         # 集計
@@ -171,7 +172,8 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
             "parent_rank": parent_df, "parent_model_rank": p_model_df,
             "parent_brand_rank": p_brand_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
-            "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}"
+            "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}",
+            "raw_df": rdf # 相性・疲弊度分析用の生データフレームを格納
         }
         return None
     except Exception as e: return str(e)
@@ -329,7 +331,7 @@ def main():
     per_invite_revenue = (success_p * success_rev) + ((1 - success_p) * failure_rev)
 
     # --- タブ表示 ---
-    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
+    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
     # 1. ダッシュボード
     with tabs[0]:
@@ -496,8 +498,250 @@ def main():
             p_adv = f"- **最強の親機**: 現在 **{best_pm['parent_model']}** が成功率 **{best_pm['成功率']:.1f}%** でトップ。<br>- **要警戒**: **{worst_pm['parent_model']}** は成功率 **{worst_pm['成功率']:.1f}%** に留まる傾向。"
             st.markdown(f"<div class='advice-card' style='border-color: #ffd700;'><div class='advice-title'>💡 親機戦略のアドバイス</div><div class='advice-text'>{p_adv}</div></div>", unsafe_allow_html=True)
 
-    # 5. シミュレーション (内訳復元)
+    # 5. 相性・疲弊度分析 (新タブ)
     with tabs[4]:
+        res = st.session_state.get('actual_res')
+        if res:
+            st.caption(f"📊 分析対象期間: {res['period']}")
+            
+        st.markdown("## 🧬 相性・疲弊度分析")
+        
+        if not res or 'raw_df' not in res:
+            st.info("集計データがありません。「実績分析」タブでデータを同期してください。")
+        else:
+            raw_df = res['raw_df']
+            
+            # --- サブタブ分け ---
+            sub_tabs = st.tabs(["🧩 親機×子機 相性マトリクス", "📱 子端末 疲弊度・シャドウバン警告"])
+            
+            # Sub-tab 1: 相性マトリクス
+            with sub_tabs[0]:
+                st.markdown("### 🧩 親機ブランド × 子機ブランド 相性マトリクス")
+                st.write("親機ブランドと子機ブランドの組み合わせごとの成功率を表示します（赤：低成功率、緑：高成功率）。")
+                
+                if not raw_df.empty:
+                    # 相性集計
+                    affinity_df = raw_df.groupby(['parent_brand', 'brand']).agg(
+                        試行数=('is_success', 'count'),
+                        成功率=('is_success', 'mean')
+                    ).reset_index()
+                    affinity_df['成功率'] = affinity_df['成功率'] * 100
+                    
+                    # ピボット化
+                    pivot_rate = affinity_df.pivot(index='parent_brand', columns='brand', values='成功率')
+                    pivot_count = affinity_df.pivot(index='parent_brand', columns='brand', values='試行数').fillna(0).astype(int)
+                    
+                    y_labels = list(pivot_rate.index)
+                    x_labels = list(pivot_rate.columns)
+                    z_values = pivot_rate.values
+                    
+                    # テキスト用（成功率% と 試行数 をセットで表示）
+                    text_values = []
+                    for i, parent in enumerate(y_labels):
+                        row_text = []
+                        for j, child in enumerate(x_labels):
+                            rate = z_values[i][j]
+                            count = pivot_count.values[i][j]
+                            if pd.isna(rate):
+                                row_text.append("データ無")
+                            else:
+                                row_text.append(f"{rate:.1f}%<br>({count}回)")
+                        text_values.append(row_text)
+                        
+                    fig_heat = go.Figure(data=go.Heatmap(
+                        z=z_values,
+                        x=x_labels,
+                        y=y_labels,
+                        text=text_values,
+                        hoverinfo="text",
+                        colorscale='RdYlGn',
+                        zmin=0, zmax=100,
+                        xgap=3, ygap=3
+                    ))
+                    fig_heat.update_layout(
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font_color="#e0e0e0",
+                        height=400,
+                        margin=dict(t=30, b=30, l=30, r=30)
+                    )
+                    st.plotly_chart(fig_heat, use_container_width=True)
+                    
+                    st.markdown("---")
+                    st.markdown("#### 📊 相性ピボット詳細テーブル")
+                    styled_pivot = pd.DataFrame(index=y_labels, columns=x_labels)
+                    for i, parent in enumerate(y_labels):
+                        for j, child in enumerate(x_labels):
+                            rate = z_values[i][j]
+                            count = pivot_count.values[i][j]
+                            if pd.isna(rate):
+                                styled_pivot.at[parent, child] = "-"
+                            else:
+                                styled_pivot.at[parent, child] = f"{rate:.1f}% ({count}回)"
+                                
+                    st.dataframe(styled_pivot, use_container_width=True)
+                    
+                    # 試行数3以上のペアを抽出してアドバイス
+                    valid_pairs = affinity_df[affinity_df['試行数'] >= 3].sort_values('成功率', ascending=False)
+                    st.markdown("---")
+                    st.markdown("#### 💡 相性アナリティクス推奨プラン")
+                    if not valid_pairs.empty:
+                        best_pair = valid_pairs.iloc[0]
+                        worst_pair = valid_pairs.iloc[-1]
+                        
+                        advice_html = f"""
+                        <div class="advice-card" style="border-color: #00ff88;">
+                            <div class="advice-title">🚀 推奨組み合わせ (試行数3回以上)</div>
+                            <div class="advice-text">
+                                親機 <b>{best_pair['parent_brand']}</b> × 子機 <b>{best_pair['brand']}</b> が現在、成功率 <b>{best_pair['成功率']:.1f}%</b>（試行数: {best_pair['試行数']}回）で<b>トップ</b>です。この組み合わせを優先的に配置してください。
+                            </div>
+                        </div>
+                        """
+                        if best_pair['成功率'] - worst_pair['成功率'] > 10:
+                            advice_html += f"""
+                            <div class="advice-card" style="border-color: #ff3333; margin-top: 15px;">
+                                <div class="advice-title">⚠️ 警戒組み合わせ (試行数3回以上)</div>
+                                <div class="advice-text">
+                                    親機 <b>{worst_pair['parent_brand']}</b> × 子機 <b>{worst_pair['brand']}</b> は成功率が <b>{worst_pair['成功率']:.1f}%</b>（試行数: {worst_pair['試行数']}回）と<b>著しく低迷</b>しています。この組み合わせでの運用は避けることを強く推奨します。
+                                </div>
+                            </div>
+                            """
+                        st.markdown(advice_html, unsafe_allow_html=True)
+                    else:
+                        st.info("相性推奨アドバイスを表示するには、試行数3回以上の組み合わせデータが必要です。")
+                else:
+                    st.info("十分なデータがありません。")
+            
+            # Sub-tab 2: 子端末 疲弊度・シャドウバン警告
+            with sub_tabs[1]:
+                st.markdown("### 📱 子端末 疲弊度・シャドウバン警告")
+                st.write("子端末ごとの連続失敗回数と全体成功率から、シャドウバンの危険度を算出します。")
+                
+                f_idx = 5 # 状態カラムのインデックス
+                if not raw_df.empty and 'child_id' in raw_df.columns:
+                    child_groups = raw_df.groupby('child_id')
+                    child_data = []
+                    
+                    for child_id, group in child_groups:
+                        sorted_group = group.sort_values('date', ascending=False)
+                        
+                        consecutive_failures = 0
+                        for idx, row in sorted_group.iterrows():
+                            # 状態が成功（"成功"または"出金済み"を含む）ならカウントストップ
+                            state_val = str(row[f_idx])
+                            is_succ = "成功" in state_val or "出金済み" in state_val
+                            if is_succ:
+                                break
+                            else:
+                                consecutive_failures += 1
+                                
+                        total_trials = len(group)
+                        succ_count = group['is_success'].sum()
+                        succ_rate = (succ_count / total_trials) * 100
+                        
+                        # 危険度スコアの計算
+                        # Risk = min(100, (Cf * 25) + max(0, (50 - Rs) * 1.2))
+                        risk_score = (consecutive_failures * 25) + max(0.0, (50.0 - succ_rate) * 1.2)
+                        risk_score = min(100.0, risk_score)
+                        if total_trials < 3:
+                            risk_score = risk_score * 0.5
+                            
+                        if risk_score < 35:
+                            status = "🟢 健全"
+                        elif risk_score < 70:
+                            status = "🟡 注意"
+                        else:
+                            status = "🔴 要休止"
+                            
+                        # 直近3回の履歴をパース
+                        recent_trials = sorted_group.head(3)
+                        recent_history = []
+                        for _, r in recent_trials.iterrows():
+                            state = str(r[f_idx]) if r[f_idx] else "空欄"
+                            recent_history.append("成功" if "成功" in state or "出金済み" in state else "失敗")
+                        recent_str = " -> ".join(recent_history)
+                            
+                        child_data.append({
+                            "端末番号": child_id,
+                            "機種": group.iloc[0]['model'],
+                            "総試行数": total_trials,
+                            "成功数": succ_count,
+                            "成功率": f"{succ_rate:.1f}%",
+                            "直近連続失敗": f"{consecutive_failures}回",
+                            "直近3履歴": recent_str,
+                            "危険度スコア": risk_score,
+                            "ステータス": status
+                        })
+                        
+                    child_summary_df = pd.DataFrame(child_data)
+                    child_summary_df = child_summary_df.sort_values("危険度スコア", ascending=False)
+                    
+                    total_devices = len(child_summary_df)
+                    healthy_count = len(child_summary_df[child_summary_df['ステータス'] == "🟢 健全"])
+                    warning_count = len(child_summary_df[child_summary_df['ステータス'] == "🟡 注意"])
+                    critical_count = len(child_summary_df[child_summary_df['ステータス'] == "🔴 要休止"])
+                    
+                    cc1, cc2, cc3 = st.columns(3)
+                    with cc1:
+                        st.metric("🟢 健全な端末数", f"{healthy_count}台 / {total_devices}台", help="危険度35%未満の安定して稼働している端末")
+                    with cc2:
+                        st.metric("🟡 警戒中の端末数", f"{warning_count}台", help="危険度35%以上70%未満。やや挙動が怪しい端末")
+                    with cc3:
+                        st.metric("🔴 要休止・BAN端末数", f"{critical_count}台", help="危険度70%以上。シャドウバンの確率が極めて高い端末")
+                        
+                    st.markdown("---")
+                    st.markdown("#### 📱 子端末 疲弊度ブラックリスト")
+                    
+                    disp_df = child_summary_df.copy()
+                    disp_df["危険度スコア"] = disp_df["危険度スコア"].map("{:.1f}%".format)
+                    
+                    st.dataframe(
+                        disp_df,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "危険度スコア": st.column_config.TextColumn("シャドウバン危険度", help="高いほどシャドウバン確率が高い"),
+                            "ステータス": st.column_config.TextColumn("診断ステータス")
+                        }
+                    )
+                    
+                    critical_devices = child_summary_df[child_summary_df['ステータス'] == "🔴 要休止"]
+                    warning_devices = child_summary_df[child_summary_df['ステータス'] == "🟡 注意"]
+                    
+                    st.markdown("---")
+                    st.markdown("#### 💡 疲弊端末の具体的なメンテナンスアクション")
+                    
+                    if not critical_devices.empty:
+                        reset_list = ", ".join([f"**#{row['端末番号']}** ({row['機種']})" for _, row in critical_devices.iterrows()])
+                        st.markdown(f"""
+                        <div class="advice-card" style="border-color: #ff3333;">
+                            <div class="advice-title">🔴 工場出荷状態リセット推奨 (シャドウバン確実)</div>
+                            <div class="advice-text">
+                                以下の端末はシャドウバンされている確率が極めて高いです。リセットするか、最低でも7日間は完全に休止させてください。<br>
+                                対象端末: {reset_list}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    if not warning_devices.empty:
+                        ip_list = ", ".join([f"**#{row['端末番号']}**" for _, row in warning_devices.iterrows()])
+                        st.markdown(f"""
+                        <div class="advice-card" style="border-color: #ffaa00; margin-top: 15px;">
+                            <div class="advice-title">🟡 IP変更・キャッシュクリア推奨 (疲弊開始)</div>
+                            <div class="advice-text">
+                                以下の端末は連続失敗が発生し始めています。次回運用の前に、接続回線のIP切り替え（機内モードON/OFFなど）やTikTok Lite of アプリキャッシュ削除を行ってください。<br>
+                                対象端末: {ip_list}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                    if critical_devices.empty and warning_devices.empty:
+                        st.success("✨ 現在、すべての稼働端末が極めてクリーン（🟢 健全）な状態です！素晴らしい運用サイクルです。")
+                else:
+                    st.info("十分なデータがありません。")
+
+    # 6. シミュレーション (内訳復元)
+    with tabs[5]:
         st.markdown("## 🔄 稼働シミュレーション")
         st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:5px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
         c1, c2, c3 = st.columns(3)
@@ -510,8 +754,8 @@ def main():
         with sc1: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>✅ 成功時</b><br>確率: {success_p*100:.1f}%<br>拘束: {prep_d+check_d:.1f}日</div>", unsafe_allow_html=True)
         with sc2: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>❌ 失敗時</b><br>確率: {(1-success_p)*100:.1f}%<br>拘束: {(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f}日</div>", unsafe_allow_html=True)
 
-    # 6. 設定 (SelectboxColumn復元)
-    with tabs[5]:
+    # 7. 設定 (SelectboxColumn復元)
+    with tabs[6]:
         st.markdown("## ⚙️ 設定 (運用比率のみ編集可能)")
         col_cfg = {"運用比率(%)": st.column_config.SelectboxColumn("運用比率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}
         st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, use_container_width=True, disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
