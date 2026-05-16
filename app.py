@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 # ページ設定
 st.set_page_config(
-    page_title="TikTok Lite Strategy Simulator v2.5",
+    page_title="TikTok Lite Strategy Simulator v2.6",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -27,7 +27,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📱 TikTok Lite 運用戦略シミュレーター v2.5")
+st.title("📱 TikTok Lite 運用戦略シミュレーター v2.6")
 
 # --- セッション状態の初期化 ---
 if 'invite_types_df' not in st.session_state:
@@ -68,28 +68,17 @@ with st.sidebar:
         success_rate = st.slider("招待成功率 (%)", 0, 100, 80) / 100
         keep_rate_success = st.slider("成功時の高報酬(キープ)率 (%)", 0, 100, 100) / 100
         keep_rate_fail = st.slider("失敗時の高報酬(キープ)率 (%)", 0, 100, 30) / 100
-        st.caption("※キープしない端末は1日で即リセットし、次の準備に入ります")
 
 # --- ロジック計算 ---
-
-# 4つのグループの比率とサイクル
-# 1. 成功 + キープ
 ratio_s_keep = success_rate * keep_rate_success
-# 2. 成功 + 即リセット
 ratio_s_reset = success_rate * (1 - keep_rate_success)
-# 3. 失敗 + キープ
 ratio_f_keep = (1 - success_rate) * keep_rate_fail
-# 4. 失敗 + 即リセット
 ratio_f_reset = (1 - success_rate) * (1 - keep_rate_fail)
 
-# サイクル
 cycle_full = prep_days + checkin_days
 cycle_reset = prep_days + 1
-
-# 平均サイクル
 avg_child_cycle = (cycle_full * (ratio_s_keep + ratio_f_keep)) + (cycle_reset * (ratio_s_reset + ratio_f_reset))
 
-# 1日あたりのキャパシティ
 daily_parent_cap = parent_count / parent_cycle
 daily_child_cap = child_count / avg_child_cycle
 actual_daily_invites = min(daily_parent_cap, daily_child_cap)
@@ -99,23 +88,8 @@ tab1, tab2, tab3 = st.tabs(["📊 ダッシュボード", "🔄 稼働シミュ�
 
 with tab3:
     st.subheader("💼 招待種別の管理")
-    edited_df = st.data_editor(
-        st.session_state.invite_types_df,
-        num_rows="dynamic",
-        column_config={
-            "運用比率(%)": st.column_config.NumberColumn(min_value=0, max_value=100, format="%d%%"),
-            "即時報酬": st.column_config.NumberColumn(format="¥%d"),
-            "完走報酬": st.column_config.NumberColumn(format="¥%d"),
-        },
-        use_container_width=True,
-        key="invite_editor"
-    )
-    
-    total_ratio = edited_df["運用比率(%)"].sum()
-    if total_ratio != 100:
-        st.error(f"「運用比率(%)」の合計を100%にしてください（現在: {total_ratio}%）")
-    else:
-        st.session_state.invite_types_df = edited_df
+    edited_df = st.data_editor(st.session_state.invite_types_df, num_rows="dynamic", use_container_width=True)
+    st.session_state.invite_types_df = edited_df
 
     w_immediate = sum(edited_df["即時報酬"] * edited_df["運用比率(%)"] / 100)
     w_task = sum(edited_df["完走報酬"] * edited_df["運用比率(%)"] / 100)
@@ -128,7 +102,6 @@ with tab3:
         p2 = st.slider("2700円の確率 (%)", 0, 100 - p1, st.session_state.checkin_rewards["tier2"]["prob"])
         p3 = 100 - p1 - p2
         expected_checkin = (1350 * p1/100) + (2700 * p2/100) + (6750 * p3/100)
-        st.write(f"期待値: ¥{int(expected_checkin):,}")
 
     with col_v:
         st.markdown("### 📺 動画再生追加報酬")
@@ -136,14 +109,34 @@ with tab3:
         video_active = st.toggle("動画再生報酬を有効にする", value=True)
         final_video = video_amount if video_active else 0
 
-    # 収益内訳計算
-    # 即時報酬はすべての成功(Group 1a, 1b)で発生
     rev_immediate = w_immediate * success_rate
-    # 完走報酬・チェックイン・動画はキープ端末(Group 1a, 2)で発生
     rev_additional = (w_task + expected_checkin + final_video) * (ratio_s_keep + ratio_f_keep)
     per_invite_revenue = rev_immediate + rev_additional
 
 with tab1:
+    # 📍 本日のスポット・シミュレーション
+    st.subheader("📍 本日のスポット・シミュレーション")
+    st.markdown("サイクルとは別に、本日招待可能な具体的な台数から収益を計算します。")
+    
+    c_spot1, c_spot2, c_spot3 = st.columns(3)
+    with c_spot1:
+        today_ready_children = st.number_input("本日招待可能な子端末 (台)", value=50)
+    with c_spot2:
+        today_ready_parents = st.number_input("本日稼働可能な親端末 (台)", value=int(daily_parent_cap))
+    with c_spot3:
+        today_invites = min(today_ready_children, today_ready_parents)
+        today_profit = today_invites * per_invite_revenue
+        st.metric("本日の最大招待可能数", f"{today_invites} 件")
+        st.metric("本日の見込み収益", f"¥{int(today_profit):,}")
+
+    if today_ready_children > today_ready_parents:
+        st.warning(f"親端末が不足しています。あと {today_ready_children - today_ready_parents} 台の親端末があれば、すべての子端末を使い切れます。")
+    elif today_ready_children < today_ready_parents:
+        st.info(f"親端末に余裕があります。あと {today_ready_parents - today_ready_children} 台の子端末を準備できれば、親の枠をフル活用できます。")
+
+    st.divider()
+
+    st.subheader("📈 長期予測（サイクル計算ベース）")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("1日あたりの招待(試行)数", f"{actual_daily_invites:.1f} 件")
@@ -176,13 +169,10 @@ with tab1:
     fig_line = px.line(df_sim, x="日付", y="累積収益", title=f"{sim_days}日間の累積収益予測")
     fig_line.update_layout(template="plotly_dark")
     st.plotly_chart(fig_line, use_container_width=True)
-    
-    st.info(f"期間中の総収益予測: ¥{int(cum_rev[-1]):,}")
 
 with tab2:
     st.subheader("🔄 回転戦略の詳細")
     st.write(f"平均子端末サイクル: **{avg_child_cycle:.2f} 日**")
-    
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.success(f"### 成功・キープ\n{ratio_s_keep*100:.1f}%\n{cycle_full:.1f}日")
@@ -194,4 +184,4 @@ with tab2:
         st.error(f"### 失敗・リセット\n{ratio_f_reset*100:.1f}%\n{cycle_reset:.1f}日")
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Created by Antigravity Assistant v2.5")
+st.sidebar.caption("Created by Antigravity Assistant v2.6")
