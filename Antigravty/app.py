@@ -339,7 +339,7 @@ def main():
         if res:
             st.caption(f"📊 分析対象期間: {res['period']}")
         
-        st.markdown("<h2 style='margin-bottom:20px;'>チャンネルの概要</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin-bottom:20px;'>概要</h2>", unsafe_allow_html=True)
         if datetime.now().hour >= 20:
             st.info("🌙 **20:00を過ぎました。本日の運用データが確定しています。**")
             res = st.session_state.get('actual_res')
