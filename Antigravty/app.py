@@ -713,7 +713,7 @@ def main():
                     st.markdown("#### 💡 疲弊端末の具体的なメンテナンスアクション")
                     
                     if not critical_devices.empty:
-                        reset_list = ", ".join([f"**#{row['端末番号']}** ({row['機種']})" for _, row in critical_devices.iterrows()])
+                        reset_list = ", ".join([f"<b>#{row['端末番号']}</b> ({row['機種']})" for _, row in critical_devices.iterrows()])
                         st.markdown(textwrap.dedent(f"""
                             <div class="advice-card" style="border-color: #ff3333;">
                                 <div class="advice-title">🔴 工場出荷状態リセット推奨 (シャドウバン確実)</div>
@@ -725,7 +725,7 @@ def main():
                         """), unsafe_allow_html=True)
                         
                     if not warning_devices.empty:
-                        ip_list = ", ".join([f"**#{row['端末番号']}**" for _, row in warning_devices.iterrows()])
+                        ip_list = ", ".join([f"<b>#{row['端末番号']}</b>" for _, row in warning_devices.iterrows()])
                         st.markdown(textwrap.dedent(f"""
                             <div class="advice-card" style="border-color: #ffaa00; margin-top: 15px;">
                                 <div class="advice-title">🟡 IP変更・キャッシュクリア推奨 (疲弊開始)</div>
