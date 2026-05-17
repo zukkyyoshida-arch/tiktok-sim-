@@ -362,9 +362,9 @@ def main():
         advice = []
         # 基本ボトルネック
         if daily_parent_cap < daily_child_cap:
-            req_p = int(np.ceil(daily_child_cap * p_cycle)); advice.append(f"🔴 **親端末の不足**: あと **{req_p - parent_dev} 台** 追加で収益 **¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}** 増")
+            req_p = int(np.ceil(daily_child_cap * p_cycle)); advice.append(f"🔴 <b>親端末の不足</b>: あと <b>{req_p - parent_dev} 台</b> 追加で収益 <b>¥{int((daily_child_cap - daily_parent_cap) * 30 * per_invite_revenue):,}</b> 増")
         else:
-            req_c = int(np.ceil(daily_parent_cap * avg_cycle)); advice.append(f"🔵 **子端末の不足**: あと **{req_c - child_dev} 台** 追加で収益 **¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}** 増")
+            req_c = int(np.ceil(daily_parent_cap * avg_cycle)); advice.append(f"🔵 <b>子端末の不足</b>: あと <b>{req_c - child_dev} 台</b> 追加で収益 <b>¥{int((daily_parent_cap - daily_child_cap) * 30 * per_invite_revenue):,}</b> 増")
         
         # 高度な分析 (実績ベース)
         if st.session_state.get('actual_res'):
@@ -373,14 +373,14 @@ def main():
             gap = actual_s_rate - success_p
             if abs(gap) > 0.03:
                 loss_gain = int(actual_daily_invites * 30 * gap * per_invite_revenue)
-                if gap < 0: advice.append(f"⚠️ **成功率の下振れ注意**: 実績({actual_s_rate*100:.1f}%)が想定を下回っています。月間収益が予測より **¥{abs(loss_gain):,}** 減少するリスクがあります。")
-                else: advice.append(f"✨ **想定以上のパフォーマンス**: 実績が想定を上回っています！ **¥{loss_gain:,}** のポジティブな上振れが期待できます。")
+                if gap < 0: advice.append(f"⚠️ <b>成功率の下振れ注意</b>: 実績({actual_s_rate*100:.1f}%)が想定を下回っています。月間収益が予測より <b>¥{abs(loss_gain):,}</b> 減少するリスクがあります。")
+                else: advice.append(f"✨ <b>想定以上のパフォーマンス</b>: 実績が想定を上回っています！ <b>¥{loss_gain:,}</b> のポジティブな上振れが期待できます。")
             
             if len(res['brand']) > 1:
                 best_b, worst_b = res['brand'].loc[res['brand']['成功率'].idxmax()], res['brand'].loc[res['brand']['成功率'].idxmin()]
                 if (best_b['成功率'] - worst_b['成功率']) > 5:
                     potential = int(actual_daily_invites * 30 * (best_b['成功率'] - worst_b['成功率'])/100 * per_invite_revenue * (worst_b['試行数']/res['total']))
-                    advice.append(f"📱 **端末の最適化**: {worst_b['brand']} の成功率が低迷。{best_b['brand']} 並みに改善することで月間 **¥{potential:,}** の増収余地。")
+                    advice.append(f"📱 <b>端末の最適化</b>: {worst_b['brand']} の成功率が低迷。{best_b['brand']} 並みに改善することで月間 <b>¥{potential:,}</b> の増収余地。")
             
             s_df = res['summary'].copy()
             if len(s_df) > 1:
@@ -388,10 +388,10 @@ def main():
                 best_c = s_df.loc[s_df['EV'].idxmax()]
                 if best_c['EV'] > (actual_s_rate * per_invite_revenue) * 1.05:
                     boost = int(actual_daily_invites * 30 * (best_c['EV'] - (actual_s_rate * per_invite_revenue)))
-                    advice.append(f"🎯 **戦略の転換推奨**: 現在 **{best_c.iloc[0]}** が最も効率的。シフトにより月間 **¥{boost:,}** 底上げ可能。")
+                    advice.append(f"🎯 <b>戦略の転換推奨</b>: 現在 <b>{best_c.iloc[0]}</b> が最も効率的。シフトにより月間 <b>¥{boost:,}</b> 底上げ可能。")
 
             yield_val = int(rev / total_dev)
-            advice.append(f"💰 **収益効率 (Yield)**: 端末1台あたり月間 **¥{yield_val:,}** を稼ぎ出しています。")
+            advice.append(f"💰 <b>収益効率 (Yield)</b>: 端末1台あたり月間 <b>¥{yield_val:,}</b> を稼ぎ出しています。")
         
         st.markdown(f"<div class='advice-card'><div class='advice-title'>💎 定量アクションプラン</div><div class='advice-text'>{'<br><br>'.join(advice)}</div></div>", unsafe_allow_html=True)
 
@@ -495,7 +495,7 @@ def main():
             
             st.markdown("---")
             best_pm, worst_pm = res['parent_model_rank'].iloc[0], res['parent_model_rank'].iloc[-1]
-            p_adv = f"- **最強の親機**: 現在 **{best_pm['parent_model']}** が成功率 **{best_pm['成功率']:.1f}%** でトップ。<br>- **要警戒**: **{worst_pm['parent_model']}** は成功率 **{worst_pm['成功率']:.1f}%** に留まる傾向。"
+            p_adv = f"- <b>最強の親機</b>: 現在 <b>{best_pm['parent_model']}</b> が成功率 <b>{best_pm['成功率']:.1f}%</b> でトップ。<br>- <b>要警戒</b>: <b>{worst_pm['parent_model']}</b> は成功率 <b>{worst_pm['成功率']:.1f}%</b> に留まる傾向。"
             st.markdown(f"<div class='advice-card' style='border-color: #ffd700;'><div class='advice-title'>💡 親機戦略のアドバイス</div><div class='advice-text'>{p_adv}</div></div>", unsafe_allow_html=True)
 
     # 5. 相性・疲弊度分析 (新タブ)
