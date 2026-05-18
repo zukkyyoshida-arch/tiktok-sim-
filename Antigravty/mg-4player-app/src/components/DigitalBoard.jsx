@@ -595,14 +595,14 @@ function DigitalBoard({
                     <div style={{ background: 'rgba(255, 0, 127, 0.02)', border: '1px solid rgba(255, 0, 127, 0.1)', padding: '3px 4px', borderRadius: '4px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '0.58rem', color: 'var(--color-pink)', fontWeight: 'bold' }}>③製品</span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', margin: '2px 0', alignContent: 'flex-start', flexGrow: 1 }}>
-                        {Array.from({ length: Math.min(15, Math.max(0, Math.floor(pRes.prd.endingCount || 0))) }).map((_, i) => (
+                        {Array.from({ length: Math.min(15, Math.max(0, Math.floor(pRes.prod.endingCount || 0))) }).map((_, i) => (
                           <div key={i} style={{ width: '4px', height: '4px', borderRadius: '1px', background: 'var(--color-pink)' }}></div>
                         ))}
-                        {Math.max(0, pRes.prd.endingCount || 0) > 15 && <span style={{ fontSize: '0.5rem', color: 'var(--text-muted)' }}>+</span>}
+                        {Math.max(0, pRes.prod.endingCount || 0) > 15 && <span style={{ fontSize: '0.5rem', color: 'var(--text-muted)' }}>+</span>}
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', borderTop: '1px dashed rgba(255, 0, 127, 0.08)', paddingTop: '1px' }}>
-                        <strong style={{ color: '#fff' }}>{Math.max(0, pRes.prd.endingCount || 0)}個</strong>
-                        <span style={{ color: 'var(--color-cyan)', fontSize: '0.55rem' }}>@{pRes.prd.unitCost ? pRes.prd.unitCost.toFixed(0) : 0}</span>
+                        <strong style={{ color: '#fff' }}>{Math.max(0, pRes.prod.endingCount || 0)}個</strong>
+                        <span style={{ color: 'var(--color-cyan)', fontSize: '0.55rem' }}>@{pRes.prod.unitCost ? pRes.prod.unitCost.toFixed(0) : 0}</span>
                       </div>
                     </div>
 
