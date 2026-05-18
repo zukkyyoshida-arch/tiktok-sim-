@@ -1,0 +1,803 @@
+/* ==========================================
+   戦略MG（製造業）4人対戦ダッシュボード
+   プレミアム・ネオンダーク デザインシステム
+   ========================================== */
+
+:root {
+  /* サイバーパンク・ネオンダークパレット */
+  --bg-main: #06070d;          /* 極薄の漆黒（深宇宙） */
+  --bg-card: rgba(18, 22, 38, 0.7); /* 半透明ガラスモルフィズム */
+  --bg-card-hover: rgba(26, 32, 54, 0.85);
+  --border-glow: rgba(0, 242, 254, 0.15);
+  --border-light: rgba(255, 255, 255, 0.05);
+  
+  /* ネオンアクセントカラー */
+  --color-cyan: #00f2fe;        /* シアン：現金・資産 */
+  --color-pink: #ff007f;        /* ネオンピンク：売上・限界利益 */
+  --color-purple: #9b51e0;      /* パープル：機械・固定資産 */
+  --color-green: #05ffa1;       /* エメラルドグリーン：材料・在庫 */
+  --color-yellow: #ffd000;      /* ゴールド：借入・自己資本 */
+  --color-red: #ff3838;         /* レッド：費用・損失・エラー */
+  
+  /* テキスト・中立カラー */
+  --text-primary: #f5f6fa;
+  --text-secondary: #8b9bb4;
+  --text-muted: #576574;
+  --bg-input: rgba(10, 12, 22, 0.9);
+  
+  /* エフェクト */
+  --shadow-neon-cyan: 0 0 15px rgba(0, 242, 254, 0.35);
+  --shadow-neon-pink: 0 0 15px rgba(ff, 00, 7f, 0.35);
+  --glass-blur: blur(12px);
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
+  --font-sans: 'Inter', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ライトテーマ用変数 */
+.light-theme {
+  --bg-main: #f0f2f5;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --border-glow: rgba(0, 122, 255, 0.15);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --bg-input: #ffffff;
+  --color-cyan: #0284c7;
+  --color-pink: #db2777;
+  --color-purple: #7c3aed;
+  --color-green: #059669;
+  --color-yellow: #d97706;
+  --color-red: #dc2626;
+  --shadow-neon-cyan: 0 4px 12px rgba(2, 132, 199, 0.15);
+  --shadow-neon-pink: 0 4px 12px rgba(219, 39, 119, 0.15);
+}
+
+/* ==========================================
+   グローバル・リセットと基本スタイル
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted) transparent;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.5s ease;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* スクロールバー装飾 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ==========================================
+   プレミアムPCレイアウト（グリッド構成）
+   ========================================== */
+.app-container {
+  display: grid;
+  grid-template-rows: 70px 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ヘッダー */
+.app-header {
+  grid-row: 1;
+  background: rgba(10, 12, 22, 0.85);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  z-index: 100;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 8px var(--color-cyan));
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, var(--color-pink), #a000c8);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* メインコンテンツ・スプリットスクリーン */
+.main-workspace {
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 320px 1fr; /* 左側: 4人比較ダッシュボード、右側: 個別帳票ワークスペース */
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ==========================================
+   左サイドバー：4人比較ダッシュボード（eスポーツ風）
+   ========================================== */
+.sidebar-panel {
+  background: rgba(8, 10, 18, 0.95);
+  border-right: 1px solid var(--border-light);
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.sidebar-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 1.5px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* プレイヤーランキング・ミニカード */
+.players-ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.player-rank-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 12px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.player-rank-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--player-color, var(--color-cyan));
+}
+
+.player-rank-card.active {
+  background: rgba(0, 242, 254, 0.05);
+  border-color: var(--player-color, var(--color-cyan));
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.08);
+}
+
+.player-rank-card:hover {
+  transform: translateY(-2px);
+  background: var(--bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.card-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: #fff;
+  background: var(--player-color, var(--color-cyan));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.player-rank-badge {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+.player-rank-badge.rank-1 {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #000;
+}
+
+.card-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-top: 1px dashed var(--border-light);
+  padding-top: 8px;
+}
+
+.metric-mini-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-mini-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.metric-mini-value {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.value-cyan { color: var(--color-cyan); }
+.value-pink { color: var(--color-pink); }
+.value-green { color: var(--color-green); }
+.value-yellow { color: var(--color-yellow); }
+
+/* ==========================================
+   右メインエリア：タブと帳票ワークスペース
+   ========================================== */
+.content-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* サブヘッダー（プレイヤー切り替えと主要タブ） */
+.workspace-bar {
+  background: rgba(14, 18, 30, 0.7);
+  border-bottom: 1px solid var(--border-light);
+  padding: 10px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.active-player-banner {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.active-player-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.period-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* タブデザイン */
+.tab-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: rgba(0, 242, 254, 0.08);
+  border-color: rgba(0, 242, 254, 0.2);
+  color: var(--color-cyan);
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.05);
+}
+
+/* 帳票表示エリア（スクロール可能） */
+.workspace-scroll-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background: radial-gradient(circle at top right, rgba(16, 20, 38, 0.4), transparent);
+}
+
+/* ==========================================
+   コンポーネントスタイル：ガラスカード
+   ========================================== */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: var(--transition-smooth);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.card-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ==========================================
+   出納帳 (Cash Ledger) スタイル
+   ========================================== */
+.ledger-container {
+  display: grid;
+  grid-template-columns: 1fr 340px; /* 左: 仕訳入力・履歴、右: 生産状況ミニマップ・決算チェック */
+  gap: 24px;
+  align-items: start;
+}
+
+.ledger-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ledger-input-form {
+  display: grid;
+  grid-template-columns: auto 1fr 120px 150px auto;
+  gap: 12px;
+  align-items: end;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px dashed var(--border-light);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.form-input, .form-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  border-radius: 8px;
+  height: 42px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: var(--color-cyan);
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+}
+
+/* 出納帳テーブル */
+.ledger-table-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.ledger-table th {
+  background: rgba(14, 18, 30, 0.9);
+  padding: 12px 16px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.ledger-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  background: rgba(18, 22, 38, 0.3);
+}
+
+.ledger-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.badge-symbol {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  margin-right: 8px;
+}
+
+/* 科目別カラーバッジ */
+.symbol-pink { background: rgba(255, 0, 127, 0.15); color: var(--color-pink); border: 1px solid rgba(255, 0, 127, 0.3); }
+.symbol-purple { background: rgba(155, 81, 224, 0.15); color: var(--color-purple); border: 1px solid rgba(155, 81, 224, 0.3); }
+.symbol-green { background: rgba(5, 255, 161, 0.15); color: var(--color-green); border: 1px solid rgba(5, 255, 161, 0.3); }
+.symbol-blue { background: rgba(0, 242, 254, 0.15); color: var(--color-cyan); border: 1px solid rgba(0, 242, 254, 0.3); }
+.symbol-yellow { background: rgba(255, 208, 0, 0.15); color: var(--color-yellow); border: 1px solid rgba(255, 208, 0, 0.3); }
+
+/* ==========================================
+   工場盤面ミニマップ (Company Board Minimap)
+   ========================================== */
+.minimap-grid {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 15px;
+}
+
+.minimap-section {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.minimap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+/* 設備表示スロット */
+.facility-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.machine-slot {
+  background: rgba(155, 81, 224, 0.1);
+  border: 1px solid rgba(155, 81, 224, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.machine-slot.large {
+  background: rgba(255, 0, 127, 0.1);
+  border-color: rgba(255, 0, 127, 0.3);
+  color: var(--color-pink);
+}
+
+.worker-slot {
+  background: rgba(0, 242, 254, 0.1);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: var(--color-cyan);
+}
+
+/* 在庫パイル */
+.stock-pile {
+  display: flex;
+  gap: 12px;
+}
+
+.stock-box {
+  flex: 1;
+  background: rgba(5, 255, 161, 0.05);
+  border: 1px solid rgba(5, 255, 161, 0.15);
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.stock-box:hover {
+  background: rgba(5, 255, 161, 0.1);
+}
+
+.stock-count {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-green);
+}
+
+.stock-label {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================
+   ボタン・UIコントロール
+   ========================================== */
+.btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+
+.btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-cyan), #00a8ff);
+  border: none;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.35);
+  filter: brightness(1.1);
+}
+
+.btn-danger {
+  background: rgba(255, 56, 56, 0.15);
+  border-color: rgba(255, 56, 56, 0.3);
+  color: var(--color-red);
+}
+
+.btn-danger:hover {
+  background: var(--color-red);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 56, 56, 0.3);
+}
+
+/* ==========================================
+   財務決算書 (Financial Statements)
+   ========================================== */
+.statements-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.statement-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.statement-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.88rem;
+}
+
+.statement-table tr.total-row td {
+  font-weight: 700;
+  border-top: 1px solid var(--text-secondary);
+  border-bottom: 2px double var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.statement-table .indent-1 { padding-left: 24px; }
+.statement-table .indent-2 { padding-left: 36px; }
+
+.number-cell {
+  font-family: var(--font-display);
+  text-align: right;
+  font-weight: 500;
+}
+
+/* ==========================================
+   競合オークションアシスタント (Auction Helper)
+   ========================================== */
+.auction-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.auction-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auction-player-row {
+  display: grid;
+  grid-template-columns: auto 120px 120px auto;
+  gap: 15px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+/* 期末決算ウィザード */
+.wizard-step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.wizard-step-indicator::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-light);
+  z-index: 1;
+}
+
+.wizard-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  z-index: 2;
+  color: var(--text-secondary);
+  transition: var(--transition-smooth);
+}
+
+.wizard-step.active {
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.wizard-step.completed {
+  background: var(--color-cyan);
+  border-color: var(--color-cyan);
+  color: #000;
+}

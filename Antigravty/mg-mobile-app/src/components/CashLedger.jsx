@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CATEGORIES } from '../utils/calculations';
+import CompanyBoardMinimap from './CompanyBoardMinimap';
 
 function CashLedger({ carryover, ledger, onUpdateLedger, results }) {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -12,6 +13,7 @@ function CashLedger({ carryover, ledger, onUpdateLedger, results }) {
   // 電卓の状態
   const [calcInput, setCalcInput] = useState('');
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showMinimap, setShowMinimap] = useState(false);
 
   // 新規取引の追加
   const handleAddTransaction = (e) => {
@@ -129,6 +131,35 @@ function CashLedger({ carryover, ledger, onUpdateLedger, results }) {
             <span className="electric-number" style={{ fontSize: '1rem', color: 'var(--mg-green)' }}>-¥ {results.cashOutflow} 万</span>
           </div>
         </div>
+      </div>
+
+      {/* 会社盤ミニマップのアコーディオン */}
+      <div style={{ margin: '8px 16px' }}>
+        <button
+          type="button"
+          onClick={() => setShowMinimap(!showMinimap)}
+          className="btn-premium btn-secondary"
+          style={{ 
+            width: '100%', 
+            padding: '10px', 
+            fontSize: '0.78rem', 
+            borderRadius: '10px', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            gap: '8px', 
+            border: '1px solid rgba(0, 176, 255, 0.2)',
+            background: showMinimap ? 'rgba(0, 176, 255, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+            color: showMinimap ? '#00e676' : 'var(--text-secondary)'
+          }}
+        >
+          {showMinimap ? "盤面ミニマップを非表示 ▽" : "🔮 リアルタイム会社盤ミニマップを表示 ▷"}
+        </button>
+        {showMinimap && (
+          <div style={{ marginTop: '8px' }}>
+            <CompanyBoardMinimap results={results} />
+          </div>
+        )}
       </div>
 
       {/* 取引履歴タイムライン */}

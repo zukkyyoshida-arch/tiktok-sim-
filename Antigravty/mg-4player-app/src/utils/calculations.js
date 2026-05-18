@@ -200,7 +200,6 @@ export function calculateFinancials(carryover, ledger, actuals) {
   // 購入された機械工具 (ケ)
   const purchasedMachineValue = ledgerTotals["ケ"].amount;
   // 機械資産の期末残高 (理論値)
-  // 期首金額 + 新規購入 - 減価償却 (売却があった場合は売却価値を引くが、ここでは簡易化し期末簿価に反映)
   const bookEndingMachines = Math.max(0, carryover.machinesValue + purchasedMachineValue - depreciation - ledgerTotals["イ"].amount);
 
   // 4. P/L (変動損益計算書) の計算
@@ -210,7 +209,6 @@ export function calculateFinancials(carryover, ledger, actuals) {
   const marginRatio = salesRevenue > 0 ? (margin / salesRevenue) * 100 : 0; // m率
   
   // 固定費 F (シ, ス, セ, ソ, タ, チ + 減価償却)
-  // 注: サ(完成費)、コ(投入費)、ツ(材料)、ケ(機械)、ナ(借入返済)、ニ(納税)、ヌ(買掛支払)は固定費ではない
   const laborCost = ledgerTotals["シ"].amount; // 労務費
   const manufacturingFixed = ledgerTotals["ス"].amount + depreciation; // 製造固定費 (製造経費 + 減価償却)
   const salesCost = ledgerTotals["セ"].amount; // 販売費
@@ -224,7 +222,6 @@ export function calculateFinancials(carryover, ledger, actuals) {
   const fmRatio = margin > 0 ? (fixedCost / margin) * 100 : 0; // f/m比率
 
   // 特別損益 (災害損失 + 受取保険金など)
-  // 事故災害損失 = 火災金額 + 製造ミス金額 + 盗難金額
   const accidentLoss = matFireValue + wipMissValue + prodTheftValue;
   const extraordinaryLoss = accidentLoss;
   const extraordinaryGain = ledgerTotals["エ"].amount + ledgerTotals["イ"].amount; // 保険金 + 機械売却収入
@@ -233,8 +230,6 @@ export function calculateFinancials(carryover, ledger, actuals) {
   const profitBeforeTax = operatingProfit + extraordinaryProfit; // 税引前当期純利益
 
   // 法人税等の計算
-  // ルール: 前期繰越利益剰余金がマイナスで合計(税引前＋前期繰越)がプラスなら合計の50%。
-  // 前期繰越利益剰余金がプラスなら税引前当期純利益の50%。
   const priorRetained = carryover.retainedEarnings || 0;
   const totalTaxBase = profitBeforeTax + priorRetained;
   let corporateTax = 0;
@@ -280,7 +275,6 @@ export function calculateFinancials(carryover, ledger, actuals) {
   const bsDifference = Math.abs(totalAssets - totalLiabilitiesAndNetAssets);
 
   // 6. C/F (キャッシュフロー計算書)
-  // 営業キャッシュフロー
   const operatingCF = 
     profitBeforeTax 
     + depreciation 
@@ -292,10 +286,10 @@ export function calculateFinancials(carryover, ledger, actuals) {
     - ledgerTotals["ニ"].amount; // 納税出金
   
   // 投資キャッシュフロー
-  const investingCF = extraordinaryGain - purchasedMachineValue; // 売却/保険収入 - 新規購入
+  const investingCF = extraordinaryGain - purchasedMachineValue;
   
   // 財務キャッシュフロー
-  const financingCF = ledgerTotals["カ"].amount + ledgerTotals["オ"].amount - ledgerTotals["ナ"].amount; // 資本金増 + 新規借入 - 返済
+  const financingCF = ledgerTotals["カ"].amount + ledgerTotals["オ"].amount - ledgerTotals["ナ"].amount;
   
   const freeCF = operatingCF + investingCF;
   const totalCF = freeCF + financingCF;
@@ -435,7 +429,6 @@ export function calculateFinancials(carryover, ledger, actuals) {
 export function calculateBudget(budget, carryover) {
   const G = Number(budget.targetG) || 0;
   
-  // 固定費合計
   const F = 
     (Number(budget.laborBudget) || 0) +
     (Number(budget.manufacturingBudget) || 0) +
@@ -445,7 +438,6 @@ export function calculateBudget(budget, carryover) {
     (Number(budget.nonOperatingBudget) || 0) +
     (Number(budget.rdBudget) || 0);
 
-  // 必要MQ = G + F
   const requiredMQ = G + F;
   
   return {

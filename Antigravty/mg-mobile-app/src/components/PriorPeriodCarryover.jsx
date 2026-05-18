@@ -259,6 +259,27 @@ function PriorPeriodCarryover({
               </div>
             </div>
           </div>
+
+          <hr style={{ border: 'none', borderBottom: '1px solid var(--border-glass)' }} />
+
+          {/* 人員・組織 */}
+          <div>
+            <h4 style={{ fontSize: '0.85rem', color: '#00e676', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>人員・組織（従業員）</h4>
+            <div className="form-group">
+              <label className="form-label">👤 社員数 (人)</label>
+              <input
+                type="number"
+                value={carryover.workers !== undefined ? carryover.workers : 3}
+                onChange={(e) => handleInputChange('workers', e.target.value)}
+                placeholder="3"
+                className="form-input"
+                min="0"
+              />
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+                ※研修の開始時は通常3名（自分＋社員2名）です。機械の運転に必要となります。
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
