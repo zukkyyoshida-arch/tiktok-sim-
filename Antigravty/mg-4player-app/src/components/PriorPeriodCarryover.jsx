@@ -244,13 +244,33 @@ function PriorPeriodCarryover({ carryover, onUpdateCarryover, currentPeriod, per
                 />
               </div>
               <div className="form-group">
-                <label>期首社員数 (労務)</label>
+                <label>期首ワーカー数 (⚙️職人)</label>
                 <input 
                   type="number" 
                   className="form-input" 
-                  value={carryover.workers || 3} 
-                  onChange={(e) => handleInputChange('workers', e.target.value)}
-                  min="1"
+                  value={carryover.workersProd !== undefined ? carryover.workersProd : 0} 
+                  onChange={(e) => {
+                    const prodVal = Math.max(0, Number(e.target.value));
+                    const salesVal = carryover.workersSales !== undefined ? carryover.workersSales : 0;
+                    handleInputChange('workersProd', prodVal);
+                    handleInputChange('workers', prodVal + salesVal);
+                  }}
+                  min="0"
+                />
+              </div>
+              <div className="form-group">
+                <label>期首セールスマン数 (💼営業)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={carryover.workersSales !== undefined ? carryover.workersSales : 0} 
+                  onChange={(e) => {
+                    const salesVal = Math.max(0, Number(e.target.value));
+                    const prodVal = carryover.workersProd !== undefined ? carryover.workersProd : 0;
+                    handleInputChange('workersSales', salesVal);
+                    handleInputChange('workers', prodVal + salesVal);
+                  }}
+                  min="0"
                 />
               </div>
             </div>

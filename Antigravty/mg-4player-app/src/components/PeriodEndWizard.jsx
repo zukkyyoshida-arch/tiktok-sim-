@@ -480,8 +480,8 @@ function PeriodEndWizard({ players = [], commonPeriod = 1, carryover = {}, ledge
           <div>
             <h4 style={{ fontWeight: '700', marginBottom: '8px', fontSize: '0.95rem', color: '#fff' }}>ステップ 2: 生産設備と人員の期末監査</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              期末時点での工場の「機械台数」と「社員数」が、期首繰越＋今期取引（ケでの購入等）と一致しているか確認します。
-              これに基づき、<strong>減価償却費</strong>および<strong>労務費（社員の人件費）</strong>の計算が行われます。
+              期末時点での工場の「機械台数」と「ワーカー・セールスマン数」が、期首繰越＋今期取引と一致しているか確認します。
+              これに基づき、<strong>減価償却費</strong>および<strong>労務費・一般管理費（人件費）</strong>の計算が行われます。
             </p>
           </div>
 
@@ -512,11 +512,19 @@ function PeriodEndWizard({ players = [], commonPeriod = 1, carryover = {}, ledge
               <h5 style={{ color: 'var(--color-cyan)', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 'bold' }}>👤 人員構成チェック</h5>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>社員数 (期首設定に基づく):</span>
-                  <strong>{results.workers} 名</strong>
+                  <span>⚙️ ワーカー数 (製造職人):</span>
+                  <strong>{carryover.workersProd !== undefined ? carryover.workersProd : 0} 名</strong>
                 </div>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '10px' }}>
-                  ※ 社員雇用やリストラを行った場合は、出納帳への「労務費（シ）」の起票、および「設定」タブでの期首社員数の整合性を確認してください。
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>💼 セールスマン数 (営業営業員):</span>
+                  <strong>{carryover.workersSales !== undefined ? carryover.workersSales : 0} 名</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--border-light)', paddingTop: '6px', fontWeight: 'bold' }}>
+                  <span>合計人員数:</span>
+                  <strong>{(carryover.workersProd !== undefined ? carryover.workersProd : 0) + (carryover.workersSales !== undefined ? carryover.workersSales : 0)} 名</strong>
+                </div>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
+                  ※ 採用を行った場合は、当期の出納帳への「ソ」の新規採用費起票、および「繰越資産エディター」での期首人員数の整合性を確認してください。
                 </p>
               </div>
             </div>

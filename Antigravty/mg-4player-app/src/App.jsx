@@ -240,6 +240,15 @@ function App() {
   });
 
   const [activeTab, setActiveTab] = useState('gameboard');
+  const [initialCapital, setInitialCapital] = useState(() => {
+    const saved = safeLocalStorage.getItem('mg4_initial_capital');
+    return saved ? Number(saved) : 300; // デフォルト 300万円
+  });
+
+  useEffect(() => {
+    safeLocalStorage.setItem('mg4_initial_capital', String(initialCapital));
+  }, [initialCapital]);
+
   const [turnStartTime, setTurnStartTime] = useState(Date.now());
   
   // 効果音設定のロード
@@ -767,59 +776,138 @@ function App() {
 
         case "buy_machine":
           if (isTarget) {
-            let price = 0;
-            let label = "";
-            if (payload.type === 'small') {
-              price = 100; // ジュニア・ルール: 小型 100万
-              label = "小型機械";
-              newCarryover.smallMachines = (newCarryover.smallMachines || 0) + 1;
-            } else if (payload.type === 'large') {
-              price = 200; // ジュニア・ルール: 大型 200万
-              label = "大型機械";
-              newCarryover.largeMachines = (newCarryover.largeMachines || 0) + 1;
-            } else if (payload.type === 'attachment') {
-              price = 20; // ジュニア・ルール: アタッチメント 20万
-              label = "アタッチメント";
-              newCarryover.attachments = (newCarryover.attachments || 0) + 1;
-            }
-            newCarryover.machinesCount = (newCarryover.largeMachines || 0) + (newCarryover.smallMachines || 0);
-            newCarryover.machinesValue = (newCarryover.machinesValue || 0) + price; // 簿価の加算
+            if (payload.type === 'bulk') {
+              const largeQty = Number(payload.machines?.large) || 0;
+              const smallQty = Number(payload.machines?.small) || 0;
+              const attachQty = Number(payload.machines?.attachment) || 0;
 
-            newLedger.push({
-              id: generateId(),
-              category: "ケ",
-              amount: price,
-              quantity: 1,
-              memo: `${label}購入`
-            });
-            actionLogText = `🏗️ [機械購入] ${p.name} が ${label} を ¥${price}万 で購入しました。`;
+              const largePrice = 200; // 大型機械 200万
+              const smallPrice = 100; // 小型機械 100万
+              const attachPrice = 20; // アタッチメント 20万
+
+              const totalCost = (largeQty * largePrice) + (smallQty * smallPrice) + (attachQty * attachPrice);
+
+              newCarryover.largeMachines = (newCarryover.largeMachines || 0) + largeQty;
+              newCarryover.smallMachines = (newCarryover.smallMachines || 0) + smallQty;
+              newCarryover.attachments = (newCarryover.attachments || 0) + attachQty;
+              
+              newCarryover.machinesCount = (newCarryover.largeMachines || 0) + (newCarryover.smallMachines || 0);
+              newCarryover.machinesValue = (newCarryover.machinesValue || 0) + totalCost;
+
+              if (largeQty > 0) {
+                newLedger.push({
+                  id: generateId(),
+                  category: "ケ",
+                  amount: largeQty * largePrice,
+                  quantity: largeQty,
+                  memo: `大型機械 ${largeQty}台購入`
+                });
+              }
+              if (smallQty > 0) {
+                newLedger.push({
+                  id: generateId(),
+                  category: "ケ",
+                  amount: smallQty * smallPrice,
+                  quantity: smallQty,
+                  memo: `小型機械 ${smallQty}台購入`
+                });
+              }
+              if (attachQty > 0) {
+                newLedger.push({
+                  id: generateId(),
+                  category: "ケ",
+                  amount: attachQty * attachPrice,
+                  quantity: attachQty,
+                  memo: `アタッチメント ${attachQty}台購入`
+                });
+              }
+
+              let detailTexts = [];
+              if (largeQty > 0) detailTexts.push(`大型:${largeQty}台`);
+              if (smallQty > 0) detailTexts.push(`小型:${smallQty}台`);
+              if (attachQty > 0) detailTexts.push(`アタッチ:${attachQty}台`);
+
+              actionLogText = `🏗️ [設備投資] ${p.name} が機械設備を一括購入しました (${detailTexts.join(', ')}、合計購入額 ¥${totalCost}万)。`;
+            } else {
+              let price = 0;
+              let label = "";
+              if (payload.type === 'small') {
+                price = 100;
+                label = "小型機械";
+                newCarryover.smallMachines = (newCarryover.smallMachines || 0) + 1;
+              } else if (payload.type === 'large') {
+                price = 200;
+                label = "大型機械";
+                newCarryover.largeMachines = (newCarryover.largeMachines || 0) + 1;
+              } else if (payload.type === 'attachment') {
+                price = 20;
+                label = "アタッチメント";
+                newCarryover.attachments = (newCarryover.attachments || 0) + 1;
+              }
+              newCarryover.machinesCount = (newCarryover.largeMachines || 0) + (newCarryover.smallMachines || 0);
+              newCarryover.machinesValue = (newCarryover.machinesValue || 0) + price;
+
+              newLedger.push({
+                id: generateId(),
+                category: "ケ",
+                amount: price,
+                quantity: 1,
+                memo: `${label}購入`
+              });
+              actionLogText = `🏗️ [機械購入] ${p.name} が ${label} を ¥${price}万 で購入しました。`;
+            }
           }
           break;
 
         case "hire":
           if (isTarget) {
-            const currentProd = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 2;
-            const currentSales = newCarryover.workersSales !== undefined ? newCarryover.workersSales : 1;
-            
-            const isProd = payload.type === 'prod';
-            
-            if (isProd) {
-              newCarryover.workersProd = currentProd + 1;
+            const currentProd = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 0;
+            const currentSales = newCarryover.workersSales !== undefined ? newCarryover.workersSales : 0;
+
+            if (payload.type === 'bulk') {
+              const prodQty = Number(payload.hire?.prod) || 0;
+              const salesQty = Number(payload.hire?.sales) || 0;
+              const hireCostPerPerson = 30; // 戦略MG公式ルール: 新規採用費は30万
+
+              const totalHireCost = (prodQty + salesQty) * hireCostPerPerson;
+
+              newCarryover.workersProd = currentProd + prodQty;
+              newCarryover.workersSales = currentSales + salesQty;
+              newCarryover.workers = newCarryover.workersProd + newCarryover.workersSales;
+
+              if (totalHireCost > 0) {
+                newLedger.push({
+                  id: generateId(),
+                  category: "ソ",
+                  amount: totalHireCost,
+                  quantity: prodQty + salesQty,
+                  memo: `新規採用（ワーカー:${prodQty}名 / セールスマン:${salesQty}名）`
+                });
+              }
+
+              let detailTexts = [];
+              if (prodQty > 0) detailTexts.push(`ワーカー:${prodQty}名`);
+              if (salesQty > 0) detailTexts.push(`セールスマン:${salesQty}名`);
+
+              actionLogText = `👤 [雇用] ${p.name} が社員を新規採用しました (${detailTexts.join(', ')}、合計採用費 ¥${totalHireCost}万は「ソ」に計上)。`;
             } else {
-              newCarryover.workersSales = currentSales + 1;
+              const isProd = payload.type === 'prod';
+              if (isProd) {
+                newCarryover.workersProd = currentProd + 1;
+              } else {
+                newCarryover.workersSales = currentSales + 1;
+              }
+              newCarryover.workers = newCarryover.workersProd + newCarryover.workersSales;
+
+              newLedger.push({
+                id: generateId(),
+                category: "ソ",
+                amount: 30, // 採用時の一人当たり費用: 30万円
+                quantity: 1,
+                memo: `新規採用（${isProd ? 'ワーカー' : 'セールスマン'}）`
+              });
+              actionLogText = `👤 [雇用] ${p.name} が ${isProd ? '⚙️ワーカー' : '💼セールスマン'} を新規採用しました。(採用費¥30万は「ソ」に計上)。`;
             }
-            
-            newCarryover.workers = newCarryover.workersProd + newCarryover.workersSales;
-            
-            // ジュニア・ルール: 採用費は5万円、科目は一般管理費（ソ）
-            newLedger.push({
-              id: generateId(),
-              category: "ソ",
-              amount: 5,
-              quantity: 1,
-              memo: `新規採用（${isProd ? 'ワーカー' : 'セールスマン'}）`
-            });
-            actionLogText = `👤 [雇用] ${p.name} が ${isProd ? '⚙️ワーカー (工場職人)' : '💼セールスマン (営業員)'} を新規採用しました。(採用費¥5万は「ソ」に計上。合計: ${newCarryover.workers}人、ワーカー:${newCarryover.workersProd}人 / セールスマン:${newCarryover.workersSales}人)`;
           }
           break;
 
@@ -904,8 +992,8 @@ function App() {
         case "transfer_worker":
           if (isTarget) {
             const toType = payload.type; // 'prod' または 'sales'
-            const currentProd = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 2;
-            const currentSales = newCarryover.workersSales !== undefined ? newCarryover.workersSales : 1;
+            const currentProd = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 0;
+            const currentSales = newCarryover.workersSales !== undefined ? newCarryover.workersSales : 0;
             
             if (toType === 'prod' && currentSales > 0) {
               newCarryover.workersProd = currentProd + 1;
@@ -1381,8 +1469,8 @@ function App() {
             const machineTotal = Math.max(0, currentLarge + currentSmall + currentAttach);
 
             // 現在のワーカー数とセールスマン数を算出
-            let workersProdCount = carryover.workersProd !== undefined ? carryover.workersProd : 2;
-            let workersSalesCount = carryover.workersSales !== undefined ? carryover.workersSales : 1;
+            let workersProdCount = carryover.workersProd !== undefined ? carryover.workersProd : 0;
+            let workersSalesCount = carryover.workersSales !== undefined ? carryover.workersSales : 0;
             ledger.forEach(entry => {
               if (entry.category === 'ソ' && entry.memo?.includes('新規採用（ワーカー）')) {
                 workersProdCount += (Number(entry.quantity) || 0);
@@ -1531,8 +1619,16 @@ function App() {
 
   // ゲームの全体リセット
   const handleResetGame = () => {
-    if (window.confirm("【全データ完全初期化】\n4人のプレイヤー全員のすべてのデータを消去し、山札を再構築して第1期首からリセットしますか？\n（この操作は取り消せません）")) {
-      setPlayers(JSON.parse(JSON.stringify(INITIAL_PLAYERS)));
+    if (window.confirm(`【全データ完全初期化】\n4人のプレイヤー全員のすべてのデータを消去し、初期自己資本 ¥${initialCapital}万 にて山札を再構築して第1期首からリセットしますか？\n（この操作は取り消せません）`)) {
+      const resetPlayers = JSON.parse(JSON.stringify(INITIAL_PLAYERS)).map(p => {
+        // 設定された初期自己資本を注入
+        p.periods[1].carryover.capital = initialCapital;
+        p.periods[1].carryover.cash = initialCapital;
+        p.periods[1].actuals.actualCash = initialCapital;
+        return p;
+      });
+      
+      setPlayers(resetPlayers);
       setCommonPeriod(1);
       setCommonTurn(0);
       setDeck(generateShuffledDeck());
@@ -1971,6 +2067,41 @@ function App() {
                       </div>
                     </div>
 
+                  </div>
+                </div>
+
+                {/* C. 初期自己資本設定 */}
+                <div className="glass-card" style={{ marginBottom: 0 }}>
+                  <div className="card-title-bar">
+                    <h3 className="card-title" style={{ color: 'var(--color-yellow)' }}>👑 戦略MG 新規ゲーム初期自己資本設定</h3>
+                  </div>
+                  <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                      ゲームリセット時に、プレイヤー4社全員に適用される「第1期首の初期自己資本（資本金 ＝ 現金預金）」を設定します。(戦略MG標準は ¥300万 です)
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                      <div className="form-group" style={{ width: '200px', marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>初期自己資本（万円）</label>
+                        <input 
+                          type="number" 
+                          className="form-input" 
+                          style={{ fontSize: '0.9rem', padding: '8px', fontWeight: 'bold', color: 'var(--color-yellow)', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-light)' }} 
+                          value={initialCapital} 
+                          min="100"
+                          max="2000"
+                          step="50"
+                          onChange={(e) => setInitialCapital(Math.max(100, Number(e.target.value)))} 
+                        />
+                      </div>
+                      
+                      <button 
+                        className="btn btn-danger animate-pulse" 
+                        style={{ height: '38px', marginTop: '16px', fontSize: '0.82rem', fontWeight: 'bold', border: 'none', background: 'linear-gradient(135deg, #ff416c, #ff4b2b)', cursor: 'pointer' }}
+                        onClick={handleResetGame}
+                      >
+                        ⚠️ 設定値を反映して新規ゲームをリセット ⚡
+                      </button>
+                    </div>
                   </div>
                 </div>
 
