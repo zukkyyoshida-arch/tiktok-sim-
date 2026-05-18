@@ -44,6 +44,7 @@ function DigitalBoard({
   
   // 新規追加ルールB用パラメータ
   const [chipType, setChipType] = useState('insurance'); // 'insurance' | 'pac' | 'merchandiser' | 'research'
+  const [selectedChips, setSelectedChips] = useState([]); // 一括チップ購入用配列
   const [transferTo, setTransferTo] = useState('prod'); // 'prod' (ワーカーへ) または 'sales' (セールスマンへ)
   const [sellMachineType, setSellMachineType] = useState('small'); // 'small' | 'large' | 'attachment'
   const [repayAmount, setRepayAmount] = useState(50);
@@ -918,28 +919,85 @@ function DigitalBoard({
                                   </div>
                                 )}
 
-                                {selectedActionType === 'buy_chip' && (
-                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
-                                    <div className="form-group" style={{ width: '220px' }}>
-                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>購入するチップ</label>
-                                      <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={chipType} onChange={(e) => setChipType(e.target.value)}>
-                                        <option value="insurance">🛡️ 保険 (黄) - ¥5万 (一般管理費ソ)</option>
-                                        <option value="pac">🟢 PAC生産性 (緑) - ¥10万 (製造経費ス)</option>
-                                        <option value="merchandiser">🟢 マーチャンダイザー (緑) - ¥10万 (一般管理費ソ)</option>
-                                        <option value="research">🟢 マーケットリサーチ (緑) - ¥10万 (販売費セ)</option>
-                                      </select>
+                                {selectedActionType === 'buy_chip' && (() => {
+                                  const chipsList = [
+                                    { id: 'insurance', label: '🛡️ 保険 (黄)', price: 5, category: '一般管理費ソ', has: activePlayer.hasInsurance, desc: '火災時に16万、盗難時に10万の保険金を受領し、チップは消費されます' },
+                                    { id: 'pac', label: '🟢 PAC生産性 (緑)', price: 10, category: '製造経費ス', has: activePlayer.hasPac, desc: '工場稼働時に「稼働機械総数 × 1」個生産能力がプラスされます（1枚制限）' },
+                                    { id: 'merchandiser', label: '🟢 マーチャンダイザー (緑)', price: 10, category: '一般管理費ソ', has: activePlayer.hasMerchandiser, desc: '入札競争時に優先落札されます（1枚制限）' },
+                                    { id: 'research', label: '🟢 マーケットリサーチ (緑)', price: 10, category: '販売費セ', has: activePlayer.hasResearch, desc: 'オークション落札時に単価が+2万ブーストされます（1枚制限）' }
+                                  ];
+
+                                  const handleToggleChip = (cid) => {
+                                    setSelectedChips(prev => 
+                                      prev.includes(cid) ? prev.filter(x => x !== cid) : [...prev, cid]
+                                    );
+                                  };
+
+                                  return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', fontWeight: 'bold' }}>
+                                        🟡 チップの一括一斉購入 (購入するチップにチェックを入れてください):
+                                      </span>
+                                      
+                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', width: '100%' }}>
+                                        {chipsList.map(chip => (
+                                          <div 
+                                            key={chip.id} 
+                                            onClick={() => !chip.has && handleToggleChip(chip.id)}
+                                            style={{
+                                              background: chip.has ? 'rgba(255,255,255,0.02)' : selectedChips.includes(chip.id) ? 'rgba(0, 242, 254, 0.08)' : 'rgba(0,0,0,0.2)',
+                                              border: chip.has ? '1px solid rgba(255,255,255,0.05)' : selectedChips.includes(chip.id) ? '1px solid var(--color-cyan)' : '1px solid rgba(255,255,255,0.08)',
+                                              padding: '12px',
+                                              borderRadius: '8px',
+                                              cursor: chip.has ? 'not-allowed' : 'pointer',
+                                              display: 'flex',
+                                              gap: '10px',
+                                              alignItems: 'start',
+                                              transition: 'all 0.2s',
+                                              opacity: chip.has ? 0.6 : 1
+                                            }}
+                                          >
+                                            <input 
+                                              type="checkbox" 
+                                              checked={chip.has || selectedChips.includes(chip.id)}
+                                              disabled={chip.has}
+                                              onChange={() => {}} // 親divのクリックでハンドリング
+                                              style={{ marginTop: '3px', cursor: chip.has ? 'not-allowed' : 'pointer' }}
+                                            />
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%' }}>
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <strong style={{ fontSize: '0.8rem', color: chip.has ? 'var(--text-muted)' : '#fff' }}>{chip.label}</strong>
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--color-yellow)', fontWeight: 'bold' }}>
+                                                  {chip.has ? '所有中' : `¥${chip.price}万`}
+                                                </span>
+                                              </div>
+                                              <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', lineHeight: '1.3' }}>{chip.desc}</span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '15px', marginTop: '5px', borderTop: '1px dashed var(--border-light)', paddingTop: '10px' }}>
+                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                                          合計購入額: <strong style={{ color: 'var(--color-cyan)', fontSize: '0.88rem' }}>
+                                            ¥{selectedChips.reduce((sum, cid) => sum + (chipsList.find(c => c.id === cid)?.price || 0), 0)}万
+                                          </strong>
+                                        </span>
+                                        <button 
+                                          className="btn btn-primary" 
+                                          disabled={selectedChips.length === 0}
+                                          onClick={() => {
+                                            onExecuteAction("buy_chip", { chipTypes: selectedChips });
+                                            setSelectedChips([]);
+                                          }}
+                                          style={{ fontSize: '0.82rem', padding: '6px 16px', fontWeight: 'bold' }}
+                                        >
+                                          🛒 選択したチップを一斉購入する
+                                        </button>
+                                      </div>
                                     </div>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("buy_chip", { chipType })}>
-                                      チップ購入 🟡
-                                    </button>
-                                    <div style={{ width: '100%', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
-                                      ※ 保険（黄）: 火災時に16万、盗難時に10万の保険金を受領し、チップは国庫に戻ります。<br />
-                                      ※ PAC生産性（緑）: 工場稼働時に「稼働機械総数 × 1」個生産能力がプラスされます（1枚制限）。<br />
-                                      ※ マーチャンダイザー（緑）: 入札競争力で優位に立ちます（1枚制限）。<br />
-                                      ※ マーケットリサーチ（緑）: オークション落札時に単価が+2万ブーストされます（1枚制限、市場上限内）。
-                                    </div>
-                                  </div>
-                                )}
+                                  );
+                                })()}
 
                                 {selectedActionType === 'transfer_worker' && (
                                   <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>

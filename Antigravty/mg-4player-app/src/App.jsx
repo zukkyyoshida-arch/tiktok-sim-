@@ -856,42 +856,48 @@ function App() {
 
         case "buy_chip":
           if (isTarget) {
-            const chipType = payload.chipType;
-            let price = 0;
-            let category = "ソ";
-            let label = "";
-            
-            if (chipType === 'insurance') {
-              price = 5;
-              category = "ソ"; // 保険: 一般管理費
-              label = "保険 (黄チップ)";
-              p.hasInsurance = true;
-            } else if (chipType === 'pac') {
-              price = 10;
-              category = "ス"; // PAC生産性: 製造経費
-              label = "PAC生産性 (緑チップ)";
-              p.hasPac = true;
-            } else if (chipType === 'merchandiser') {
-              price = 10;
-              category = "ソ"; // マーチャンダイザー: 一般管理費
-              label = "マーチャンダイザー (緑チップ)";
-              p.hasMerchandiser = true;
-            } else if (chipType === 'research') {
-              price = 10;
-              category = "セ"; // マーケットリサーチ: 販売費
-              label = "マーケットリサーチ (緑チップ)";
-              p.hasResearch = true;
+            const selectedChips = payload.chipTypes || (payload.chipType ? [payload.chipType] : []);
+            if (selectedChips.length > 0) {
+              let detailTexts = [];
+              selectedChips.forEach(chipType => {
+                let price = 0;
+                let category = "ソ";
+                let label = "";
+                
+                if (chipType === 'insurance') {
+                  price = 5;
+                  category = "ソ"; // 保険: 一般管理費
+                  label = "保険 (黄チップ)";
+                  p.hasInsurance = true;
+                } else if (chipType === 'pac') {
+                  price = 10;
+                  category = "ス"; // PAC生産性: 製造経費
+                  label = "PAC生産性 (緑チップ)";
+                  p.hasPac = true;
+                } else if (chipType === 'merchandiser') {
+                  price = 10;
+                  category = "ソ"; // マーチャンダイザー: 一般管理費
+                  label = "マーチャンダイザー (緑チップ)";
+                  p.hasMerchandiser = true;
+                } else if (chipType === 'research') {
+                  price = 10;
+                  category = "セ"; // マーケットリサーチ: 販売費
+                  label = "マーケットリサーチ (緑チップ)";
+                  p.hasResearch = true;
+                }
+                
+                newLedger.push({
+                  id: generateId(),
+                  category: category,
+                  amount: price,
+                  quantity: 1,
+                  memo: `${label}購入`
+                });
+                detailTexts.push(`${label} (¥${price}万/「${category}」)`);
+              });
+              
+              actionLogText = `🟡 [チップ購入] ${p.name} が【${detailTexts.join('、')}】を一斉購入しました。`;
             }
-            
-            newLedger.push({
-              id: generateId(),
-              category: category,
-              amount: price,
-              quantity: 1,
-              memo: `${label}購入`
-            });
-            
-            actionLogText = `🟡 [チップ購入] ${p.name} が ${label} を ¥${price}万 で購入しました。(科目:「${category}」)`;
           }
           break;
 
@@ -1867,21 +1873,42 @@ function App() {
             )}
 
             {activeTab === 'periodEnd' && (
-              <PeriodEndWizard 
-                players={players}
-                commonPeriod={commonPeriod}
-                carryover={currentData.carryover}
-                ledger={currentData.ledger}
-                actuals={currentData.actuals}
-                onUpdateActuals={(newActuals) => setPlayers(prev => prev.map((p, idx) => {
-                  if (idx !== activePlayerIdx) return p;
-                  return {
-                    ...p,
-                    periods: { ...p.periods, [p.currentPeriod]: { ...p.periods[p.currentPeriod], actuals: newActuals } }
-                  };
-                }))}
-                results={results}
-              />
+              (!currentData.ledger || currentData.ledger.length === 0) ? (
+                <div className="glass-card" style={{ textAlign: 'center', padding: '40px 20px', border: '1px solid rgba(255, 56, 56, 0.2)', boxShadow: '0 0 25px rgba(255,56,56,0.05)', maxWidth: '600px', margin: '30px auto' }}>
+                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: '15px' }}>⚠️</span>
+                  <h3 style={{ color: 'var(--color-red)', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '10px' }}>
+                    期末決算処理を行えません
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '25px' }}>
+                    まだ今期のゲーム（取引）が開始されていないか、出納帳への起票履歴がありません。<br />
+                    期末決算は、ゲームをプレイしてターンを完了した後に実行可能です。<br />
+                    まずは<strong>「ゲーム盤」</strong>へ移動し、カードをドローして経営を進めましょう！
+                  </p>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setActiveTab('gameboard')}
+                    style={{ background: 'linear-gradient(135deg, var(--color-cyan), var(--color-purple))', border: 'none', color: '#000', fontWeight: 'bold', padding: '8px 25px', borderRadius: '6px' }}
+                  >
+                    🎮 ゲーム盤へ移動する
+                  </button>
+                </div>
+              ) : (
+                <PeriodEndWizard 
+                  players={players}
+                  commonPeriod={commonPeriod}
+                  carryover={currentData.carryover}
+                  ledger={currentData.ledger}
+                  actuals={currentData.actuals}
+                  onUpdateActuals={(newActuals) => setPlayers(prev => prev.map((p, idx) => {
+                    if (idx !== activePlayerIdx) return p;
+                    return {
+                      ...p,
+                      periods: { ...p.periods, [p.currentPeriod]: { ...p.periods[p.currentPeriod], actuals: newActuals } }
+                    };
+                  }))}
+                  results={results}
+                />
+              )
             )}
 
             {activeTab === 'settings' && (

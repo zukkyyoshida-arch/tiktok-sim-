@@ -86,7 +86,33 @@ export const CARD_DECK_TEMPLATE = [
  * デッキをシャッフル生成
  */
 export function generateShuffledDeck() {
-  const deck = [...CARD_DECK_TEMPLATE];
+  const deck = [];
+  
+  // 150枚の意思決定カード (Decision) を生成
+  for (let i = 1; i <= 150; i++) {
+    deck.push({
+      id: `d_${i}`,
+      title: `経営意思決定カード (Decision) #${i}`,
+      category: CARD_CATEGORIES.DECISION,
+      description: "あなたが経営者として、次の経営戦略アクション（仕入・製造・販売・雇用・投資等）を自由に選択して実行できます。",
+      color: "#00f2fe",
+      icon: "🧠"
+    });
+  }
+
+  // 50枚のリスクカード (Risk) を生成
+  for (let i = 1; i <= 50; i++) {
+    deck.push({
+      id: `r_${i}`,
+      title: `⚠️ リスク・偶発イベント (Risk) #${i}`,
+      category: CARD_CATEGORIES.RISK,
+      description: "突発的な市場変動やアクシデントが発生！めくった瞬間にランダムなイベントが確定し、強制適用されます。",
+      color: "#ff3838",
+      icon: "🎲"
+    });
+  }
+
+  // シャッフル
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
