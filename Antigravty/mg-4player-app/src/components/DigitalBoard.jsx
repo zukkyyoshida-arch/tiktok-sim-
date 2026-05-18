@@ -276,9 +276,9 @@ function DigitalBoard({
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      gap: '16px', 
-      height: 'calc(100vh - 100px)', 
-      overflowY: 'auto',
+      gap: '20px', 
+      height: 'auto', 
+      minWidth: '1250px',
       padding: '10px 5px'
     }}>
 
@@ -370,7 +370,7 @@ function DigitalBoard({
         display: 'grid',
         gridTemplateColumns: '1.25fr 1fr',
         gap: '16px',
-        minHeight: '260px'
+        minHeight: '290px'
       }}>
         
         {/* A. 日本全国6大都市市場 (左側) */}
@@ -393,7 +393,7 @@ function DigitalBoard({
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    minHeight: '150px',
+                    minHeight: '175px',
                     boxShadow: isNoMaterials ? 'none' : '0 4px 12px rgba(0,0,0,0.25)',
                     transition: 'all 0.3s ease'
                   }}
@@ -1137,15 +1137,15 @@ function DigitalBoard({
                 className="glass-card" 
                 style={{ 
                   margin: 0, 
-                  padding: '14px',
+                  padding: '16px',
                   border: isActive ? `3px solid ${p.color}` : '1.5px solid var(--border-light)',
-                  boxShadow: isActive ? `0 0 15px ${p.color}45` : 'none',
-                  background: isSelf ? 'rgba(0, 242, 254, 0.02)' : 'rgba(10, 15, 30, 0.85)',
+                  boxShadow: isActive ? `0 0 20px ${p.color}25` : 'none',
+                  background: isSelf ? 'rgba(0, 242, 254, 0.03)' : 'rgba(10, 15, 30, 0.85)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '10px',
+                  gap: '14px',
                   transition: 'all 0.3s ease',
-                  minHeight: '260px'
+                  minHeight: '390px'
                 }}
               >
                 {/* プレイヤーヘッダー情報 */}
