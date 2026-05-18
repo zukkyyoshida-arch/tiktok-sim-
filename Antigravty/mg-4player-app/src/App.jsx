@@ -292,6 +292,142 @@ function App() {
     }
   };
 
+  // --- 4社決算サマリーのCSVエクスポート ---
+  const handleExportSummaryCsv = () => {
+    try {
+      const headers = [
+        "プレイヤー名",
+        "期",
+        "自己資本",
+        "現預金",
+        "売上高(PQ)",
+        "限界利益(MQ)",
+        "固定費(F)",
+        "経常利益(G)",
+        "社員数",
+        "機械台数(大)",
+        "機械台数(小)",
+        "技術レベル",
+        "広告レベル"
+      ];
+      
+      const rows = players.map(p => {
+        const pPeriod = p.currentPeriod;
+        const periodData = p.periods[pPeriod];
+        const res = calculateFinancials(periodData.carryover, periodData.ledger, periodData.actuals);
+        
+        return [
+          p.name,
+          pPeriod,
+          res.bs.totalNetAssets,
+          res.bookEndingCash,
+          res.pl.pq,
+          res.pl.mq,
+          res.pl.f,
+          res.pl.g,
+          res.workers,
+          res.machines.large,
+          res.machines.small,
+          p.rdLevel || 0,
+          p.adLevel || 0
+        ];
+      });
+      
+      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `mg_4player_summary_period_${commonPeriod}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      playActionSound();
+      addLog("📊 4社決算サマリー（CSV）を保存しました。スプレッドシートへ転記可能です！");
+    } catch (e) {
+      console.error("Summary CSV Export failed", e);
+      alert("❌ 決算サマリーCSVの出力に失敗しました。");
+    }
+  };
+
+  // --- 自社仕訳出納帳のCSVエクスポート ---
+  const handleExportLedgerCsv = () => {
+    try {
+      const myData = players[0].periods[players[0].currentPeriod];
+      const myRes = calculateFinancials(myData.carryover, myData.ledger, myData.actuals);
+      
+      const headers = [
+        "取引No",
+        "仕訳記号",
+        "取引内容(勘定科目)",
+        "数量",
+        "単価",
+        "出金額",
+        "入金額",
+        "現金残高",
+        "摘要(メモ)"
+      ];
+      
+      let runningCash = myRes.bs.cash; // 期首現金残高
+      const rows = (myData.ledger || []).map((entry, idx) => {
+        // 出金額と入金額を判定
+        let payment = 0;
+        let receipt = 0;
+        const amount = entry.amount || 0;
+        
+        if (entry.type === "payment" || entry.memo.includes("支払") || entry.memo.includes("仕入") || entry.memo.includes("出金") || entry.memo.includes("購入")) {
+          payment = amount;
+          runningCash -= amount;
+        } else if (entry.type === "receipt" || entry.memo.includes("売上") || entry.memo.includes("入金") || entry.memo.includes("借入") || entry.memo.includes("販売") || entry.memo.includes("落札")) {
+          receipt = amount;
+          runningCash += amount;
+        } else {
+          // 不明な場合は摘要内容や金額で補正
+          if (amount > 0) {
+            if (entry.memo.includes("出納") || entry.memo.includes("記帳")) {
+              receipt = amount;
+              runningCash += amount;
+            } else {
+              payment = amount;
+              runningCash -= amount;
+            }
+          }
+        }
+        
+        return [
+          idx + 1,
+          entry.category || "-",
+          entry.account || entry.memo.split(" ")[0] || "取引",
+          entry.quantity || 0,
+          entry.price || 0,
+          payment,
+          receipt,
+          runningCash,
+          entry.memo || ""
+        ];
+      });
+      
+      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `mg_my_ledger_period_${commonPeriod}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      playActionSound();
+      addLog("✏️ 自社仕訳出納帳（CSV）を保存しました。スプレッドシートの帳簿へインポート可能です！");
+    } catch (e) {
+      console.error("Ledger CSV Export failed", e);
+      alert("❌ 出納帳CSVの出力に失敗しました。");
+    }
+  };
+
   // --- 経営データのアップロード (アジェンダ③: JSON読込) ---
   const handleLoadGameData = (event) => {
     const fileReader = new FileReader();
@@ -981,8 +1117,44 @@ function App() {
 
           <div style={{ marginTop: '15px', borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleSaveGameData}>
-              💾 経営セーブデータを保存
+              💾 JSONセーブデータを保存
             </button>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button 
+                className="btn animate-pulse-neon" 
+                style={{ 
+                  width: '100%', 
+                  fontSize: '0.72rem', 
+                  padding: '6px 2px', 
+                  background: 'rgba(5, 255, 161, 0.05)', 
+                  border: '1.5px solid var(--color-green)', 
+                  color: 'var(--color-green)',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }} 
+                onClick={handleExportSummaryCsv}
+              >
+                📊 4社決算CSV
+              </button>
+              <button 
+                className="btn animate-pulse-neon" 
+                style={{ 
+                  width: '100%', 
+                  fontSize: '0.72rem', 
+                  padding: '6px 2px', 
+                  background: 'rgba(0, 242, 254, 0.05)', 
+                  border: '1.5px solid var(--color-cyan)', 
+                  color: 'var(--color-cyan)',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }} 
+                onClick={handleExportLedgerCsv}
+              >
+                ✏️ 自社帳簿CSV
+              </button>
+            </div>
+            
             <button className="btn btn-danger" style={{ width: '100%' }} onClick={handleResetGame}>
               ⚠️ ゲームの全初期化
             </button>
