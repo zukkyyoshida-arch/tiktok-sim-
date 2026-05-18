@@ -276,10 +276,10 @@ function DigitalBoard({
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      gap: '20px', 
+      gap: '10px', 
       height: 'auto', 
       minWidth: '1250px',
-      padding: '10px 5px'
+      padding: '5px'
     }}>
 
       {/* ==================== 📢 【他社意思決定のLIVE速報ディスプレイ】(新規追加) ==================== */}
@@ -287,20 +287,20 @@ function DigitalBoard({
         className="glass-card animate-pulse-neon" 
         style={{ 
           margin: 0, 
-          padding: '12px 16px', 
+          padding: '6px 12px', 
           background: 'rgba(255, 0, 127, 0.03)', 
           border: '1.5px solid rgba(255, 0, 127, 0.35)',
-          borderRadius: '12px',
-          boxShadow: '0 0 15px rgba(255, 0, 127, 0.1)'
+          borderRadius: '10px',
+          boxShadow: '0 0 10px rgba(255, 0, 127, 0.05)'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--color-pink)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-display)' }}>
-            <span style={{ fontSize: '1.2rem', animation: 'spin-slow 4s infinite' }}>📢</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <h4 style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--color-pink)', margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-display)' }}>
+            <span style={{ fontSize: '1rem', animation: 'spin-slow 4s infinite' }}>📢</span>
             ライバル他社 意思決定＆アクション LIVE速報
           </h4>
-          <span style={{ fontSize: '0.65rem', background: 'rgba(255, 0, 127, 0.15)', color: 'var(--color-pink)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-            最新4件を掲示
+          <span style={{ fontSize: '0.6rem', background: 'rgba(255, 0, 127, 0.15)', color: 'var(--color-pink)', padding: '1px 6px', borderRadius: '3px', fontWeight: 'bold' }}>
+            最新4件
           </span>
         </div>
 
@@ -368,18 +368,18 @@ function DigitalBoard({
       {/* ==================== 【上段コモンボード】(市場マップ ✕ アクション・山札) ==================== */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1.25fr 1fr',
+        gridTemplateColumns: '1.4fr 1fr',
         gap: '16px',
-        minHeight: '290px'
+        minHeight: '190px'
       }}>
         
         {/* A. 日本全国6大都市市場 (左側) */}
-        <div className="glass-card" style={{ background: 'rgba(5, 10, 25, 0.85)', border: '1px solid var(--border-light)', margin: 0, padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: '800', margin: '0 0 12px 0', color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="glass-card" style={{ background: 'rgba(5, 10, 25, 0.85)', border: '1px solid var(--border-light)', margin: 0, padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.92rem', fontWeight: '800', margin: '0 0 6px 0', color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>🗺️</span> 全国6大主要都市市場 (コモンボード)
           </h4>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px', flexGrow: 1 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '6px', flexGrow: 1 }}>
             {Object.values(markets).map(m => {
               const isNoMaterials = m.materials === 0;
               return (
@@ -387,55 +387,54 @@ function DigitalBoard({
                   key={m.id} 
                   style={{ 
                     background: 'rgba(255,255,255,0.02)', 
-                    border: `1.5px solid ${isNoMaterials ? 'rgba(255,56,56,0.4)' : 'var(--border-light)'}`, 
-                    borderRadius: '10px', 
-                    padding: '10px', 
+                    border: `1.5px solid ${isNoMaterials ? 'rgba(255,56,56,0.3)' : 'var(--border-light)'}`, 
+                    borderRadius: '8px', 
+                    padding: '6px 5px', 
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    minHeight: '175px',
-                    boxShadow: isNoMaterials ? 'none' : '0 4px 12px rgba(0,0,0,0.25)',
+                    minHeight: '110px',
+                    boxShadow: isNoMaterials ? 'none' : '0 3px 8px rgba(0,0,0,0.15)',
                     transition: 'all 0.3s ease'
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <strong style={{ fontSize: '0.95rem', color: '#fff' }}>{m.name.replace("市場", "")}</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                      <strong style={{ fontSize: '0.8rem', color: '#fff' }}>{m.name.replace("市場", "")}</strong>
                       {m.baseFreight > 0 && (
-                        <span style={{ fontSize: '0.65rem', color: 'var(--color-pink)', fontWeight: '800', background: 'rgba(255, 0, 127, 0.1)', padding: '1px 4px', borderRadius: '3px' }}>
+                        <span style={{ fontSize: '0.58rem', color: 'var(--color-pink)', fontWeight: '800', background: 'rgba(255, 0, 127, 0.1)', padding: '1px 3px', borderRadius: '3px' }}>
                           +{m.baseFreight}
                         </span>
                       )}
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 8px', borderRadius: '6px', marginBottom: '6px' }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '3px 4px', borderRadius: '4px', marginBottom: '3px' }}>
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                         <span>残数:</span>
-                        <strong style={{ color: isNoMaterials ? 'var(--color-red)' : 'var(--color-green)', fontSize: '0.85rem' }}>
+                        <strong style={{ color: isNoMaterials ? 'var(--color-red)' : 'var(--color-green)', fontSize: '0.72rem' }}>
                           {m.materials}/{m.maxMaterials}
                         </strong>
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
                         {Array.from({ length: m.materials }).map((_, i) => (
-                          <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-green)', boxShadow: '0 0 4px var(--color-green)' }}></div>
+                          <div key={i} style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-green)', boxShadow: '0 0 3px var(--color-green)' }}></div>
                         ))}
-                        {isNoMaterials && <span style={{ fontSize: '0.65rem', color: 'var(--color-red)', fontWeight: 'bold' }}>SOLD OUT</span>}
+                        {isNoMaterials && <span style={{ fontSize: '0.58rem', color: 'var(--color-red)', fontWeight: 'bold', transform: 'scale(0.9)', display: 'block' }}>完売</span>}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ borderTop: '1px dashed var(--border-light)', paddingTop: '6px', fontSize: '0.7rem' }}>
-                    <div style={{ maxHeight: '38px', overflowY: 'hidden', color: 'var(--text-muted)' }}>
-                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>最新取引:</span>
+                  <div style={{ borderTop: '1px dashed rgba(255,255,255,0.06)', paddingTop: '3px', fontSize: '0.62rem' }}>
+                    <div style={{ maxHeight: '18px', overflowY: 'hidden', color: 'var(--text-muted)' }}>
                       {m.salesHistory && m.salesHistory.length > 0 ? (
                         m.salesHistory.slice(0, 1).map((h, i) => (
                           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '500' }}>
-                            <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '45px', color: '#fff' }}>{h.player.split(" ")[0]}</span>
-                            <span style={{ color: 'var(--color-yellow)' }}>{h.qty}@¥{h.price}</span>
+                            <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '38px', color: '#fff' }}>{h.player.split(" ")[0].slice(0, 3)}</span>
+                            <span style={{ color: 'var(--color-yellow)' }}>{h.qty}@{h.price}</span>
                           </div>
                         ))
                       ) : (
-                        <span style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>履歴なし</span>
+                        <span style={{ fontSize: '0.58rem', fontStyle: 'italic' }}>取引なし</span>
                       )}
                     </div>
                   </div>
@@ -446,49 +445,46 @@ function DigitalBoard({
         </div>
 
         {/* B. 山札 ✕ カードドロー・処理 (右側) */}
-        <div className="glass-card" style={{ border: `2.5px solid ${activePlayer.color}`, background: 'rgba(10, 15, 30, 0.95)', margin: 0, padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '20px', height: '100%', alignItems: 'center' }}>
+        <div className="glass-card" style={{ border: `2px solid ${activePlayer.color}`, background: 'rgba(10, 15, 30, 0.95)', margin: 0, padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '14px', height: '100%', alignItems: 'center' }}>
             
             {/* 左カラム: 山札ドローボタン */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', borderRight: '1px solid var(--border-light)', paddingRight: '16px', height: '100%', justifyContent: 'center' }}>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                山札残高: <strong style={{ color: '#fff', fontSize: '1rem' }}>{deckLength}</strong> 枚<br />
-                現在のターン: <strong style={{ color: 'var(--color-cyan)', fontSize: '1rem' }}>{commonTurn}T</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', borderRight: '1px solid var(--border-light)', paddingRight: '10px', height: '100%', justifyContent: 'center' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: '1.2' }}>
+                山札残: <strong style={{ color: '#fff', fontSize: '0.82rem' }}>{deckLength}</strong> 枚<br />
+                現在: <strong style={{ color: 'var(--color-cyan)', fontSize: '0.82rem' }}>{commonTurn}T</strong>
               </div>
 
               <div 
                 onClick={phase === 'draw' ? onDrawCard : null}
                 style={{ 
                   width: '100%', 
-                  height: '140px', 
-                  borderRadius: '12px', 
+                  height: '80px', 
+                  borderRadius: '8px', 
                   background: phase === 'draw' 
-                    ? `linear-gradient(135deg, ${activePlayer.color}25, #0c102b)` 
+                    ? `linear-gradient(135deg, ${activePlayer.color}15, #0c102b)` 
                     : 'rgba(255,255,255,0.01)', 
-                  border: `2px dashed ${phase === 'draw' ? activePlayer.color : 'var(--border-light)'}`,
-                  boxShadow: phase === 'draw' ? `0 0 15px ${activePlayer.color}35` : 'none',
+                  border: `1.5px dashed ${phase === 'draw' ? activePlayer.color : 'var(--border-light)'}`,
+                  boxShadow: phase === 'draw' ? `0 0 10px ${activePlayer.color}25` : 'none',
                   cursor: phase === 'draw' ? 'pointer' : 'default',
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
                   justifyContent: 'center',
                   textAlign: 'center',
-                  padding: '12px',
+                  padding: '6px',
                   transition: 'all 0.3s ease'
                 }}
               >
                 {phase === 'draw' ? (
                   <>
-                    <span style={{ fontSize: '2.5rem', marginBottom: '6px', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.3))' }}>🎴</span>
-                    <strong style={{ fontSize: '1rem', color: '#fff' }}>カードをドロー</strong>
-                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
-                      クリックして引く
-                    </span>
+                    <span style={{ fontSize: '1.4rem', marginBottom: '2px', filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.3))' }}>🎴</span>
+                    <strong style={{ fontSize: '0.75rem', color: '#fff' }}>ドロー</strong>
                   </>
                 ) : (
                   <div style={{ color: 'var(--text-muted)' }}>
-                    <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '6px' }}>🔒</span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>手番アクション中</span>
+                    <span style={{ fontSize: '1.4rem', display: 'block', marginBottom: '2px' }}>🔒</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>手番中</span>
                   </div>
                 )}
               </div>
