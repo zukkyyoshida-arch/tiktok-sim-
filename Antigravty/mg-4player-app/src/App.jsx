@@ -114,12 +114,12 @@ const INITIAL_PLAYERS = [
 ];
 
 const INITIAL_MARKETS = {
-  sapporo: { id: "sapporo", name: "札幌市場", materials: 6, maxMaterials: 8, baseFreight: 2, salesHistory: [] },
-  sendai: { id: "sendai", name: "仙台市場", materials: 6, maxMaterials: 8, baseFreight: 1, salesHistory: [] },
-  tokyo: { id: "tokyo", name: "東京市場", materials: 14, maxMaterials: 20, baseFreight: 0, salesHistory: [] },
-  nagoya: { id: "nagoya", name: "名古屋市場", materials: 6, maxMaterials: 8, baseFreight: 0, salesHistory: [] },
-  osaka: { id: "osaka", name: "大阪市場", materials: 8, maxMaterials: 12, baseFreight: 0, salesHistory: [] },
-  fukuoka: { id: "fukuoka", name: "福岡市場", materials: 6, maxMaterials: 8, baseFreight: 2, salesHistory: [] }
+  sapporo: { id: "sapporo", name: "札幌市場", materials: 3, maxMaterials: 3, baseFreight: 4, salesHistory: [] },
+  sendai: { id: "sendai", name: "仙台市場", materials: 4, maxMaterials: 4, baseFreight: 3, salesHistory: [] },
+  tokyo: { id: "tokyo", name: "東京市場", materials: 6, maxMaterials: 6, baseFreight: 0, salesHistory: [] },
+  nagoya: { id: "nagoya", name: "名古屋市場", materials: 9, maxMaterials: 9, baseFreight: 2, salesHistory: [] },
+  osaka: { id: "osaka", name: "大阪市場", materials: 13, maxMaterials: 13, baseFreight: 3, salesHistory: [] },
+  fukuoka: { id: "fukuoka", name: "福岡市場", materials: 20, maxMaterials: 20, baseFreight: 5, salesHistory: [] }
 };
 
 function App() {
@@ -171,7 +171,7 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [phase, setPhase] = useState(() => safeLocalStorage.getItem('mg4_phase_v3') || 'draw'); // draw, action, resolved
+  const [phase, setPhase] = useState(() => safeLocalStorage.getItem('mg4_phase_v3') || 'ruleB'); // ruleB, draw, action, resolved
 
   const [markets, setMarkets] = useState(() => {
     const saved = safeLocalStorage.getItem('mg4_markets_v3');
@@ -529,24 +529,54 @@ function App() {
         
         case "purchase":
           if (isTarget) {
-            newLedger.push({
-              id: generateId(),
-              category: "ツ",
-              amount: payload.qty * payload.price,
-              quantity: payload.qty,
-              memo: `材料仕入（単価:${payload.price}万 / ${INITIAL_MARKETS[payload.marketId].name}）`
-            });
-            
-            setMarkets(prevMarkets => {
-              const updated = { ...prevMarkets };
-              updated[payload.marketId] = {
-                ...updated[payload.marketId],
-                materials: Math.max(0, updated[payload.marketId].materials - payload.qty)
-              };
-              return updated;
+            const purchases = payload.purchases || {};
+            let totalQty = 0;
+            let totalAmount = 0;
+            let detailTexts = [];
+
+            Object.entries(purchases).forEach(([marketId, qty]) => {
+              if (qty <= 0) return;
+              
+              const mInfo = INITIAL_MARKETS[marketId];
+              const freight = (mInfo.baseFreight || 0) * qty; // 送料
+              const itemCost = qty * payload.price; // 材料費 (1万円/個)
+              
+              totalQty += qty;
+              totalAmount += (itemCost + freight);
+              
+              newLedger.push({
+                id: generateId(),
+                category: "ツ",
+                amount: itemCost,
+                quantity: qty,
+                memo: `材料仕入（単価:${payload.price}万 / ${mInfo.name}）`
+              });
+
+              if (freight > 0) {
+                newLedger.push({
+                  id: generateId(),
+                  category: "セ",
+                  amount: freight,
+                  quantity: 0,
+                  memo: `${mInfo.name}からの仕入運賃`
+                });
+                detailTexts.push(`${mInfo.name}から${qty}個(送料¥${freight}万)`);
+              } else {
+                detailTexts.push(`${mInfo.name}から${qty}個`);
+              }
+
+              // 全国の市場残高を減らす
+              setMarkets(prevMarkets => {
+                const updated = { ...prevMarkets };
+                updated[marketId] = {
+                  ...updated[marketId],
+                  materials: Math.max(0, updated[marketId].materials - qty)
+                };
+                return updated;
+              });
             });
 
-            actionLogText = `📥 [仕入] ${p.name} が ${INITIAL_MARKETS[payload.marketId].name} から材料を ${payload.qty} 個仕入れました (計 ¥${payload.qty * payload.price}万)`;
+            actionLogText = `📥 [仕入] ${p.name} が材料を計 ${totalQty} 個仕入れました (${detailTexts.join("、")} / 総計 ¥${totalAmount}万支出)`;
           }
           break;
 
@@ -812,11 +842,47 @@ function App() {
     if (actionLogText) {
       addLog(actionLogText);
     }
-    setPhase('resolved');
+    // もしルールBフェーズ中なら、フェーズを移行せずルールBを維持する
+    if (phase !== 'ruleB') {
+      setPhase('resolved');
+    }
   };
 
-  // AI(NPC)の手番プレイ (効果音連携)
   const handleNpcTurnPlay = () => {
+    const npcData = activePlayer.periods[activePlayer.currentPeriod];
+    const npcRes = calculateFinancials(npcData.carryover, npcData.ledger, npcData.actuals);
+
+    // --- AIのルールB（手番前アクション）フェーズ ---
+    if (phase === 'ruleB') {
+      if (!activePlayer.isNpc) return;
+
+      // 1. お金が十分（¥150万以上）かつ機械台数が少ない場合 ➔ 機械購入
+      if (npcRes.bookEndingCash >= 150 && (npcRes.machines.large + npcRes.machines.small) < 2) {
+        handleExecuteAction("buy_machine", { type: "small" });
+        setPhase('draw'); // 実行後、ドローへ移行
+        return;
+      }
+      
+      // 2. お金が十分（¥120万以上）かつ社員が3名未満の場合 ➔ 雇用
+      if (npcRes.bookEndingCash >= 120 && npcRes.workers < 3) {
+        handleExecuteAction("hire", {});
+        setPhase('draw');
+        return;
+      }
+      
+      // 3. 原料仕掛品（WIP）があり、完成できる場合 ➔ 製造完成 (加工費: ¥10万/個)
+      if (npcRes.wip.endingCount > 0 && npcRes.bookEndingCash >= 50) {
+        const qtyToProduce = Math.min(npcRes.wip.endingCount, npcRes.workers * 2);
+        handleExecuteAction("produce", { type: "complete", qty: qtyToProduce });
+        setPhase('draw');
+        return;
+      }
+      
+      // 特にやることがなければ、そのままドローへ移行
+      setPhase('draw');
+      return;
+    }
+
     if (!activePlayer.isNpc || phase !== 'action') return;
 
     if (currentCard.category === CARD_CATEGORIES.RISK) {
@@ -926,7 +992,7 @@ function App() {
     setOrderIndex(nextOrderIndex);
     setCurrentCard(null);
     setActiveRiskEvent(null);
-    setPhase('draw');
+    setPhase('ruleB');
     playActionSound(); // 次の手番切り替え音
   };
 
@@ -939,7 +1005,7 @@ function App() {
       setDeck(generateShuffledDeck());
       setCurrentCard(null);
       setActiveRiskEvent(null);
-      setPhase('draw');
+      setPhase('ruleB');
       setMarkets(JSON.parse(JSON.stringify(INITIAL_MARKETS)));
       setGameLogs(["🎲 戦略MG 新規対戦ゲームが開始しました！手番順がシャッフルされました。"]);
       
@@ -1229,6 +1295,7 @@ function App() {
                 onEndTurn={handleEndTurn}
                 onNpcPlay={handleNpcTurnPlay}
                 onNpcAuction={handleRunAuctionWithNpcs}
+                onEndRuleB={() => setPhase('draw')}
               />
             )}
 

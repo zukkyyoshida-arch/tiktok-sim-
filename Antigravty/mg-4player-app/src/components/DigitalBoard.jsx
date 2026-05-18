@@ -20,7 +20,8 @@ function DigitalBoard({
   onExecuteAction, 
   onEndTurn,
   onNpcPlay,
-  onNpcAuction
+  onNpcAuction,
+  onEndRuleB
 }) {
   const activePlayer = players[activePlayerIdx] || players[0];
   const isSelf = activePlayer.id === 0;
@@ -51,9 +52,56 @@ function DigitalBoard({
   const [revealedCounts, setRevealedCounts] = useState(0); 
   const [npcThinkingValues, setNpcThinkingValues] = useState({ 1: 20, 2: 20, 3: 20 });
 
-  // 最大購入可能数の計算
-  const selectedMarket = markets[targetMarketId] || markets.tokyo;
-  const maxPurchaseQty = Math.min(selectedMarket.materials, 6);
+  // 複数市場からの仕入数量ステート
+  const [purchaseQuantities, setPurchaseQuantities] = useState({
+    sapporo: 0,
+    sendai: 0,
+    tokyo: 0,
+    nagoya: 0,
+    osaka: 0,
+    fukuoka: 0
+  });
+
+  // 生産能力と仕入上限数（生産能力の2倍）の算出
+  const activePeriod = activePlayer.currentPeriod;
+  const pData = activePlayer.periods[activePeriod];
+  const pRes = calculateFinancials(pData.carryover, pData.ledger, pData.actuals);
+  const myMachines = pRes.machines || { large: 0, small: 0, attachment: 0 };
+  const prodCapacity = (myMachines.large * 2) + (myMachines.small * 1) + (myMachines.attachment || 0);
+  const maxAllowedQty = Math.max(2, prodCapacity * 2); // 最低でも2個は仕入可能
+
+  // 合計仕入希望数量
+  const totalPurchaseQty = Object.values(purchaseQuantities).reduce((a, b) => a + b, 0);
+
+  // 各市場の残数チェックと合計仕入希望数のバリデーション関数
+  const handleUpdatePurchaseQty = (marketId, val) => {
+    const market = markets[marketId];
+    if (!market) return;
+    
+    const qty = Math.max(0, Number(val));
+    const currentOtherTotal = Object.entries(purchaseQuantities)
+      .filter(([id]) => id !== marketId)
+      .reduce((sum, [, q]) => sum + q, 0);
+      
+    // 市場残数および全体上限（生産能力の2倍）を超えないようにクリップ
+    const allowedForThisMarket = Math.min(market.materials, maxAllowedQty - currentOtherTotal);
+    const finalQty = Math.min(qty, allowedForThisMarket);
+    
+    setPurchaseQuantities(prev => ({
+      ...prev,
+      [marketId]: finalQty
+    }));
+  };
+
+  // ルールBの時に、無効なアクションタイプが選ばれないように制御
+  useEffect(() => {
+    if (phase === 'ruleB') {
+      const invalidRuleBTypes = ['purchase', 'sale_direct', 'sale_auction'];
+      if (invalidRuleBTypes.includes(selectedActionType)) {
+        setSelectedActionType('produce');
+      }
+    }
+  }, [phase, selectedActionType]);
 
   // 他社（NPC）のアクションログのみを抽出（ゲームログからA社, B社, C社のログをフィルタ）
   const getLatestNpcLogs = () => {
@@ -379,26 +427,54 @@ function DigitalBoard({
 
             {/* 右カラム: 引いたカードと意思決定/リスク処理 */}
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-              {phase !== 'draw' && currentCard ? (
+              
+              {/* 1. ルールBフェーズまたはカードアクションフェーズ */}
+              {(phase === 'ruleB' || (phase !== 'draw' && currentCard)) ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   
-                  {/* カード基本情報表示 */}
-                  <div style={{ background: `linear-gradient(135deg, ${currentCard.color}15, rgba(10,12,22,0.95))`, border: `1.5px solid ${currentCard.color}77`, borderRadius: '10px', padding: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                        <span style={{ fontSize: '1.3rem' }}>{currentCard.icon}</span> {currentCard.title}
-                      </h4>
-                      <span className="logo-badge" style={{ background: currentCard.color, color: '#000', fontSize: '0.75rem', fontWeight: '900', padding: '3px 8px', borderRadius: '4px' }}>
-                        手番: {activePlayer.name.split(" ")[0]}
-                      </span>
+                  {/* ヘッダーカード情報 */}
+                  {phase === 'ruleB' ? (
+                    <div 
+                      className="glass-card animate-pulse-neon" 
+                      style={{ 
+                        margin: 0, 
+                        padding: '12px 16px', 
+                        background: 'rgba(0, 242, 254, 0.05)', 
+                        border: '1.5px solid var(--color-cyan)',
+                        borderRadius: '10px',
+                        boxShadow: '0 0 15px rgba(0, 242, 254, 0.15)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--color-cyan)', fontFamily: 'var(--font-display)' }}>
+                          <span style={{ fontSize: '1.3rem' }}>🔵</span> ルールB: 手番前アクション
+                        </h4>
+                        <span className="logo-badge" style={{ background: 'var(--color-cyan)', color: '#000', fontSize: '0.75rem', fontWeight: '900', padding: '3px 8px', borderRadius: '4px' }}>
+                          手番: {activePlayer.name.split(" ")[0]}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                        カードを引く前に、機械購入・雇用・製造・融資などの投資アクションを何回でも実行できます。
+                      </p>
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
-                      {currentCard.description}
-                    </p>
-                  </div>
+                  ) : (
+                    <div style={{ background: `linear-gradient(135deg, ${currentCard.color}15, rgba(10,12,22,0.95))`, border: `1.5px solid ${currentCard.color}77`, borderRadius: '10px', padding: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                          <span style={{ fontSize: '1.3rem' }}>{currentCard.icon}</span> {currentCard.title}
+                        </h4>
+                        <span className="logo-badge" style={{ background: currentCard.color, color: '#000', fontSize: '0.75rem', fontWeight: '900', padding: '3px 8px', borderRadius: '4px' }}>
+                          手番: {activePlayer.name.split(" ")[0]}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                        {currentCard.description}
+                      </p>
+                    </div>
+                  )}
 
                   {/* アクション実行パネル */}
-                  {phase === 'action' && (
+                  {(phase === 'action' || phase === 'ruleB') && (
                     <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border-light)', padding: '12px', borderRadius: '8px' }}>
                       
                       {/* A. ライバルAI (NPC) の手番の場合 */}
@@ -406,14 +482,14 @@ function DigitalBoard({
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0' }}>
                           <div>
                             <span style={{ fontSize: '0.9rem', display: 'block', fontWeight: 'bold', color: 'var(--color-yellow)' }}>
-                              🤖 AIライバルが思考しています...
+                              {phase === 'ruleB' ? '🤖 AIが手番前アクションを実行中...' : '🤖 AIライバルが思考しています...'}
                             </span>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                               ({activePlayer.difficulty.toUpperCase()} 経営AIモデル)
                             </span>
                           </div>
                           <button className="btn btn-primary" onClick={onNpcPlay} style={{ padding: '0 16px', height: '38px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                            AIのアクションを実行する ➡️
+                            {phase === 'ruleB' ? 'AIのルールBを実行 ➡️' : 'AIのアクションを実行する ➡️'}
                           </button>
                         </div>
                       ) : (
@@ -422,7 +498,7 @@ function DigitalBoard({
                         <div>
                           
                           {/* B-1. リスクカードを引いた場合 ➔ 多段階ドロー！ */}
-                          {currentCard.category === CARD_CATEGORIES.RISK ? (
+                          {phase === 'action' && currentCard.category === CARD_CATEGORIES.RISK ? (
                             activeRiskEvent ? (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ background: 'rgba(255, 56, 56, 0.08)', border: '1.5px solid rgba(255, 56, 56, 0.3)', padding: '10px', borderRadius: '8px' }}>
@@ -446,7 +522,7 @@ function DigitalBoard({
                                 <span style={{ fontSize: '2.5rem', animation: 'bounce 2s infinite' }}>🎲</span>
                                 <strong style={{ color: 'var(--color-red)', fontSize: '0.95rem' }}>偶発リスクイベントが伏せられています</strong>
                                 <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0 0 6px 0', textAlign: 'center', lineHeight: '1.4' }}>
-                                  ボタンを押して、具体的な災害・リスクイベントをドローしてください！
+                                  ボタンを押して、具体的災害・リスクイベントをドローしてください！
                                 </p>
                                 <button 
                                   className="btn btn-danger animate-pulse"
@@ -469,25 +545,27 @@ function DigitalBoard({
                             )
                           ) : (
                             
-                            // B-2. 意思決定（Decision）カードを引いた場合
+                            // B-2. 意思決定（Decision）またはルールBアクションの場合
                             <div>
                               <div style={{ marginBottom: '12px' }}>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px', fontWeight: '700' }}>
-                                  💡 意思決定アクションを選択してください:
+                                  💡 {phase === 'ruleB' ? '手番前アクションを選択してください (任意):' : '意思決定アクションを選択してください:'}
                                 </span>
                                 
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                   {[
-                                    { type: 'purchase', label: '仕入(ツ)' },
+                                    { type: 'purchase', label: '仕入(ツ)', hideOnRuleB: true },
                                     { type: 'produce', label: '製造(コサ)' },
-                                    { type: 'sale_direct', label: '直販(キ)' },
-                                    { type: 'sale_auction', label: '競合(ネ)' },
+                                    { type: 'sale_direct', label: '直販(キ)', hideOnRuleB: true },
+                                    { type: 'sale_auction', label: '競合(ネ)', hideOnRuleB: true },
                                     { type: 'buy_machine', label: '設備(ケ)' },
                                     { type: 'hire', label: '社員(シ)' },
                                     { type: 'loan', label: '融資(オ)' },
                                     { type: 'rd', label: '技術(チ)' },
                                     { type: 'ad', label: '広告(セ)' }
-                                  ].map(act => (
+                                  ]
+                                  .filter(act => phase !== 'ruleB' || !act.hideOnRuleB)
+                                  .map(act => (
                                     <button 
                                       key={act.type}
                                       onClick={() => setSelectedActionType(act.type)} 
@@ -503,40 +581,83 @@ function DigitalBoard({
                               <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
                                 
                                 {selectedActionType === 'purchase' && (
-                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
-                                    <div className="form-group" style={{ width: '150px' }}>
-                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>仕入先市場</label>
-                                      <select 
-                                        className="form-select" 
-                                        style={{ fontSize: '0.85rem', padding: '6px' }}
-                                        value={targetMarketId}
-                                        onChange={(e) => setTargetMarketId(e.target.value)}
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+                                    
+                                    {/* 動的仕入能力ステータスバー */}
+                                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                                        ⚙️ あなたの生産能力: <strong>{prodCapacity}</strong> (大:{myMachines.large}台/小:{myMachines.small}台)
+                                      </span>
+                                      <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: totalPurchaseQty > maxAllowedQty ? 'var(--color-red)' : 'var(--color-green)' }}>
+                                        仕入数量: <strong>{totalPurchaseQty}</strong> / 最大 <strong>{maxAllowedQty}</strong> 個 (生産能力の2倍まで)
+                                      </span>
+                                    </div>
+
+                                    {/* 6市場並列仕入数量カウンター */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                                      {Object.values(markets).map(m => {
+                                        const qty = purchaseQuantities[m.id] || 0;
+                                        const freight = m.baseFreight || 0;
+                                        return (
+                                          <div 
+                                            key={m.id} 
+                                            style={{ 
+                                              background: 'rgba(255,255,255,0.01)', 
+                                              border: '1px solid var(--border-light)', 
+                                              borderRadius: '6px', 
+                                              padding: '6px 10px',
+                                              display: 'flex',
+                                              justifyContent: 'space-between',
+                                              alignItems: 'center'
+                                            }}
+                                          >
+                                            <div>
+                                              <strong style={{ fontSize: '0.8rem', display: 'block', color: '#fff' }}>{m.name.replace("市場", "")}</strong>
+                                              <span style={{ fontSize: '0.65rem', color: freight > 0 ? 'var(--color-pink)' : 'var(--text-muted)' }}>
+                                                {freight > 0 ? `送料 ¥${freight}万/個` : "送料無料"} (残{m.materials})
+                                              </span>
+                                            </div>
+                                            <input 
+                                              type="number" 
+                                              className="form-input" 
+                                              style={{ 
+                                                width: '60px', 
+                                                fontSize: '0.85rem', 
+                                                padding: '4px 6px', 
+                                                textAlign: 'center', 
+                                                background: qty > 0 ? 'rgba(5, 255, 161, 0.08)' : 'rgba(255,255,255,0.01)',
+                                                border: qty > 0 ? '1px solid var(--color-green)' : '1px solid var(--border-light)',
+                                                color: qty > 0 ? 'var(--color-green)' : '#fff'
+                                              }}
+                                              min="0"
+                                              max={m.materials}
+                                              value={qty}
+                                              onChange={(e) => handleUpdatePurchaseQty(m.id, e.target.value)}
+                                            />
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+
+                                    {/* 支払額シミュレーター & 確定ボタン */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed var(--border-light)', paddingTop: '10px', marginTop: '4px' }}>
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                        材料費: ¥{totalPurchaseQty}万 + 
+                                        送料: ¥{Object.entries(purchaseQuantities).reduce((sum, [id, q]) => sum + (markets[id]?.baseFreight || 0) * q, 0)}万 
+                                        ➔ <strong style={{ color: 'var(--color-yellow)', fontSize: '0.85rem' }}>支払総額: ¥{totalPurchaseQty + Object.entries(purchaseQuantities).reduce((sum, [id, q]) => sum + (markets[id]?.baseFreight || 0) * q, 0)}万</strong>
+                                      </div>
+                                      <button 
+                                        className="btn btn-primary animate-pulse-neon"
+                                        style={{ fontSize: '0.85rem', padding: '6px 20px', fontWeight: 'bold', height: '34px' }}
+                                        onClick={() => {
+                                          onExecuteAction("purchase", { purchases: purchaseQuantities, price: 1 });
+                                          setPurchaseQuantities({ sapporo: 0, sendai: 0, tokyo: 0, nagoya: 0, osaka: 0, fukuoka: 0 });
+                                        }}
+                                        disabled={totalPurchaseQty <= 0}
                                       >
-                                        {Object.values(markets).map(m => (
-                                          <option key={m.id} value={m.id}>{m.name} (残:{m.materials})</option>
-                                        ))}
-                                      </select>
+                                        仕入一括確定 📥
+                                      </button>
                                     </div>
-                                    <div className="form-group" style={{ width: '100px' }}>
-                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>購入数量</label>
-                                      <input 
-                                        type="number" 
-                                        className="form-input" 
-                                        style={{ fontSize: '0.85rem', padding: '6px' }}
-                                        min="1" 
-                                        max={maxPurchaseQty}
-                                        value={purchaseQty}
-                                        onChange={(e) => setPurchaseQty(Math.min(maxPurchaseQty, Math.max(1, Number(e.target.value))))}
-                                      />
-                                    </div>
-                                    <button 
-                                      className="btn btn-primary"
-                                      style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }}
-                                      onClick={() => onExecuteAction("purchase", { qty: purchaseQty, price: 1, marketId: targetMarketId })}
-                                      disabled={maxPurchaseQty <= 0}
-                                    >
-                                      仕入確定 📥
-                                    </button>
                                   </div>
                                 )}
 
@@ -683,6 +804,30 @@ function DigitalBoard({
                                 )}
 
                               </div>
+
+                              {/* ルールBフェーズ中のみ表示されるドロー移行ボタン */}
+                              {phase === 'ruleB' && (
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1.5px solid var(--border-light)', paddingTop: '12px', marginTop: '12px' }}>
+                                  <button 
+                                    className="btn animate-pulse-neon" 
+                                    style={{ 
+                                      fontSize: '0.85rem', 
+                                      padding: '8px 24px', 
+                                      background: 'var(--color-pink)', 
+                                      color: '#000', 
+                                      fontWeight: '900', 
+                                      borderRadius: '6px',
+                                      boxShadow: '0 0 15px rgba(255, 0, 127, 0.4)',
+                                      border: 'none',
+                                      cursor: 'pointer'
+                                    }} 
+                                    onClick={onEndRuleB}
+                                  >
+                                    🃏 意思決定カードを引くへ進む ➡️
+                                  </button>
+                                </div>
+                              )}
+
                             </div>
                           )}
 
