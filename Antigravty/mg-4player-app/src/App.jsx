@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { calculateFinancials, DEFAULT_PERIOD_DATA } from './utils/calculations';
 import { generateShuffledDeck, CARD_CATEGORIES, drawRandomRiskEvent } from './utils/cards';
 import { decideNpcAction, decideNpcBid, DIFFICULTY_LEVELS } from './utils/npcAi';
+import { 
+  playDrawSound, 
+  playActionSound, 
+  playRiskWarningSound, 
+  playRiskConfirmSound, 
+  playFanfareSound,
+  setSoundEnabled,
+  getSoundEnabled
+} from './utils/soundEffects';
+
 import GlobalDashboard from './components/GlobalDashboard';
 import DigitalBoard from './components/DigitalBoard';
 import CashLedger from './components/CashLedger';
@@ -182,6 +192,12 @@ function App() {
   });
 
   const [activeTab, setActiveTab] = useState('gameboard');
+  
+  // 効果音設定のロード
+  const [soundOn, setSoundOn] = useState(() => {
+    const saved = safeLocalStorage.getItem('mg4_sound_on_v3');
+    return saved !== 'false'; // デフォルト true
+  });
 
   // --- 自動セーブ ---
   useEffect(() => {
@@ -225,6 +241,12 @@ function App() {
     safeLocalStorage.setItem('mg4_theme_v3', theme);
   }, [theme]);
 
+  // 効果音設定の適用
+  useEffect(() => {
+    setSoundEnabled(soundOn);
+    safeLocalStorage.setItem('mg4_sound_on_v3', String(soundOn));
+  }, [soundOn]);
+
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
@@ -238,7 +260,75 @@ function App() {
     setGameLogs(prev => [msg, ...prev].slice(0, 100));
   };
 
-  // --- ドロー処理 (多段階リスクドロー対応) ---
+  // --- 経営データのダウンロード (アジェンダ③: JSON保存) ---
+  const handleSaveGameData = () => {
+    try {
+      const saveData = {
+        version: "mg_dx_v3",
+        timestamp: new Date().toISOString(),
+        players,
+        turnOrder,
+        orderIndex,
+        commonPeriod,
+        commonTurn,
+        deck,
+        markets,
+        gameLogs
+      };
+      
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(saveData, null, 2))}`;
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", jsonString);
+      downloadAnchor.setAttribute("download", `mg_save_period_${commonPeriod}_turn_${commonTurn}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      
+      playActionSound();
+      addLog("💾 経営セーブデータ（JSON）のダウンロードを出力しました。");
+    } catch (e) {
+      console.error("Save failed", e);
+      alert("❌ セーブデータの書き出しに失敗しました。");
+    }
+  };
+
+  // --- 経営データのアップロード (アジェンダ③: JSON読込) ---
+  const handleLoadGameData = (event) => {
+    const fileReader = new FileReader();
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    fileReader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.version === "mg_dx_v3" && Array.isArray(parsed.players)) {
+          setPlayers(parsed.players);
+          setTurnOrder(parsed.turnOrder);
+          setOrderIndex(parsed.orderIndex);
+          setCommonPeriod(parsed.commonPeriod);
+          setCommonTurn(parsed.commonTurn);
+          setDeck(parsed.deck);
+          setMarkets(parsed.markets);
+          setGameLogs(parsed.gameLogs);
+          
+          setCurrentCard(null);
+          setActiveRiskEvent(null);
+          setPhase('draw');
+          
+          playFanfareSound();
+          addLog("📥 経営セーブデータ（JSON）が完全に復元されました！ゲームを再開します。");
+          alert("🎉 経営データの読み込みに成功しました！");
+        } else {
+          alert("❌ 無効なセーブデータ形式です。バージョンまたはフォーマットが一致しません。");
+        }
+      } catch (err) {
+        alert("❌ JSONファイルの解析に失敗しました。ファイルが破損している可能性があります。");
+      }
+    };
+    fileReader.readAsText(file);
+  };
+
+  // --- ドロー処理 (効果音追加) ---
   const handleDrawCard = () => {
     if (phase !== 'draw') return;
     
@@ -254,11 +344,13 @@ function App() {
     
     setCurrentCard(card);
     setPhase('action');
-    setActiveRiskEvent(null); // リスクは後から引くため最初はnull
+    setActiveRiskEvent(null);
 
     if (card.category === CARD_CATEGORIES.RISK) {
+      playRiskWarningSound(); // 🚨 リスク警告音
       addLog(`🚨 ${activePlayer.name} は [リスクカード] をドロー！(コマンドを実行して、具体的なリスクイベントを引いてください)`);
     } else {
+      playDrawSound(); // 🎴 ドロー音
       addLog(`🧠 ${activePlayer.name} は [意思決定カード (Decision)] をドローしました！自由なアクションを選択できます。`);
     }
   };
@@ -269,12 +361,14 @@ function App() {
 
     const riskEvent = drawRandomRiskEvent();
     setActiveRiskEvent(riskEvent);
+    playRiskConfirmSound(); // 💥 開封の災害確定音！
     addLog(`🎲 リスクカードを開封 ➔ 💥【${riskEvent.title}】が確定しました！`);
   };
 
-  // アクション適用処理
+  // アクション適用処理 (効果音適用)
   const handleExecuteAction = (type, payload) => {
     let actionLogText = "";
+    let isRiskAction = type.startsWith("risk_");
 
     setPlayers(prev => prev.map((p, idx) => {
       const isTarget = idx === activePlayerIdx;
@@ -570,30 +664,37 @@ function App() {
       };
     }));
 
+    // 効果音再生
+    if (isRiskAction) {
+      playRiskConfirmSound();
+    } else if (type === "sale_auction") {
+      playFanfareSound();
+    } else {
+      playActionSound();
+    }
+
     if (actionLogText) {
       addLog(actionLogText);
     }
     setPhase('resolved');
   };
 
-  // AI(NPC)の手番プレイ
+  // AI(NPC)の手番プレイ (効果音連携)
   const handleNpcTurnPlay = () => {
     if (!activePlayer.isNpc || phase !== 'action') return;
 
-    // AIも多段階ドローに対応：リスクカードだった場合はまずリスクイベントをドローする！
     if (currentCard.category === CARD_CATEGORIES.RISK) {
       if (!activeRiskEvent) {
-        // まだ引いていなければ、まずリスクイベントを引き当てる！
         const riskEvent = drawRandomRiskEvent();
         setActiveRiskEvent(riskEvent);
+        playRiskConfirmSound(); // AIもリスク決定音
         addLog(`🎲 AIライバル ${activePlayer.name} がリスクカードを開封 ➔ 💥【${riskEvent.title}】`);
-        return; // 次のタップ、または処理で適用へ
+        return;
       }
       handleExecuteAction(activeRiskEvent.actionType, {});
       return;
     }
 
-    // 意思決定（Decision）カードの場合
     const npcResults = calculateFinancials(currentData.carryover, currentData.ledger, currentData.actuals);
     const marketList = Object.values(markets);
     const availableMarket = marketList.find(m => m.materials > 0) || marketList[2];
@@ -616,6 +717,7 @@ function App() {
         finalPayload = {};
       } else {
         addLog(`💤 [パス] ${activePlayer.name} は何もしない（パス）を選択しました。`);
+        playActionSound();
         setPhase('resolved');
         return;
       }
@@ -624,7 +726,7 @@ function App() {
     handleExecuteAction(finalType, finalPayload);
   };
 
-  // AI対戦オークション
+  // AI対戦オークション (効果音連携)
   const handleRunAuctionWithNpcs = (yourBidPrice, qty, marketId) => {
     const bids = {};
     players.forEach((p, idx) => {
@@ -689,6 +791,7 @@ function App() {
     setCurrentCard(null);
     setActiveRiskEvent(null);
     setPhase('draw');
+    playActionSound(); // 次の手番切り替え音
   };
 
   // ゲームの全体リセット
@@ -708,6 +811,7 @@ function App() {
       setTurnOrder(newOrder);
       setOrderIndex(0);
 
+      playFanfareSound();
       setActiveTab('gameboard');
     }
   };
@@ -770,6 +874,7 @@ function App() {
           }
         };
       }));
+      playActionSound();
       addLog(`⚙️ ${p.name} の第${p.currentPeriod}期首データ引継ぎが完了しました。`);
     }
   };
@@ -780,7 +885,7 @@ function App() {
         <div className="header-logo">
           <span className="logo-icon">🎰</span>
           <span className="logo-text">戦略MG 1人プレイDX</span>
-          <span className="logo-badge">正規ルール準拠</span>
+          <span className="logo-badge">Premium DX v3</span>
         </div>
 
         <nav className="tab-navigation">
@@ -823,11 +928,26 @@ function App() {
             onClick={() => setActiveTab('settings')} 
             className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
           >
-            ⚙️ 期首設定・NPC難易度
+            ⚙️ 設定・期首データ
           </button>
         </nav>
 
         <div className="header-controls">
+          {/* 効果音クイックスイッチ */}
+          <button 
+            onClick={() => setSoundOn(!soundOn)} 
+            className="btn" 
+            style={{ 
+              padding: '0 12px', 
+              height: '36px', 
+              marginRight: '8px',
+              border: `1px solid ${soundOn ? 'var(--color-cyan)' : 'var(--border-light)'}`,
+              color: soundOn ? 'var(--color-cyan)' : 'var(--text-secondary)'
+            }}
+          >
+            {soundOn ? '🔊 音ON' : '🔇 音OFF'}
+          </button>
+          
           <button onClick={toggleTheme} className="btn" aria-label="Toggle theme" style={{ padding: '0 12px', height: '36px' }}>
             {theme === 'dark' ? '☀️ ライト' : '🌙 ダーク'}
           </button>
@@ -859,7 +979,10 @@ function App() {
             ))}
           </div>
 
-          <div style={{ marginTop: '15px', borderTop: '1px solid var(--border-light)', paddingTop: '15px' }}>
+          <div style={{ marginTop: '15px', borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleSaveGameData}>
+              💾 経営セーブデータを保存
+            </button>
             <button className="btn btn-danger" style={{ width: '100%' }} onClick={handleResetGame}>
               ⚠️ ゲームの全初期化
             </button>
@@ -871,7 +994,13 @@ function App() {
             <div className="active-player-banner">
               <span 
                 className="player-avatar" 
-                style={{ background: activePlayer.color, width: '36px', height: '36px', fontSize: '1.1rem' }}
+                style={{ 
+                  background: activePlayer.color, 
+                  width: '36px', 
+                  height: '36px', 
+                  fontSize: '1.1rem',
+                  boxShadow: `0 0 12px ${activePlayer.color}` // プレミアムネオン発光エフェクト！
+                }}
               >
                 {activePlayer.name.charAt(0)}
               </span>
@@ -922,7 +1051,7 @@ function App() {
                 phase={phase}
                 markets={markets}
                 onDrawCard={handleDrawCard}
-                onDrawRiskEvent={handleDrawRiskEvent} // 追加したドローコマンド
+                onDrawRiskEvent={handleDrawRiskEvent}
                 onExecuteAction={handleExecuteAction}
                 onEndTurn={handleEndTurn}
                 onNpcPlay={handleNpcTurnPlay}
@@ -986,6 +1115,68 @@ function App() {
 
             {activeTab === 'settings' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {/* A. プレミアム環境設定 (セーブロード・効果音) */}
+                <div className="glass-card" style={{ marginBottom: 0 }}>
+                  <div className="card-title-bar">
+                    <h3 className="card-title" style={{ color: 'var(--color-cyan)' }}>💾 経営セーブデータ ✕ 環境設定</h3>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginTop: '15px' }}>
+                    
+                    <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-light)', padding: '15px', borderRadius: '10px' }}>
+                      <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: '700', marginBottom: '10px' }}>💾 クラウド形式ローカルセーブ・ロード</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>
+                        現在の経営データ（4社の出納帳、設備、山札、全国の市場残数）をファイルに保存して、いつでも同じ状態から再開できます。
+                      </p>
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <button className="btn btn-primary" onClick={handleSaveGameData} style={{ fontSize: '0.8rem' }}>
+                          💾 経営データを保存 (JSON)
+                        </button>
+                        
+                        <div style={{ position: 'relative', overflow: 'hidden', display: 'inline-block' }}>
+                          <button className="btn btn-success" style={{ fontSize: '0.8rem' }}>
+                            📥 データを読込 (JSON)
+                          </button>
+                          <input 
+                            type="file" 
+                            accept=".json"
+                            onChange={handleLoadGameData}
+                            style={{ 
+                              position: 'absolute', 
+                              left: 0, 
+                              top: 0, 
+                              opacity: 0, 
+                              cursor: 'pointer',
+                              width: '100%',
+                              height: '100%' 
+                            }} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-light)', padding: '15px', borderRadius: '10px' }}>
+                      <h4 style={{ color: '#fff', fontSize: '0.9rem', fontWeight: '700', marginBottom: '10px' }}>🎵 音響・SE設定 (Web Audio API 自作シンセ)</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>
+                        カードドロー音、意思決定ポチッ音、落札時のファンファーレ音、リスクの災害効果音など、MGの臨場感を高めるレトロシンセ効果音の設定です。
+                      </p>
+                      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={soundOn} 
+                            onChange={(e) => setSoundOn(e.target.checked)} 
+                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                          />
+                          経営効果音 (SE) を有効にする
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* B. NPC難易度設定 */}
                 <div className="glass-card" style={{ marginBottom: 0 }}>
                   <div className="card-title-bar">
                     <h3 className="card-title" style={{ color: 'var(--color-cyan)' }}>🤖 NPCライバルAI難易度設定</h3>

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CARD_CATEGORIES } from '../utils/cards';
 import { calculateFinancials } from '../utils/calculations';
+import { decideNpcBid } from '../utils/npcAi';
+import { playActionSound, playRiskConfirmSound, playFanfareSound } from '../utils/soundEffects';
 
 function DigitalBoard({ 
   players, 
@@ -13,7 +15,7 @@ function DigitalBoard({
   phase, 
   markets, 
   onDrawCard, 
-  onDrawRiskEvent, // 新しく追加されたリスクドローイベント
+  onDrawRiskEvent, 
   onExecuteAction, 
   onEndTurn,
   onNpcPlay,
@@ -26,9 +28,9 @@ function DigitalBoard({
   const [selectedActionType, setSelectedActionType] = useState('purchase'); // purchase, produce, sale_direct, buy_machine, hire, loan, rd, ad
 
   // アクション用パラメータ
-  const [targetMarketId, setTargetMarketId] = useState('tokyo'); // デフォルトは東京市場
+  const [targetMarketId, setTargetMarketId] = useState('tokyo'); 
   const [purchaseQty, setPurchaseQty] = useState(1);
-  const [produceType, setProduceType] = useState('input'); // input (コ), complete (サ)
+  const [produceType, setProduceType] = useState('input'); 
   const [produceQty, setProduceQty] = useState(1);
   const [directSalePrice, setDirectSalePrice] = useState(25);
   const [directSaleQty, setDirectSaleQty] = useState(1);
@@ -39,13 +41,104 @@ function DigitalBoard({
   const [yourBidPrice, setYourBidPrice] = useState(26);
   const [auctionQty, setAuctionQty] = useState(2);
 
+  // === 【アジェンダ②】オークションアリーナ特設演出用ステート ===
+  const [arenaOpen, setArenaOpen] = useState(false);
+  const [arenaState, setArenaState] = useState('thinking'); // thinking ➔ reveal ➔ done
+  const [arenaBids, setArenaBids] = useState({});
+  const [arenaWinnerIdx, setArenaWinnerIdx] = useState(-1);
+  const [arenaWinnerPrice, setArenaWinnerPrice] = useState(-1);
+  const [revealedCounts, setRevealedCounts] = useState(0); // 順次反転表示用
+  const [npcThinkingValues, setNpcThinkingValues] = useState({ 1: 20, 2: 20, 3: 20 });
+
   // 最大購入可能数の計算
   const selectedMarket = markets[targetMarketId] || markets.tokyo;
   const maxPurchaseQty = Math.min(selectedMarket.materials, 6);
 
-  const handleApplyYourAuction = () => {
+  // オークションアリーナ起動・対戦演出
+  const handleStartAuctionArena = () => {
     if (yourBidPrice <= 0 || auctionQty <= 0) return;
+    
+    // アリーナを開く
+    setArenaOpen(true);
+    setArenaState('thinking');
+    setRevealedCounts(0);
+    playActionSound();
+
+    // AIの入札を裏で事前計算
+    const bids = { 0: Number(yourBidPrice) };
+    players.forEach((p) => {
+      if (p.isNpc) {
+        const npcData = p.periods[p.currentPeriod];
+        const npcRes = calculateFinancials(npcData.carryover, npcData.ledger, npcData.actuals);
+        const bid = decideNpcBid(p, npcRes, p.difficulty);
+        bids[p.id] = bid;
+      }
+    });
+    setArenaBids(bids);
+
+    // 落札者の計算
+    let highest = -1;
+    let winner = -1;
+    Object.entries(bids).forEach(([idStr, price]) => {
+      const id = Number(idStr);
+      if (price > highest) {
+        highest = price;
+        winner = id;
+      }
+    });
+    setArenaWinnerIdx(winner);
+    setArenaWinnerPrice(highest);
+  };
+
+  // AIが考えてカタカタと入札額が動く演出エフェクト
+  useEffect(() => {
+    let interval;
+    if (arenaOpen && arenaState === 'thinking') {
+      interval = setInterval(() => {
+        setNpcThinkingValues({
+          1: Math.floor(Math.random() * 15) + 15,
+          2: Math.floor(Math.random() * 15) + 15,
+          3: Math.floor(Math.random() * 15) + 15
+        });
+      }, 80);
+
+      // 2.2秒後にシャッフルを止め、開票フェーズへ
+      setTimeout(() => {
+        clearInterval(interval);
+        setArenaState('reveal');
+        playActionSound();
+      }, 2200);
+    }
+    return () => clearInterval(interval);
+  }, [arenaOpen, arenaState]);
+
+  // 開票時、カードを1枚ずつドン！ドン！と反転表示させる
+  useEffect(() => {
+    if (arenaOpen && arenaState === 'reveal') {
+      if (revealedCounts < 4) {
+        const timer = setTimeout(() => {
+          setRevealedCounts(prev => prev + 1);
+          playActionSound();
+        }, 600); // 0.6秒間隔で反転
+        return () => clearTimeout(timer);
+      } else {
+        // 全員反転が完了したら、結果決定音 (落札ファンファーレ)
+        setTimeout(() => {
+          setArenaState('done');
+          if (arenaWinnerIdx === 0) {
+            playFanfareSound(); // あなたの勝利！
+          } else {
+            playRiskConfirmSound(); // ライバルの落札
+          }
+        }, 400);
+      }
+    }
+  }, [arenaOpen, arenaState, revealedCounts]);
+
+  const handleApplyAuctionResult = () => {
+    // 実際の売上アクションを親コンポーネントに反映
     onNpcAuction(Number(yourBidPrice), auctionQty, targetMarketId);
+    setArenaOpen(false);
   };
 
   return (
@@ -258,14 +351,18 @@ function DigitalBoard({
                                   ボタンを押して、具体的な偶発災害・リスクイベントをドローしてください！
                                 </p>
                                 <button 
-                                  className="btn btn-danger"
+                                  className="btn btn-danger animate-pulse"
                                   onClick={onDrawRiskEvent}
                                   style={{ 
                                     fontWeight: 'bold', 
                                     fontSize: '0.75rem', 
                                     padding: '6px 16px',
-                                    boxShadow: '0 0 10px rgba(255, 56, 56, 0.3)',
-                                    animation: 'pulse 1.5s infinite'
+                                    boxShadow: '0 0 10px rgba(255, 56, 56, 0.4)',
+                                    background: 'var(--color-red)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer'
                                   }}
                                 >
                                   🎰 リスクイベントをドローする！
@@ -423,8 +520,12 @@ function DigitalBoard({
                                       <label style={{ fontSize: '0.6rem' }}>入札額</label>
                                       <input type="number" className="form-input" style={{ fontSize: '0.7rem', padding: '4px' }} value={yourBidPrice} onChange={(e) => setYourBidPrice(Math.max(1, Number(e.target.value)))} />
                                     </div>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={handleApplyYourAuction}>
-                                      入札 ⚔️
+                                    <button 
+                                      className="btn btn-primary" 
+                                      style={{ fontSize: '0.7rem', padding: '5px 10.5px', background: 'var(--color-pink)', border: 'none', fontWeight: 'bold' }} 
+                                      onClick={handleStartAuctionArena}
+                                    >
+                                      アリーナ入札 ⚔️
                                     </button>
                                   </div>
                                 )}
@@ -499,7 +600,7 @@ function DigitalBoard({
                       <span style={{ fontSize: '0.75rem' }}>
                         ✔️ アクション完了！仕訳完了しました。
                       </span>
-                      <button className="btn btn-primary" onClick={onEndTurn} style={{ fontSize: '0.75rem', padding: '4px 12px' }}>
+                      <button className="btn btn-primary animate-pulse-neon" onClick={onEndTurn} style={{ fontSize: '0.75rem', padding: '4px 12px', background: 'var(--color-cyan)', color: '#000', border: 'none', fontWeight: 'bold' }}>
                         次の手番へ ➡️
                       </button>
                     </div>
@@ -537,9 +638,9 @@ function DigitalBoard({
           <span>🏭</span> 4社並列工場盤 ✕ 物理在庫棚
         </h4>
 
-        {/* 2x2 の超美麗・超コンパクトグリッド構成（一画面に完全集約） */}
+        {/* 2x2 の超美麗・超コンパクトグリッド構成 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-          {players.map((p, idx) => {
+          {players.map((p) => {
             const pPeriod = p.currentPeriod;
             const pData = p.periods[pPeriod];
             const pRes = calculateFinancials(pData.carryover, pData.ledger, pData.actuals);
@@ -554,17 +655,27 @@ function DigitalBoard({
                   margin: 0, 
                   padding: '8px',
                   border: isActive ? `2px solid ${p.color}` : '1px solid var(--border-light)',
-                  boxShadow: isActive ? `0 0 8px ${p.color}15` : 'none',
+                  boxShadow: isActive ? `0 0 10px ${p.color}25` : 'none',
                   background: isSelf ? 'rgba(0, 242, 254, 0.01)' : 'rgba(10, 15, 30, 0.8)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px'
+                  gap: '6px',
+                  transition: 'all 0.3s ease'
                 }}
               >
                 {/* プレイヤー基本情報 */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '4px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: p.color }}></div>
+                    <div 
+                      className={isActive ? "animate-pulse" : ""}
+                      style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: p.color,
+                        boxShadow: isActive ? `0 0 8px ${p.color}` : 'none'
+                      }}
+                    ></div>
                     <strong style={{ fontSize: '0.75rem', color: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '70px' }}>
                       {p.name.replace(" (あなた)", "").replace(" (ライバル/初級)", "").replace(" (ライバル/中級)", "").replace(" (ライバル/上級)", "")}
                     </strong>
@@ -642,6 +753,240 @@ function DigitalBoard({
           })}
         </div>
       </div>
+
+      {/* ==================== 🏆 【アジェンダ②】特設競合入札アリーナ・モーダル ==================== */}
+      {arenaOpen && (
+        <div style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(5, 7, 20, 0.85)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          
+          <div style={{
+            width: '650px',
+            background: 'rgba(10, 15, 30, 0.95)',
+            border: '2px solid var(--border-light)',
+            borderRadius: '16px',
+            boxShadow: '0 0 30px rgba(0, 242, 254, 0.25)',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+          }}>
+            
+            {/* アリーナ・ヘッダー */}
+            <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.8rem' }}>⚔️</span>
+                <div>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: '800', margin: 0, color: 'var(--color-pink)' }}>
+                    競合入札対戦アリーナ (オークション会場)
+                  </h2>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                    開催市場: {markets[targetMarketId]?.name || "東京"} │ 数量: {auctionQty} 個
+                  </span>
+                </div>
+              </div>
+              
+              {/* キャンセルボタン (決定前のみ) */}
+              {arenaState === 'thinking' && (
+                <button 
+                  onClick={() => setArenaOpen(false)}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid var(--border-light)',
+                    color: 'var(--text-secondary)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  キャンセル ❌
+                </button>
+              )}
+            </div>
+
+            {/* アリーナ・ステージ (4社の入札カード) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', minHeight: '180px', alignItems: 'center' }}>
+              {players.map((p, i) => {
+                const isWinner = p.id === arenaWinnerIdx;
+                const isNpc = p.isNpc;
+                
+                // 表示状態の決定
+                let displayVal = "??";
+                let isRevealed = false;
+                
+                if (arenaState === 'thinking') {
+                  displayVal = isNpc ? String(npcThinkingValues[p.id]) : String(yourBidPrice);
+                  isRevealed = !isNpc;
+                } else if (arenaState === 'reveal' || arenaState === 'done') {
+                  isRevealed = revealedCounts > i;
+                  displayVal = isRevealed ? String(arenaBids[p.id]) : "??";
+                }
+
+                const showWinnerEffect = arenaState === 'done' && isWinner;
+
+                return (
+                  <div 
+                    key={p.id}
+                    style={{
+                      background: showWinnerEffect 
+                        ? `linear-gradient(135deg, ${p.color}25, rgba(15,25,50,0.95))` 
+                        : 'rgba(255,255,255,0.01)',
+                      border: `2px solid ${showWinnerEffect ? p.color : isRevealed ? 'var(--border-light)' : 'rgba(255,255,255,0.05)'}`,
+                      borderRadius: '12px',
+                      padding: '16px 8px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '12px',
+                      transform: showWinnerEffect ? 'scale(1.05)' : 'scale(1)',
+                      boxShadow: showWinnerEffect ? `0 0 20px ${p.color}45` : 'none',
+                      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    }}
+                  >
+                    {/* アバター */}
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%', 
+                      background: p.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      color: '#000',
+                      boxShadow: showWinnerEffect ? `0 0 10px ${p.color}` : 'none'
+                    }}>
+                      {p.name.charAt(0)}
+                    </div>
+
+                    {/* 会社名 */}
+                    <div style={{ textAlign: 'center' }}>
+                      <strong style={{ fontSize: '0.75rem', color: '#fff', display: 'block' }}>
+                        {p.name.split(" ")[0]}
+                      </strong>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>
+                        {isNpc ? `AI (${p.difficulty.toUpperCase()})` : "あなた"}
+                      </span>
+                    </div>
+
+                    {/* 入札金額表示パネル */}
+                    <div style={{
+                      background: isRevealed 
+                        ? 'rgba(0,0,0,0.5)' 
+                        : 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))',
+                      width: '100%',
+                      padding: '10px 0',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      textAlign: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      minHeight: '52px'
+                    }}>
+                      {arenaState === 'thinking' && isNpc ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <span className="animate-spin-slow" style={{ fontSize: '0.8rem', color: p.color }}>⚙️</span>
+                          <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '2px' }}>入札中...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <strong style={{ 
+                            fontSize: isRevealed ? '1.4rem' : '1.1rem', 
+                            color: showWinnerEffect ? 'var(--color-yellow)' : isRevealed ? p.color : 'rgba(255,255,255,0.2)',
+                            fontFamily: 'var(--font-display)',
+                            textShadow: showWinnerEffect ? `0 0 8px ${p.color}` : 'none'
+                          }}>
+                            {isRevealed ? `¥${displayVal}万` : "🔒"}
+                          </strong>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* アリーナ・コントロールフッター */}
+            <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '15px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+              
+              {arenaState === 'thinking' && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="animate-spin" style={{ color: 'var(--color-cyan)' }}>⌛</span>
+                  <span>ライバルAIが入札額を計算中... 駆け引きが始まっています。</span>
+                </div>
+              )}
+
+              {arenaState === 'reveal' && (
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-pink)', fontWeight: 'bold' }}>
+                  🥁 ドラムロール... 順次開票中！
+                </div>
+              )}
+
+              {arenaState === 'done' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                  
+                  {/* 落札アナウンス */}
+                  <div style={{ 
+                    background: 'rgba(5, 255, 161, 0.05)', 
+                    border: '1px solid rgba(5, 255, 161, 0.2)', 
+                    padding: '12px 24px', 
+                    borderRadius: '10px', 
+                    textAlign: 'center',
+                    boxShadow: '0 0 15px rgba(5, 255, 161, 0.1)',
+                    width: '100%'
+                  }}>
+                    <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '2px' }}>
+                      {arenaWinnerIdx === 0 ? "🎉 【落札大成功！】" : "💥 【競り負け！】"}
+                    </span>
+                    <strong style={{ fontSize: '0.95rem', color: players[arenaWinnerIdx].color }}>
+                      {players[arenaWinnerIdx].name}
+                    </strong>
+                    <span> が単価 </span>
+                    <strong style={{ color: 'white', fontSize: '1rem' }}>¥{arenaWinnerPrice}万円</strong>
+                    <span> で落札しました！</span>
+                  </div>
+
+                  {/* 確定して適用ボタン */}
+                  <button 
+                    className="btn btn-primary animate-pulse-neon"
+                    onClick={handleApplyAuctionResult}
+                    style={{ 
+                      fontSize: '0.85rem', 
+                      padding: '10px 28px',
+                      background: 'var(--color-cyan)',
+                      color: '#000',
+                      fontWeight: '800',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    アリーナ結果を確定適用して戻る ➡️
+                  </button>
+                </div>
+              )}
+
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
