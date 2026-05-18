@@ -14,6 +14,7 @@ function DigitalBoard({
   deckLength, 
   phase, 
   markets, 
+  gameLogs = [], 
   onDrawCard, 
   onDrawRiskEvent, 
   onExecuteAction, 
@@ -53,6 +54,25 @@ function DigitalBoard({
   // 最大購入可能数の計算
   const selectedMarket = markets[targetMarketId] || markets.tokyo;
   const maxPurchaseQty = Math.min(selectedMarket.materials, 6);
+
+  // 他社（NPC）のアクションログのみを抽出（ゲームログからA社, B社, C社のログをフィルタ）
+  const getLatestNpcLogs = () => {
+    return gameLogs.filter(log => {
+      // ログ内に自分（ずっきー）以外のプレイヤー名（A社, B社, C社）が含まれているか確認
+      const isNpcLog = log.includes('A社') || log.includes('B社') || log.includes('C社');
+      // パスやドローなどの途中ログではなく、具体的な実行結果のログを優先
+      const isActionExec = log.includes('[仕入]') || log.includes('[投入]') || 
+                           log.includes('[完成]') || log.includes('[直接販売]') || 
+                           log.includes('[オークション落札]') || log.includes('[機械購入]') || 
+                           log.includes('[雇用]') || log.includes('[融資]') || 
+                           log.includes('[研究開発]') || log.includes('[広告宣伝]') ||
+                           log.includes('災害') || log.includes('故障') || log.includes('火災') ||
+                           log.includes('パス');
+      return isNpcLog && isActionExec;
+    }).slice(0, 4); // 最新の他社意思決定結果を最大4件抽出
+  };
+
+  const npcLogs = getLatestNpcLogs();
 
   // オークションアリーナ起動・対戦演出
   const handleStartAuctionArena = () => {
@@ -139,11 +159,94 @@ function DigitalBoard({
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      gap: '20px', 
+      gap: '16px', 
       height: 'calc(100vh - 100px)', 
       overflowY: 'auto',
       padding: '10px 5px'
     }}>
+
+      {/* ==================== 📢 【他社意思決定のLIVE速報ディスプレイ】(新規追加) ==================== */}
+      <div 
+        className="glass-card animate-pulse-neon" 
+        style={{ 
+          margin: 0, 
+          padding: '12px 16px', 
+          background: 'rgba(255, 0, 127, 0.03)', 
+          border: '1.5px solid rgba(255, 0, 127, 0.35)',
+          borderRadius: '12px',
+          boxShadow: '0 0 15px rgba(255, 0, 127, 0.1)'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h4 style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--color-pink)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-display)' }}>
+            <span style={{ fontSize: '1.2rem', animation: 'spin-slow 4s infinite' }}>📢</span>
+            ライバル他社 意思決定＆アクション LIVE速報
+          </h4>
+          <span style={{ fontSize: '0.65rem', background: 'rgba(255, 0, 127, 0.15)', color: 'var(--color-pink)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+            最新4件を掲示
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+          {npcLogs.length > 0 ? (
+            npcLogs.map((log, idx) => {
+              // どのプレイヤーのログかに基づいてカラーを分類
+              let borderClr = 'rgba(255,255,255,0.08)';
+              let bgClr = 'rgba(255,255,255,0.01)';
+              let playerLabel = '';
+
+              if (log.includes('A社')) {
+                borderClr = 'rgba(255, 0, 127, 0.3)';
+                bgClr = 'rgba(255, 0, 127, 0.02)';
+                playerLabel = 'A社';
+              } else if (log.includes('B社')) {
+                borderClr = 'rgba(5, 255, 161, 0.3)';
+                bgClr = 'rgba(5, 255, 161, 0.02)';
+                playerLabel = 'B社';
+              } else if (log.includes('C社')) {
+                borderClr = 'rgba(255, 208, 0, 0.3)';
+                bgClr = 'rgba(255, 208, 0, 0.02)';
+                playerLabel = 'C社';
+              }
+
+              return (
+                <div 
+                  key={idx}
+                  style={{
+                    background: bgClr,
+                    borderLeft: `3px solid ${borderClr.replace('0.3', '1')}`,
+                    borderTop: `1px solid ${borderClr}`,
+                    borderRight: `1px solid ${borderClr}`,
+                    borderBottom: `1px solid ${borderClr}`,
+                    borderRadius: '6px',
+                    padding: '8px 10px',
+                    fontSize: '0.75rem',
+                    lineHeight: '1.4',
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '52px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  <div style={{ fontWeight: '500', color: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    {log.split(' が ')[1] || log.split(' は ')[1] || log}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: '800', color: borderClr.replace('0.3', '1') }}>{playerLabel}</span>
+                    <span>{idx === 0 ? 'LIVE NOW' : `${idx}手前`}</span>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div style={{ gridColumn: 'span 4', textAlign: 'center', padding: '10px 0', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              💤 まだ他社の意思決定データはありません。ゲームが進行すると自動で速報が流れます。
+            </div>
+          )}
+        </div>
+      </div>
       
       {/* ==================== 【上段コモンボード】(市場マップ ✕ アクション・山札) ==================== */}
       <div style={{

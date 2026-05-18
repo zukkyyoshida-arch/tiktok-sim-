@@ -1050,6 +1050,7 @@ function App() {
                 deckLength={deck.length}
                 phase={phase}
                 markets={markets}
+                gameLogs={gameLogs}
                 onDrawCard={handleDrawCard}
                 onDrawRiskEvent={handleDrawRiskEvent}
                 onExecuteAction={handleExecuteAction}
