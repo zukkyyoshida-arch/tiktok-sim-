@@ -189,20 +189,22 @@ export function calculateFinancials(carryover, ledger, actuals) {
   const prodEndingValue = prodEndingCount * prodUnitCost;
 
   // 3. 機械資産の計算
-  // 減価償却費の決定 (大型機械・小型機械・アタッチメントの台数に基づく固定費)
-  // 機械内訳は、期首＋購入（ケ の数量）−売却（イ の数量）
+  // ジュニア・ルールに準拠：機械資産の期末減価償却（簿価の減少）は廃止し、期末製造経費「ス」として一括で費用化します。
+  // 機械内訳は、期首＋購入（ケ）−売却（イ）
   // 簡略化のため、機械の台数は前期繰越に「ケ」で買った分を加算、売却「イ」を減算
   const largeMachines = carryover.largeMachines || 0;
   const smallMachines = carryover.smallMachines || 0;
   const attachments = carryover.attachments || 0;
   
-  // 減価償却費 (大型: 20/台, 小型: 10/台, アタッチメント: 2/台)
-  const depreciation = (largeMachines * 20) + (smallMachines * 10) + (attachments * 2);
+  // ジュニア・ルールでは減価償却による簿価減少は行わないため、depreciation は 0
+  const depreciation = 0;
   
   // 購入された機械工具 (ケ)
   const purchasedMachineValue = ledgerTotals["ケ"].amount;
+  // 売却された機械の購入時簿価 (売却額「イ」は購入単価の半額であるため、売却額の2倍が元々の簿価となる)
+  const soldMachineBookValue = ledgerTotals["イ"].amount * 2;
   // 機械資産の期末残高 (理論値)
-  const bookEndingMachines = Math.max(0, carryover.machinesValue + purchasedMachineValue - depreciation - ledgerTotals["イ"].amount);
+  const bookEndingMachines = Math.max(0, carryover.machinesValue + purchasedMachineValue - soldMachineBookValue);
 
   // 4. P/L (変動損益計算書) の計算
   const salesRevenue = ledgerTotals["キ"].amount + ledgerTotals["ネ"].amount; // 売上高 PQ

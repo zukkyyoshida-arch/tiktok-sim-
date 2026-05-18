@@ -15,9 +15,11 @@ function DigitalBoard({
   phase, 
   markets, 
   gameLogs = [], 
-  onDrawCard, 
-  onDrawRiskEvent, 
-  onExecuteAction, 
+  turnOrder = [],
+  orderIndex = 0,
+  onDrawCard,
+  onDrawRiskEvent,
+  onExecuteAction,
   onEndTurn,
   onNpcPlay,
   onNpcAuction,
@@ -27,7 +29,7 @@ function DigitalBoard({
   const isSelf = activePlayer.id === 0;
 
   // 意思決定カードの時に選択中のアクションタイプ
-  const [selectedActionType, setSelectedActionType] = useState('purchase'); 
+  const [selectedActionType, setSelectedActionType] = useState('buy_chip'); 
 
   // アクション用パラメータ
   const [targetMarketId, setTargetMarketId] = useState('tokyo'); 
@@ -39,6 +41,12 @@ function DigitalBoard({
   const [machineType, setMachineType] = useState('small');
   const [loanAmount, setLoanAmount] = useState(50);
   const [hireType, setHireType] = useState('prod'); // 'prod' (ワーカー) または 'sales' (セールスマン)
+  
+  // 新規追加ルールB用パラメータ
+  const [chipType, setChipType] = useState('insurance'); // 'insurance' | 'pac' | 'merchandiser' | 'research'
+  const [transferTo, setTransferTo] = useState('prod'); // 'prod' (ワーカーへ) または 'sales' (セールスマンへ)
+  const [sellMachineType, setSellMachineType] = useState('small'); // 'small' | 'large' | 'attachment'
+  const [repayAmount, setRepayAmount] = useState(50);
 
   // オークション入札パラメータ
   const [yourBidPrice, setYourBidPrice] = useState(26);
@@ -64,22 +72,33 @@ function DigitalBoard({
   });
 
   // 生産能力と仕入上限数（生産能力の2倍）の算出
-  const activePeriod = activePlayer.currentPeriod;
-  const pData = activePlayer.periods[activePeriod];
-  const pRes = calculateFinancials(pData.carryover, pData.ledger, pData.actuals);
+  const activePeriod = activePlayer.currentPeriod || 1;
+  const pData = activePlayer.periods?.[activePeriod] || { carryover: {}, ledger: [], actuals: {} };
+  const pRes = calculateFinancials(pData.carryover || {}, pData.ledger || [], pData.actuals || {});
   const myMachines = pRes.machines || { large: 0, small: 0, attachments: 0 };
   
-  // 今期のこれまでの仕訳から、現在のワーカー数（workersProd）とセールスマン数（workersSales）を算出
-  let myWorkersProd = pData.carryover.workersProd !== undefined ? pData.carryover.workersProd : 2;
-  let myWorkersSales = pData.carryover.workersSales !== undefined ? pData.carryover.workersSales : 1;
-  pData.ledger.forEach(entry => {
-    if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
-      myWorkersProd += (Number(entry.quantity) || 0);
-    }
-    if (entry.category === 'シ' && entry.memo?.includes('セールスマン')) {
-      myWorkersSales += (Number(entry.quantity) || 0);
-    }
-  });
+  // 今期のこれまでの仕訳から、現在のワーカー数（workersProd）とセールスマン数（workersSales）を正確に算出
+  let myWorkersProd = pData.carryover?.workersProd !== undefined ? pData.carryover.workersProd : 2;
+  let myWorkersSales = pData.carryover?.workersSales !== undefined ? pData.carryover.workersSales : 1;
+  
+  if (pData.ledger && Array.isArray(pData.ledger)) {
+    pData.ledger.forEach(entry => {
+      if (entry.category === 'ソ' && entry.memo?.includes('新規採用（ワーカー）')) {
+        myWorkersProd += (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('新規採用（セールスマン）')) {
+        myWorkersSales += (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('配置転換（ワーカーに移動）')) {
+        myWorkersProd += (Number(entry.quantity) || 0);
+        myWorkersSales -= (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('配置転換（セールスマンに移動）')) {
+        myWorkersProd -= (Number(entry.quantity) || 0);
+        myWorkersSales += (Number(entry.quantity) || 0);
+      }
+    });
+  }
 
   // ワーカー数に応じた機械の稼働判定 (大型 -> 小型 の順にワーカーを割り当て)
   let activeLarge = 0;
@@ -92,12 +111,27 @@ function DigitalBoard({
   activeSmall = Math.min(myMachines.small || 0, remainingWorkers);
   remainingWorkers -= activeSmall;
   
-  const baseCapacity = (activeLarge * 2) + (activeSmall * 1);
-  const totalActiveMachines = activeLarge + activeSmall;
-  const activeAttach = Math.min(myMachines.attachments || 0, totalActiveMachines);
+  // ジュニア・ルール: アタッチメントは小型機械に対してのみ有効
+  const activeAttach = Math.min(myMachines.attachments || 0, activeSmall);
   
-  const prodCapacity = baseCapacity + activeAttach;
+  // 基本生産能力: 大型4個、小型1個、アタッチ+1個
+  const baseCapacity = (activeLarge * 4) + (activeSmall * 1) + activeAttach;
+  
+  // PAC生産性 (緑チップ) のブースト: 稼働している機械（大型+小型）1台につき+1個
+  const pacBoost = activePlayer.hasPac ? (activeLarge + activeSmall) : 0;
+  
+  const prodCapacity = baseCapacity + pacBoost;
   const maxAllowedQty = Math.max(2, prodCapacity * 2); // 最低でも2個は仕入可能
+
+  // ジュニア・ルール公式販売能力: セールスマン数×2 ＋ 有効広告チップ(赤)数×2
+  const maxAdLimit = myWorkersSales * 2; // セールスマン1人につき広告2枚まで有効
+  const effectiveAdLevel = Math.min(activePlayer.adLevel || 0, maxAdLimit);
+  const salesCapacity = (myWorkersSales * 2) + (effectiveAdLevel * 2);
+
+  // 価格競争力（お客様の値ごろ感補正値）
+  const parentIdx = (turnOrder && turnOrder[orderIndex] !== undefined) ? turnOrder[orderIndex] : activePlayerIdx;
+  const isParent = activePlayerIdx === parentIdx;
+  const priceCompetitiveness = (isParent ? 2 : 0) + ((activePlayer.rdLevel || 0) * 2);
 
   // 合計仕入希望数量
   const totalPurchaseQty = Object.values(purchaseQuantities).reduce((a, b) => a + b, 0);
@@ -122,12 +156,17 @@ function DigitalBoard({
     }));
   };
 
-  // ルールBの時に、無効なアクションタイプが選ばれないように制御
+  // フェーズに応じて選択できるアクションタイプを自動補正
   useEffect(() => {
     if (phase === 'ruleB') {
-      const invalidRuleBTypes = ['purchase', 'sale_direct', 'sale_auction'];
-      if (invalidRuleBTypes.includes(selectedActionType)) {
-        setSelectedActionType('produce');
+      const validRuleBTypes = ['buy_chip', 'transfer_worker', 'sell_machine', 'loan', 'repay'];
+      if (!validRuleBTypes.includes(selectedActionType)) {
+        setSelectedActionType('buy_chip');
+      }
+    } else {
+      const validRuleATypes = ['purchase', 'produce', 'sale_direct', 'sale_auction', 'buy_machine', 'hire', 'rd', 'ad'];
+      if (!validRuleATypes.includes(selectedActionType)) {
+        setSelectedActionType('purchase');
       }
     }
   }, [phase, selectedActionType]);
@@ -582,28 +621,46 @@ function DigitalBoard({
                                 </span>
                                 
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                  {[
-                                    { type: 'purchase', label: '仕入(ツ)', hideOnRuleB: true },
-                                    { type: 'produce', label: '製造(コサ)' },
-                                    { type: 'sale_direct', label: '直販(キ)', hideOnRuleB: true },
-                                    { type: 'sale_auction', label: '競合(ネ)', hideOnRuleB: true },
-                                    { type: 'buy_machine', label: '設備(ケ)' },
-                                    { type: 'hire', label: '社員(シ)' },
-                                    { type: 'loan', label: '借入金(オ)' },
-                                    { type: 'rd', label: '研究開発(チ)' },
-                                    { type: 'ad', label: '広告(セ)' }
-                                  ]
-                                  .filter(act => phase !== 'ruleB' || !act.hideOnRuleB)
-                                  .map(act => (
-                                    <button 
-                                      key={act.type}
-                                      onClick={() => setSelectedActionType(act.type)} 
-                                      className={`btn ${selectedActionType === act.type ? 'btn-primary' : ''}`}
-                                      style={{ padding: '5px 12px', fontSize: '0.8rem', fontWeight: 'bold' }}
-                                    >
-                                      {act.label}
-                                    </button>
-                                  ))}
+                                  {phase === 'ruleB' ? (
+                                    // ルールB（手番前・任意アクション）
+                                    [
+                                      { type: 'buy_chip', label: '🟡チップ購入(ソ/ス/セ)' },
+                                      { type: 'transfer_worker', label: '🔄配置転換(ソ)' },
+                                      { type: 'sell_machine', label: '💸機械売却(イ)' },
+                                      { type: 'loan', label: '🏦銀行借入(オ)' },
+                                      { type: 'repay', label: '🏦借入返済(ナ)' }
+                                    ].map(act => (
+                                      <button 
+                                        key={act.type}
+                                        onClick={() => setSelectedActionType(act.type)} 
+                                        className={`btn ${selectedActionType === act.type ? 'btn-primary' : ''}`}
+                                        style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 'bold', borderRadius: '6px' }}
+                                      >
+                                        {act.label}
+                                      </button>
+                                    ))
+                                  ) : (
+                                    // ルールA（ドロー後・1回のみアクション）
+                                    [
+                                      { type: 'purchase', label: '📥材料購入(ツ)' },
+                                      { type: 'buy_machine', label: '🏗️設備投資(ケ)' },
+                                      { type: 'produce', label: '⚙️製造(コサ)' },
+                                      { type: 'hire', label: '👤採用(ソ)' },
+                                      { type: 'rd', label: '🔬研究開発(チ)' },
+                                      { type: 'ad', label: '📢広告(セ)' },
+                                      { type: 'sale_direct', label: '💰直販(キ)' },
+                                      { type: 'sale_auction', label: '⚔️競合(ネ)' }
+                                    ].map(act => (
+                                      <button 
+                                        key={act.type}
+                                        onClick={() => setSelectedActionType(act.type)} 
+                                        className={`btn ${selectedActionType === act.type ? 'btn-primary' : ''}`}
+                                        style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 'bold', borderRadius: '6px' }}
+                                      >
+                                        {act.label}
+                                      </button>
+                                    ))
+                                  )}
                                 </div>
                               </div>
 
@@ -786,12 +843,12 @@ function DigitalBoard({
 
                                 {selectedActionType === 'buy_machine' && (
                                   <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
-                                    <div className="form-group" style={{ width: '180px' }}>
+                                    <div className="form-group" style={{ width: '220px' }}>
                                       <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>機械タイプ</label>
                                       <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={machineType} onChange={(e) => setMachineType(e.target.value)}>
-                                        <option value="small">小型 (¥40万)</option>
-                                        <option value="large">大型 (¥80万)</option>
-                                        <option value="attachment">アタッチ (¥10万)</option>
+                                        <option value="small">小型機械 (¥100万)</option>
+                                        <option value="large">大型機械 (¥200万)</option>
+                                        <option value="attachment">アタッチメント (¥20万)</option>
                                       </select>
                                     </div>
                                     <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("buy_machine", { type: machineType })}>
@@ -803,7 +860,7 @@ function DigitalBoard({
                                 {selectedActionType === 'hire' && (
                                   <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
                                     <div className="form-group" style={{ width: '180px' }}>
-                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>雇用職種 (採用費: ¥5万)</label>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>雇用職種 (採用費: ¥5万 / 科目ソ)</label>
                                       <select 
                                         className="form-select" 
                                         style={{ fontSize: '0.85rem', padding: '6px' }} 
@@ -837,15 +894,15 @@ function DigitalBoard({
                                       借入実行 🏦
                                     </button>
                                     <div style={{ width: '100%', fontSize: '0.7rem', color: 'var(--color-yellow)', marginTop: '4px', lineHeight: '1.4' }}>
-                                      ※ 借入時に金利即時支払 (1〜3期目10% / 4〜5期目5%) が発生し「タ」に自動計上されます。<br />
-                                      ※ 毎期の期末処理時に、借入金残高の20%が自動的に返済 (カテゴリ「ナ」) されます。
+                                      ※ 借入実行時に金利即時支払 (2〜3期目10% / 4期目以降5%) が発生し「タ」に即時計上されます。<br />
+                                      ※ さらに毎期の期末決算時にも、借入金残高に対する当期金利が自動的に発生します。
                                     </div>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'rd' && (
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>研究開発費 ¥20万を支払い、研究開発チップ(レベル)を+1</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>研究開発費 ¥20万を支払い、研究開発チップ(レベル)を+1 (科目「チ」)</span>
                                     <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("rd", {})}>
                                       研究開発実行 🔬
                                     </button>
@@ -854,9 +911,79 @@ function DigitalBoard({
 
                                 {selectedActionType === 'ad' && (
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>広告費 ¥10万を支払い、集客力を+1</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>広告宣伝費 ¥10万を支払い、広告チップを+1 (科目「セ」)</span>
                                     <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("ad", {})}>
                                       広告宣伝費支払 📢
+                                    </button>
+                                  </div>
+                                )}
+
+                                {selectedActionType === 'buy_chip' && (
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
+                                    <div className="form-group" style={{ width: '220px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>購入するチップ</label>
+                                      <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={chipType} onChange={(e) => setChipType(e.target.value)}>
+                                        <option value="insurance">🛡️ 保険 (黄) - ¥5万 (一般管理費ソ)</option>
+                                        <option value="pac">🟢 PAC生産性 (緑) - ¥10万 (製造経費ス)</option>
+                                        <option value="merchandiser">🟢 マーチャンダイザー (緑) - ¥10万 (一般管理費ソ)</option>
+                                        <option value="research">🟢 マーケットリサーチ (緑) - ¥10万 (販売費セ)</option>
+                                      </select>
+                                    </div>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("buy_chip", { chipType })}>
+                                      チップ購入 🟡
+                                    </button>
+                                    <div style={{ width: '100%', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
+                                      ※ 保険（黄）: 火災時に16万、盗難時に10万の保険金を受領し、チップは国庫に戻ります。<br />
+                                      ※ PAC生産性（緑）: 工場稼働時に「稼働機械総数 × 1」個生産能力がプラスされます（1枚制限）。<br />
+                                      ※ マーチャンダイザー（緑）: 入札競争力で優位に立ちます（1枚制限）。<br />
+                                      ※ マーケットリサーチ（緑）: オークション落札時に単価が+2万ブーストされます（1枚制限、市場上限内）。
+                                    </div>
+                                  </div>
+                                )}
+
+                                {selectedActionType === 'transfer_worker' && (
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                    <div className="form-group" style={{ width: '240px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>配置転換先 (研修費: ¥5万 / 一般管理費ソ)</label>
+                                      <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={transferTo} onChange={(e) => setTransferTo(e.target.value)}>
+                                        <option value="prod">⚙️ ワーカー (工場生産職) へ転換</option>
+                                        <option value="sales">💼 セールスマン (営業職) へ転換</option>
+                                      </select>
+                                    </div>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("transfer_worker", { type: transferTo })}>
+                                      配置転換実行 🔄
+                                    </button>
+                                  </div>
+                                )}
+
+                                {selectedActionType === 'sell_machine' && (
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
+                                    <div className="form-group" style={{ width: '220px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>売却する機械 (購入額の半額回収 / 科目イ)</label>
+                                      <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={sellMachineType} onChange={(e) => setSellMachineType(e.target.value)}>
+                                        <option value="small">小型機械 (¥50万回収)</option>
+                                        <option value="large">大型機械 (¥100万回収)</option>
+                                        <option value="attachment">アタッチメント (¥10万回収)</option>
+                                      </select>
+                                    </div>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => {
+                                      if (confirm("本当に機械を売却しますか？ (工場に機械がゼロになる売却はできません)")) {
+                                        onExecuteAction("sell_machine", { machineType: sellMachineType });
+                                      }
+                                    }}>
+                                      機械売却 💸
+                                    </button>
+                                  </div>
+                                )}
+
+                                {selectedActionType === 'repay' && (
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                    <div className="form-group" style={{ width: '150px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>返済額 (万円 / 科目ナ)</label>
+                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={repayAmount} step="10" onChange={(e) => setRepayAmount(Math.max(10, Number(e.target.value)))} />
+                                    </div>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("repay", { amount: repayAmount })}>
+                                      返済実行 🏦
                                     </button>
                                   </div>
                                 )}
@@ -939,7 +1066,7 @@ function DigitalBoard({
 
         {/* 1x4 グリッド：横幅全体を最大限に活用し、個々のボードを大きく表示！ */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
-          {players.map((p) => {
+          {players.map((p, idx) => {
             const pPeriod = p.currentPeriod;
             const pData = p.periods[pPeriod];
             const pRes = calculateFinancials(pData.carryover, pData.ledger, pData.actuals);
@@ -985,24 +1112,76 @@ function DigitalBoard({
                   </span>
                 </div>
 
-                {/* 資金、自己資本、人員、研究開発 */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px' }}>
-                  <div>
-                    自己資本: <strong style={{ color: 'var(--color-yellow)', fontSize: '0.85rem' }}>¥{pRes.bs.totalNetAssets}万</strong>
-                  </div>
-                  <div>
-                    社員数: <strong style={{ color: '#fff' }}>{pRes.workers} 名</strong>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>
-                      (⚙️{pData.carryover.workersProd !== undefined ? pData.carryover.workersProd + (pData.ledger || []).filter(e => e.category === 'シ' && e.memo?.includes('ワーカー')).reduce((sum, e) => sum + (Number(e.quantity) || 0), 0) : 2}/💼{pData.carryover.workersSales !== undefined ? pData.carryover.workersSales + (pData.ledger || []).filter(e => e.category === 'シ' && e.memo?.includes('セールスマン')).reduce((sum, e) => sum + (Number(e.quantity) || 0), 0) : 1})
-                    </span>
-                  </div>
-                  <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    工場設備: <strong style={{ color: 'var(--color-purple)' }}>大{pRes.machines.large}/小{pRes.machines.small}</strong>
-                  </div>
-                  <div>
-                    研究開発: <strong style={{ color: 'var(--color-cyan)' }}>L{p.rdLevel}</strong> │ 広告: <strong style={{ color: 'var(--color-pink)' }}>L{p.adLevel}</strong>
-                  </div>
-                </div>
+                {/* 資金、自己資本、人員、研究開発、および公式ジュニア能力パラメータ */}
+                {(() => {
+                  let pProdCount = pData.carryover.workersProd !== undefined ? pData.carryover.workersProd : 2;
+                  let pSalesCount = pData.carryover.workersSales !== undefined ? pData.carryover.workersSales : 1;
+                  (pData.ledger || []).forEach(e => {
+                    if (e.category === 'ソ' && e.memo?.includes('新規採用（ワーカー）')) pProdCount += (Number(e.quantity) || 0);
+                    if (e.category === 'ソ' && e.memo?.includes('新規採用（セールスマン）')) pSalesCount += (Number(e.quantity) || 0);
+                    if (e.category === 'ソ' && e.memo?.includes('配置転換（ワーカーに移動）')) {
+                      pProdCount += (Number(e.quantity) || 0);
+                      pSalesCount -= (Number(e.quantity) || 0);
+                    }
+                    if (e.category === 'ソ' && e.memo?.includes('配置転換（セールスマンに移動）')) {
+                      pProdCount -= (Number(e.quantity) || 0);
+                      pSalesCount += (Number(e.quantity) || 0);
+                    }
+                  });
+                  
+                  // 生産能力計算
+                  const pActiveLarge = Math.min(pRes.machines.large || 0, pProdCount);
+                  const pActiveSmall = Math.min(pRes.machines.small || 0, Math.max(0, pProdCount - pActiveLarge));
+                  const pActiveAttach = Math.min(pRes.machines.attachments || 0, pActiveSmall);
+                  const pBaseCap = (pActiveLarge * 4) + (pActiveSmall * 1) + pActiveAttach;
+                  const pPacBoost = p.hasPac ? (pActiveLarge + pActiveSmall) : 0;
+                  const pProdCap = pBaseCap + pPacBoost;
+
+                  // 販売能力計算
+                  const pMaxAdLimit = pSalesCount * 2;
+                  const pEffectiveAd = Math.min(p.adLevel || 0, pMaxAdLimit);
+                  const pSalesCap = (pSalesCount * 2) + (pEffectiveAd * 2);
+
+                  // 競争力補正値
+                  const parentId = (turnOrder && turnOrder[orderIndex] !== undefined) ? turnOrder[orderIndex] : activePlayerIdx;
+                  const pIsParent = p.id === parentId;
+                  const pPriceAdv = (pIsParent ? 2 : 0) + ((p.rdLevel || 0) * 2);
+
+                  return (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px' }}>
+                      <div>
+                        自己資本: <strong style={{ color: 'var(--color-yellow)', fontSize: '0.82rem' }}>¥{pRes.bs.totalNetAssets}万</strong>
+                      </div>
+                      <div>
+                        社員数: <strong style={{ color: '#fff' }}>{pProdCount + pSalesCount} 名</strong>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>
+                          (⚙️{pProdCount}/💼{pSalesCount})
+                        </span>
+                      </div>
+                      <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        機械設備: <strong style={{ color: 'var(--color-purple)' }}>大{pRes.machines.large}/小{pRes.machines.small}/ア{pRes.machines.attachments}</strong>
+                      </div>
+                      <div>
+                        生産力: <strong style={{ color: 'var(--color-green)' }}>{pProdCap}個/月</strong>
+                      </div>
+                      <div>
+                        販売力: <strong style={{ color: 'var(--color-pink)' }}>{pSalesCap}個/月</strong>
+                      </div>
+                      <div>
+                        競争アド: <strong style={{ color: 'var(--color-cyan)' }}>-{pPriceAdv}万</strong>
+                      </div>
+                      
+                      {/* チップ所持状況バッジ */}
+                      <div style={{ gridColumn: 'span 2', display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px', borderTop: '1px dashed rgba(255,255,255,0.06)', paddingTop: '4px' }}>
+                        {p.hasInsurance && <span style={{ fontSize: '0.65rem', background: '#ffd000', color: '#000', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>🛡️ 保険(黄)</span>}
+                        {p.hasPac && <span style={{ fontSize: '0.65rem', background: '#05ffa1', color: '#000', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>🟢 PAC(緑)</span>}
+                        {p.hasMerchandiser && <span style={{ fontSize: '0.65rem', background: '#05ffa1', color: '#000', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>🟢 マーチャン(緑)</span>}
+                        {p.hasResearch && <span style={{ fontSize: '0.65rem', background: '#05ffa1', color: '#000', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>🟢 マケリサ(緑)</span>}
+                        {!p.hasInsurance && !p.hasPac && !p.hasMerchandiser && !p.hasResearch && <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>所持チップなし</span>}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* 在庫ストッカー棚 (物理的ビジュアル表示) - 縦幅と丸の大きさを大幅スケールアップ！ */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', flexGrow: 1 }}>
@@ -1011,12 +1190,12 @@ function DigitalBoard({
                   <div style={{ background: 'rgba(5, 255, 161, 0.03)', border: '1px solid rgba(5, 255, 161, 0.15)', padding: '6px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--color-green)', fontWeight: '800', borderBottom: '1px solid rgba(5, 255, 161, 0.1)', paddingBottom: '2px' }}>①材料</span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', margin: '4px 0', alignContent: 'flex-start', flexGrow: 1 }}>
-                      {Array.from({ length: pRes.mat.endingCount }).map((_, i) => (
+                      {Array.from({ length: Math.max(0, Math.floor(pRes.mat.endingCount || 0)) }).map((_, i) => (
                         <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--color-green)', boxShadow: '0 0 3px var(--color-green)' }}></div>
                       ))}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px dashed rgba(5, 255, 161, 0.1)', paddingTop: '2px' }}>
-                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{pRes.mat.endingCount} 個</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{Math.max(0, pRes.mat.endingCount || 0)} 個</span>
                       <span style={{ color: 'var(--color-cyan)' }}>¥{pRes.mat.unitCost ? pRes.mat.unitCost.toFixed(0) : 0}</span>
                     </div>
                   </div>
@@ -1025,12 +1204,12 @@ function DigitalBoard({
                   <div style={{ background: 'rgba(155, 81, 224, 0.03)', border: '1px solid rgba(155, 81, 224, 0.15)', padding: '6px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--color-purple)', fontWeight: '800', borderBottom: '1px solid rgba(155, 81, 224, 0.1)', paddingBottom: '2px' }}>②仕掛</span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', margin: '4px 0', alignContent: 'flex-start', flexGrow: 1 }}>
-                      {Array.from({ length: pRes.wip.endingCount }).map((_, i) => (
+                      {Array.from({ length: Math.max(0, Math.floor(pRes.wip.endingCount || 0)) }).map((_, i) => (
                         <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--color-purple)', boxShadow: '0 0 3px var(--color-purple)' }}></div>
                       ))}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px dashed rgba(155, 81, 224, 0.1)', paddingTop: '2px' }}>
-                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{pRes.wip.endingCount} 個</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{Math.max(0, pRes.wip.endingCount || 0)} 個</span>
                       <span style={{ color: 'var(--color-cyan)' }}>¥{pRes.wip.unitCost ? pRes.wip.unitCost.toFixed(0) : 0}</span>
                     </div>
                   </div>
@@ -1039,12 +1218,12 @@ function DigitalBoard({
                   <div style={{ background: 'rgba(255, 0, 127, 0.03)', border: '1px solid rgba(255, 0, 127, 0.15)', padding: '6px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--color-pink)', fontWeight: '800', borderBottom: '1px solid rgba(255, 0, 127, 0.1)', paddingBottom: '2px' }}>③製品</span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', margin: '4px 0', alignContent: 'flex-start', flexGrow: 1 }}>
-                      {Array.from({ length: pRes.prod.endingCount }).map((_, i) => (
+                      {Array.from({ length: Math.max(0, Math.floor(pRes.prod.endingCount || 0)) }).map((_, i) => (
                         <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--color-pink)', boxShadow: '0 0 3px var(--color-pink)' }}></div>
                       ))}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px dashed rgba(255, 0, 127, 0.1)', paddingTop: '2px' }}>
-                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{pRes.prod.endingCount} 個</span>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{Math.max(0, pRes.prod.endingCount || 0)} 個</span>
                       <span style={{ color: 'var(--color-cyan)' }}>¥{pRes.prod.unitCost ? pRes.prod.unitCost.toFixed(0) : 0}</span>
                     </div>
                   </div>

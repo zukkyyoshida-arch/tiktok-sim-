@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { calculateFinancials, DEFAULT_PERIOD_DATA } from './utils/calculations';
 import { generateShuffledDeck, CARD_CATEGORIES, drawRandomRiskEvent } from './utils/cards';
-import { decideNpcAction, decideNpcBid, DIFFICULTY_LEVELS } from './utils/npcAi';
+import { decideNpcAction, decideNpcBid, decideNpcRuleB, DIFFICULTY_LEVELS } from './utils/npcAi';
 import { 
   playDrawSound, 
   playActionSound, 
@@ -51,7 +51,19 @@ const INITIAL_PLAYERS = [
     difficulty: "medium",
     rdLevel: 0,
     adLevel: 0,
+    hasInsurance: false,
+    hasPac: false,
+    hasMerchandiser: false,
+    hasResearch: false,
     currentPeriod: 1,
+    stats: {
+      totalDecisionTime: 0,
+      decisionCount: 0,
+      maxSingleSaleQty: 0,
+      stockoutCount: 0,
+      maxAdLevel: 0,
+      maxRdLevel: 0
+    },
     periods: {
       1: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
       2: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
@@ -68,7 +80,19 @@ const INITIAL_PLAYERS = [
     difficulty: DIFFICULTY_LEVELS.EASY,
     rdLevel: 0,
     adLevel: 0,
+    hasInsurance: false,
+    hasPac: false,
+    hasMerchandiser: false,
+    hasResearch: false,
     currentPeriod: 1,
+    stats: {
+      totalDecisionTime: 0,
+      decisionCount: 0,
+      maxSingleSaleQty: 0,
+      stockoutCount: 0,
+      maxAdLevel: 0,
+      maxRdLevel: 0
+    },
     periods: {
       1: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
       2: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
@@ -85,7 +109,19 @@ const INITIAL_PLAYERS = [
     difficulty: DIFFICULTY_LEVELS.MEDIUM,
     rdLevel: 0,
     adLevel: 0,
+    hasInsurance: false,
+    hasPac: false,
+    hasMerchandiser: false,
+    hasResearch: false,
     currentPeriod: 1,
+    stats: {
+      totalDecisionTime: 0,
+      decisionCount: 0,
+      maxSingleSaleQty: 0,
+      stockoutCount: 0,
+      maxAdLevel: 0,
+      maxRdLevel: 0
+    },
     periods: {
       1: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
       2: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
@@ -102,7 +138,19 @@ const INITIAL_PLAYERS = [
     difficulty: DIFFICULTY_LEVELS.HARD,
     rdLevel: 0,
     adLevel: 0,
+    hasInsurance: false,
+    hasPac: false,
+    hasMerchandiser: false,
+    hasResearch: false,
     currentPeriod: 1,
+    stats: {
+      totalDecisionTime: 0,
+      decisionCount: 0,
+      maxSingleSaleQty: 0,
+      stockoutCount: 0,
+      maxAdLevel: 0,
+      maxRdLevel: 0
+    },
     periods: {
       1: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
       2: JSON.parse(JSON.stringify(DEFAULT_PERIOD_DATA)),
@@ -192,6 +240,7 @@ function App() {
   });
 
   const [activeTab, setActiveTab] = useState('gameboard');
+  const [turnStartTime, setTurnStartTime] = useState(Date.now());
   
   // 効果音設定のロード
   const [soundOn, setSoundOn] = useState(() => {
@@ -582,45 +631,61 @@ function App() {
 
         case "produce":
           if (isTarget) {
-            // 生産能力の算出 (ワーカー、大型、小型、アタッチ連動)
+            // 生産能力の算出 (ワーカー、大型、小型、アタッチ、PAC緑チップ連動)
             const currentLarge = newCarryover.largeMachines || 0;
             const currentSmall = newCarryover.smallMachines || 0;
             const currentAttach = newCarryover.attachments || 0;
             
+            // 現在のワーカー数を算出
             let currentProdWorkers = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 2;
             newLedger.forEach(entry => {
-              if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+              if (entry.category === 'ソ' && entry.memo?.includes('新規採用（ワーカー）')) {
                 currentProdWorkers += (Number(entry.quantity) || 0);
+              }
+              // 配置転換での移動
+              if (entry.category === 'ソ' && entry.memo?.includes('配置転換（ワーカーに移動）')) {
+                currentProdWorkers += (Number(entry.quantity) || 0);
+              }
+              if (entry.category === 'ソ' && entry.memo?.includes('配置転換（セールスマンに移動）')) {
+                currentProdWorkers -= (Number(entry.quantity) || 0);
               }
             });
             
             let activeLarge = Math.min(currentLarge, currentProdWorkers);
             let activeSmall = Math.min(currentSmall, Math.max(0, currentProdWorkers - activeLarge));
-            const baseCap = (activeLarge * 2) + (activeSmall * 1);
-            const activeAttach = Math.min(currentAttach, activeLarge + activeSmall);
-            const activeCapacity = baseCap + activeAttach;
+            
+            // 小型機械にアタッチメントを割り当て (小型機械1台につきアタッチは最大1つ有効)
+            const activeAttach = Math.min(currentAttach, activeSmall);
+            
+            // 基本生産能力: 大型は1台につき4個、小型は1台につき1個、アタッチは+1個
+            const baseCap = (activeLarge * 4) + (activeSmall * 1) + activeAttach;
+            
+            // PAC生産性 (緑チップ) のブースト: 稼働している機械1台につき+1個
+            const pacBoost = p.hasPac ? (activeLarge + activeSmall) : 0;
+            const activeCapacity = baseCap + pacBoost;
             
             const finalProduceQty = Math.min(payload.qty, activeCapacity); // 生産能力上限で切り詰め
             
             if (payload.type === 'input') {
+              const totalInputCost = finalProduceQty * 2; // 投入は 1個につき2万円 (コ)
               newLedger.push({
                 id: generateId(),
                 category: "コ",
-                amount: 0,
+                amount: totalInputCost,
                 quantity: finalProduceQty,
-                memo: `材料投入`
+                memo: `材料投入 (単価:2万)`
               });
-              actionLogText = `⚙️ [投入] ${p.name} が材料 ${finalProduceQty} 個を工場ラインへ投入しました。(最大生産能力: ${activeCapacity}個)`;
+              actionLogText = `⚙️ [投入] ${p.name} が材料 ${finalProduceQty} 個を工場ラインへ投入しました (投入費: ¥${totalInputCost}万、最大生産能力: ${activeCapacity}個)`;
             } else {
-              const totalProcessingCost = finalProduceQty * 10;
+              const totalProcessingCost = finalProduceQty * 1; // 完成は 1個につき1万円 (サ)
               newLedger.push({
                 id: generateId(),
                 category: "サ",
                 amount: totalProcessingCost,
                 quantity: finalProduceQty,
-                memo: `完成加工費`
+                memo: `製品完成加工費 (単価:1万)`
               });
-              actionLogText = `🏭 [完成] ${p.name} が製品を ${finalProduceQty} 個完成させました (加工費: ¥${totalProcessingCost}万、最大生産能力: ${activeCapacity}個)`;
+              actionLogText = `🏭 [完成] ${p.name} が製品を ${finalProduceQty} 個完成させました (完成加工費: ¥${totalProcessingCost}万、最大生産能力: ${activeCapacity}個)`;
             }
           }
           break;
@@ -705,19 +770,20 @@ function App() {
             let price = 0;
             let label = "";
             if (payload.type === 'small') {
-              price = 40;
+              price = 100; // ジュニア・ルール: 小型 100万
               label = "小型機械";
               newCarryover.smallMachines = (newCarryover.smallMachines || 0) + 1;
             } else if (payload.type === 'large') {
-              price = 80;
+              price = 200; // ジュニア・ルール: 大型 200万
               label = "大型機械";
               newCarryover.largeMachines = (newCarryover.largeMachines || 0) + 1;
             } else if (payload.type === 'attachment') {
-              price = 10;
+              price = 20; // ジュニア・ルール: アタッチメント 20万
               label = "アタッチメント";
               newCarryover.attachments = (newCarryover.attachments || 0) + 1;
             }
             newCarryover.machinesCount = (newCarryover.largeMachines || 0) + (newCarryover.smallMachines || 0);
+            newCarryover.machinesValue = (newCarryover.machinesValue || 0) + price; // 簿価の加算
 
             newLedger.push({
               id: generateId(),
@@ -739,30 +805,29 @@ function App() {
             
             if (isProd) {
               newCarryover.workersProd = currentProd + 1;
-              newCarryover.workersSales = currentSales;
             } else {
-              newCarryover.workersProd = currentProd;
               newCarryover.workersSales = currentSales + 1;
             }
             
             newCarryover.workers = newCarryover.workersProd + newCarryover.workersSales;
             
+            // ジュニア・ルール: 採用費は5万円、科目は一般管理費（ソ）
             newLedger.push({
               id: generateId(),
-              category: "シ",
-              amount: 5, // 採用時に5万円
+              category: "ソ",
+              amount: 5,
               quantity: 1,
               memo: `新規採用（${isProd ? 'ワーカー' : 'セールスマン'}）`
             });
-            actionLogText = `👤 [雇用] ${p.name} が ${isProd ? '⚙️ワーカー (工場職人)' : '💼セールスマン (営業員)'} を新規採用しました。(合計: ${newCarryover.workers}人、ワーカー:${newCarryover.workersProd}人 / セールスマン:${newCarryover.workersSales}人)`;
+            actionLogText = `👤 [雇用] ${p.name} が ${isProd ? '⚙️ワーカー (工場職人)' : '💼セールスマン (営業員)'} を新規採用しました。(採用費¥5万は「ソ」に計上。合計: ${newCarryover.workers}人、ワーカー:${newCarryover.workersProd}人 / セールスマン:${newCarryover.workersSales}人)`;
           }
           break;
 
         case "loan":
           if (isTarget) {
             const pPeriod = p.currentPeriod || 1;
-            const isOneToThree = pPeriod <= 3;
-            const interestRate = isOneToThree ? 0.10 : 0.05;
+            // 2〜3期目は10%、4期目以降は5%
+            const interestRate = pPeriod <= 3 ? 0.10 : 0.05;
             const interestAmount = Math.round(payload.amount * interestRate); // 金利(万円)
             
             // 1. 借入金 (オ) 入金
@@ -786,6 +851,125 @@ function App() {
             }
             
             actionLogText = `🏦 [借入金] ${p.name} が銀行から ¥${payload.amount}万 を借入しました。(金利 ¥${interestAmount}万 が自動発生し「タ」に即時計上されました)`;
+          }
+          break;
+
+        case "buy_chip":
+          if (isTarget) {
+            const chipType = payload.chipType;
+            let price = 0;
+            let category = "ソ";
+            let label = "";
+            
+            if (chipType === 'insurance') {
+              price = 5;
+              category = "ソ"; // 保険: 一般管理費
+              label = "保険 (黄チップ)";
+              p.hasInsurance = true;
+            } else if (chipType === 'pac') {
+              price = 10;
+              category = "ス"; // PAC生産性: 製造経費
+              label = "PAC生産性 (緑チップ)";
+              p.hasPac = true;
+            } else if (chipType === 'merchandiser') {
+              price = 10;
+              category = "ソ"; // マーチャンダイザー: 一般管理費
+              label = "マーチャンダイザー (緑チップ)";
+              p.hasMerchandiser = true;
+            } else if (chipType === 'research') {
+              price = 10;
+              category = "セ"; // マーケットリサーチ: 販売費
+              label = "マーケットリサーチ (緑チップ)";
+              p.hasResearch = true;
+            }
+            
+            newLedger.push({
+              id: generateId(),
+              category: category,
+              amount: price,
+              quantity: 1,
+              memo: `${label}購入`
+            });
+            
+            actionLogText = `🟡 [チップ購入] ${p.name} が ${label} を ¥${price}万 で購入しました。(科目:「${category}」)`;
+          }
+          break;
+
+        case "transfer_worker":
+          if (isTarget) {
+            const toType = payload.type; // 'prod' または 'sales'
+            const currentProd = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 2;
+            const currentSales = newCarryover.workersSales !== undefined ? newCarryover.workersSales : 1;
+            
+            if (toType === 'prod' && currentSales > 0) {
+              newCarryover.workersProd = currentProd + 1;
+              newCarryover.workersSales = currentSales - 1;
+            } else if (toType === 'sales' && currentProd > 0) {
+              newCarryover.workersProd = currentProd - 1;
+              newCarryover.workersSales = currentSales + 1;
+            }
+            
+            newLedger.push({
+              id: generateId(),
+              category: "ソ",
+              amount: 5, // 配置転換費 5万円
+              quantity: 1,
+              memo: `配置転換（${toType === 'prod' ? 'ワーカーに移動' : 'セールスマンに移動'}）`
+            });
+            
+            actionLogText = `🔄 [配置転換] ${p.name} が ¥5万（研修費）を支払い、社員の職種を配置転換しました。(ワーカー:${newCarryover.workersProd}人 / セールスマン:${newCarryover.workersSales}人)`;
+          }
+          break;
+
+        case "sell_machine":
+          if (isTarget) {
+            const mType = payload.machineType;
+            let refund = 0;
+            let label = "";
+            let originalPrice = 0;
+            
+            if (mType === 'small' && (newCarryover.smallMachines || 0) > 0) {
+              refund = 50;
+              originalPrice = 100;
+              label = "小型機械";
+              newCarryover.smallMachines = newCarryover.smallMachines - 1;
+            } else if (mType === 'large' && (newCarryover.largeMachines || 0) > 0) {
+              refund = 100;
+              originalPrice = 200;
+              label = "大型機械";
+              newCarryover.largeMachines = newCarryover.largeMachines - 1;
+            } else if (mType === 'attachment' && (newCarryover.attachments || 0) > 0) {
+              refund = 10;
+              originalPrice = 20;
+              label = "アタッチメント";
+              newCarryover.attachments = newCarryover.attachments - 1;
+            }
+            
+            newCarryover.machinesCount = (newCarryover.largeMachines || 0) + (newCarryover.smallMachines || 0);
+            newCarryover.machinesValue = Math.max(0, (newCarryover.machinesValue || 0) - originalPrice); // 元の購入価格（簿価）を減算する
+            
+            newLedger.push({
+              id: generateId(),
+              category: "イ",
+              amount: refund,
+              quantity: 1,
+              memo: `${label}売却`
+            });
+            
+            actionLogText = `💸 [機械売却] ${p.name} が ${label} を売却し、半額の ¥${refund}万 を回収しました。(「イ」に計上)`;
+          }
+          break;
+
+        case "repay":
+          if (isTarget) {
+            newLedger.push({
+              id: generateId(),
+              category: "ナ",
+              amount: payload.amount,
+              quantity: 0,
+              memo: `借入金返済`
+            });
+            actionLogText = `🏦 [借入返済] ${p.name} が銀行に借入金 ¥${payload.amount}万 を返済しました。`;
           }
           break;
 
@@ -820,7 +1004,20 @@ function App() {
         case "risk_fire":
           if (isTarget) {
             newActuals.fireCount = (newActuals.fireCount || 0) + 2;
-            actionLogText = `🔥 [火災災害] ${p.name} で火災が発生し、材料 2個 が焼失しました！`;
+            let insuranceText = "";
+            if (p.hasInsurance) {
+              const insurancePayout = 8 * 2; // 火災時に8万/個 × 2個 = 16万
+              newLedger.push({
+                id: generateId(),
+                category: "エ",
+                amount: insurancePayout,
+                quantity: 0,
+                memo: `火災保険金受取 (8万×2)`
+              });
+              p.hasInsurance = false; // 保険チップは返却
+              insuranceText = `（🛡️保険チップ適用により受取保険金「エ」¥${insurancePayout}万が自動計上され、チップは回収されました）`;
+            }
+            actionLogText = `🔥 [火災災害] ${p.name} で火災が発生し、材料 2個 が焼失しました！${insuranceText}`;
           }
           break;
 
@@ -834,7 +1031,20 @@ function App() {
         case "risk_theft":
           if (isTarget) {
             newActuals.theftCount = (newActuals.theftCount || 0) + 1;
-            actionLogText = `🕵️ [製品盗難] ${p.name} で盗難が発生し、完成品製品 1個 が紛失しました！`;
+            let insuranceText = "";
+            if (p.hasInsurance) {
+              const insurancePayout = 10 * 1; // 盗難時に10万/個 × 1個 = 10万
+              newLedger.push({
+                id: generateId(),
+                category: "エ",
+                amount: insurancePayout,
+                quantity: 0,
+                memo: `盗難保険金受取 (10万×1)`
+              });
+              p.hasInsurance = false; // 保険チップは返却
+              insuranceText = `（🛡️保険チップ適用により受取保険金「エ」¥${insurancePayout}万が自動計上され、チップは回収されました）`;
+            }
+            actionLogText = `🕵️ [製品盗難] ${p.name} で盗難が発生し、完成品製品 1個 が紛失しました！${insuranceText}`;
           }
           break;
 
@@ -868,8 +1078,41 @@ function App() {
           break;
       }
 
+      // 統計（stats）の更新と累積
+      const updatedStats = { ...p.stats };
+      if (!isRiskAction && type !== "draw") {
+        if (isTarget) {
+          const elapsed = Date.now() - turnStartTime;
+          updatedStats.totalDecisionTime = (updatedStats.totalDecisionTime || 0) + elapsed;
+          updatedStats.decisionCount = (updatedStats.decisionCount || 0) + 1;
+        }
+      }
+
+      // 1回の最大販売個数
+      if (type === "sale_direct" && isTarget) {
+        updatedStats.maxSingleSaleQty = Math.max(updatedStats.maxSingleSaleQty || 0, payload.qty || 0);
+      }
+      if (type === "sale_auction" && isAuctionWinner) {
+        updatedStats.maxSingleSaleQty = Math.max(updatedStats.maxSingleSaleQty || 0, payload.qty || 0);
+      }
+
+      // 最大チップ投資レベル
+      updatedStats.maxAdLevel = Math.max(updatedStats.maxAdLevel || 0, p.adLevel || 0);
+      updatedStats.maxRdLevel = Math.max(updatedStats.maxRdLevel || 0, p.rdLevel || 0);
+
+      // 手番の開始時点で在庫が枯渇（デッドロック）していないかの追跡
+      if (isTarget && type !== "draw" && !isRiskAction) {
+        const matCount = newCarryover.materials || 0;
+        const wipCount = newCarryover.wip || 0;
+        const prodCount = newCarryover.products || 0;
+        if (matCount === 0 && wipCount === 0 && prodCount === 0) {
+          updatedStats.stockoutCount = (updatedStats.stockoutCount || 0) + 1;
+        }
+      }
+
       return {
         ...p,
+        stats: updatedStats,
         periods: {
           ...p.periods,
           [pPeriod]: {
@@ -908,30 +1151,24 @@ function App() {
     if (phase === 'ruleB') {
       if (!activePlayer.isNpc) return;
 
-      // 1. お金が十分（¥150万以上）かつ機械台数が少ない場合 ➔ 機械購入
-      if (npcRes.bookEndingCash >= 150 && (npcRes.machines.large + npcRes.machines.small) < 2) {
-        handleExecuteAction("buy_machine", { type: "small" });
-        setPhase('draw'); // 実行後、ドローへ移行
-        return;
-      }
+      // 新設した NPC ルールB 意思決定エンジンを呼び出す
+      const decision = decideNpcRuleB(activePlayer, npcRes, activePlayer.difficulty);
       
-      // 2. お金が十分（¥120万以上）かつ社員が3名未満の場合 ➔ 雇用
-      if (npcRes.bookEndingCash >= 120 && npcRes.workers < 3) {
-        handleExecuteAction("hire", {});
+      if (!decision || decision.type === "end") {
+        // やるべきアクションがなければ、ルールBフェーズを終了し、カードドローへ移行！
+        addLog(`📢 [手番前終了] ${activePlayer.name} は手番前（ルールB）アクションを終了しました。`);
         setPhase('draw');
-        return;
+      } else {
+        // 意思決定に基づくアクションを実行する
+        let finalType = decision.type;
+        let finalPayload = decision.payload;
+        
+        handleExecuteAction(finalType, finalPayload);
+        
+        // 実行後、NPCは「ruleB」フェーズを維持します。
+        // これにより、手番進行をクリックするたびにAIは連続してルールBを評価・実行できます。
+        // AIが「やることがない（end）」と判断した時点で、自律的に draw フェーズに移行します。
       }
-      
-      // 3. 原料仕掛品（WIP）があり、完成できる場合 ➔ 製造完成 (加工費: ¥10万/個)
-      if (npcRes.wip.endingCount > 0 && npcRes.bookEndingCash >= 50) {
-        const qtyToProduce = Math.min(npcRes.wip.endingCount, npcRes.workers * 2);
-        handleExecuteAction("produce", { type: "complete", qty: qtyToProduce });
-        setPhase('draw');
-        return;
-      }
-      
-      // 特にやることがなければ、そのままドローへ移行
-      setPhase('draw');
       return;
     }
 
@@ -953,7 +1190,26 @@ function App() {
     const marketList = Object.values(markets);
     const availableMarket = marketList.find(m => m.materials > 0) || marketList[2];
     
-    const decisionCardSim = { type: "purchase" };
+    // 現在NPCが引いたカードは「意思決定（ワイルドカード）」です！
+    // したがって、NPCが現在の在庫・能力・現預金状況に基づいて、最も必要としているカードアクションをインテリジェントに選択させます。
+    let bestCardType = "pass";
+    if (npcResults.prod.endingCount > 0) {
+      bestCardType = "sale_direct";
+    } else if (npcResults.wip.endingCount > 0 && npcResults.bookEndingCash >= 5) {
+      bestCardType = "produce"; // 製造（完成）
+    } else if (npcResults.mat.endingCount > 0 && npcResults.bookEndingCash >= 10) {
+      bestCardType = "produce"; // 製造（投入）
+    } else if (availableMarket.materials > 0 && npcResults.bookEndingCash >= 30) {
+      bestCardType = "purchase"; // 材料仕入
+    } else if (npcResults.bookEndingCash >= 150 && (npcResults.machines.large + npcResults.machines.small) < 3) {
+      bestCardType = "buy_machine"; // 機械購入
+    } else if (npcResults.bookEndingCash >= 80 && (npcResults.machines.large + npcResults.machines.small) > npcResults.workers) {
+      bestCardType = "hire"; // 社員採用
+    } else if (npcResults.bookEndingCash >= 40) {
+      bestCardType = Math.random() < 0.5 ? "rd" : "ad"; // 研究開発または広告
+    }
+    
+    const decisionCardSim = { type: bestCardType };
     const decision = decideNpcAction(activePlayer, npcResults, decisionCardSim, activePlayer.difficulty, availableMarket.materials);
     
     let finalType = decision.type;
@@ -983,10 +1239,8 @@ function App() {
   // AI対戦オークション (効果音連携)
   const handleRunAuctionWithNpcs = (yourBidPrice, qty, marketId) => {
     const bids = {};
-    const rdLevels = {};
     
     players.forEach((p, idx) => {
-      rdLevels[idx] = p.rdLevel || 0;
       if (p.isNpc) {
         const npcData = p.periods[p.currentPeriod];
         const npcRes = calculateFinancials(npcData.carryover, npcData.ledger, npcData.actuals);
@@ -998,59 +1252,52 @@ function App() {
     });
 
     const parentIdx = turnOrder[orderIndex]; // 親 (現在の手番プレイヤーのインデックス)
+    const limitPrice = INITIAL_MARKETS[marketId].limitPrice; // 各市場の上限価格
 
-    // 各プレイヤーの実質的な入札評価値を計算
-    // 研究開発チップを持っているプレイヤーは「提示額 + 2万円」の評価値アドバンテージを得る
+    // 各プレイヤーの実質的な競争価格（評価値。安い方が勝ち！）を計算
     const evalPrices = {};
     players.forEach((p, idx) => {
-      const baseBid = bids[idx];
-      const hasRd = rdLevels[idx] > 0;
-      evalPrices[idx] = hasRd ? (baseBid + 2) : baseBid;
+      const baseBid = bids[idx] || 999;
+      // 親は -2、研究開発チップ(青)1枚につき -2 の補正
+      const isParent = idx === parentIdx;
+      const rdCount = p.rdLevel || 0;
+      evalPrices[idx] = baseBid - (isParent ? 2 : 0) - (rdCount * 2);
     });
 
-    // 落札者の選定 (評価値の高い順、同評価の場合は優先順位判定)
+    // 落札者の選定 (評価値が低い順、同評価の場合は優先順位判定)
     let winnerIdx = -1;
-    let highestEval = -1;
+    let lowestEval = 999;
 
     players.forEach((p, idx) => {
       const evalPrice = evalPrices[idx];
       const isWinnerEmpty = winnerIdx === -1;
       
       if (isWinnerEmpty) {
-        highestEval = evalPrice;
+        lowestEval = evalPrice;
         winnerIdx = idx;
         return;
       }
 
-      // 評価額が高い方が優先落札
-      if (evalPrice > highestEval) {
-        highestEval = evalPrice;
+      // 競争価格が安い（値ごろ感がある）方が優先落札
+      if (evalPrice < lowestEval) {
+        lowestEval = evalPrice;
         winnerIdx = idx;
       } 
-      // 評価額が同点の場合の優先順位チェック
-      else if (evalPrice === highestEval) {
-        const currentWinnerRd = rdLevels[winnerIdx] || 0;
-        const thisRd = rdLevels[idx] || 0;
+      // 評価額が同点（同金額）の場合の優先順位チェック
+      else if (evalPrice === lowestEval) {
+        const currentWinnerRd = players[winnerIdx].rdLevel || 0;
+        const thisRd = p.rdLevel || 0;
         
-        // 1. 研究開発チップを持っている方が強い
-        if (thisRd > 0 && currentWinnerRd === 0) {
+        // 1. 研究開発（青）の所持枚数が多い方が優先
+        if (thisRd > currentWinnerRd) {
           winnerIdx = idx;
-        } else if (thisRd > 0 && currentWinnerRd > 0) {
-          // 両方持っている場合は、枚数（レベル）が多い方が強い
-          if (thisRd > currentWinnerRd) {
-            winnerIdx = idx;
-          } else if (thisRd === currentWinnerRd) {
-            // 枚数も同じ場合、親（parentIdx）である方が強いが、チップ持ちは親より強い
-            // すなわち、自分が親で相手が親でないなら、自分が優先
-            if (idx === parentIdx) {
-              winnerIdx = idx;
-            }
-          }
-        } 
-        // 両方ともチップを持っていない場合
-        else if (thisRd === 0 && currentWinnerRd === 0) {
-          // 親が優先
+        } else if (thisRd === currentWinnerRd) {
+          // 2. 所持数も同じなら、親が優先
           if (idx === parentIdx) {
+            winnerIdx = idx;
+          }
+          // 3. 親でもなく、条件が完全同一ならサイコロ（ランダムで50%）
+          else if (winnerIdx !== parentIdx && Math.random() < 0.5) {
             winnerIdx = idx;
           }
         }
@@ -1059,18 +1306,28 @@ function App() {
 
     const marketName = INITIAL_MARKETS[marketId].name;
     const bidInfo = players.map(p => {
-      const hasRd = rdLevels[p.id] > 0;
+      const isParent = p.id === parentIdx;
+      const rdCount = p.rdLevel || 0;
       const displayBid = bids[p.id];
-      const evalText = hasRd ? ` (実質評価: ¥${evalPrices[p.id]}万 / 研開発チップ有)` : "";
+      const evalText = ` (実質評価: ¥${evalPrices[p.id]}万${isParent ? ' / 親特典-2万' : ''}${rdCount > 0 ? ` / 青チップ枚数:${rdCount}` : ''})`;
       return `${p.name}: ¥${displayBid}万${evalText}`;
     }).join(", ");
     
     addLog(`⚔️ [${marketName}入札結果] 一覧: ${bidInfo}`);
 
-    // 落札単価は、提示した本来の金額 (研究開発チップによる実質的な -2万円値引き落札とする)
-    const finalPrice = bids[winnerIdx];
+    // 落札単価は提示した金額。ただし、マーケットリサーチ（緑チップ）を持っているなら単価+2万円（上限を超えない）
+    let finalPrice = bids[winnerIdx];
+    let researchText = "";
+    if (players[winnerIdx].hasResearch) {
+      const oldPrice = finalPrice;
+      finalPrice = Math.min(limitPrice, finalPrice + 2);
+      if (finalPrice > oldPrice) {
+        researchText = `（🟢マーケットリサーチ適用により単価+${finalPrice - oldPrice}万ブーストされ、売上は ¥${finalPrice}万 となりました！）`;
+      }
+    }
 
     handleExecuteAction("sale_auction", { winnerIdx, price: finalPrice, qty, marketId });
+    alert(`🎉 ${players[winnerIdx].name} が ${marketName} にて製品を落札しました！(落札単価: ¥${finalPrice}万)${researchText}`);
   };
 
   // 手番の終了 ➔ 次へ
@@ -1081,7 +1338,7 @@ function App() {
 
     if (nextOrderIndex === 0) {
       if (commonTurn >= 30) {
-        if (window.confirm("第30ターン（最終ターン）が終了しました。期末決算処理を行いますか？\n（期末自動人件費の記帳、および借入金の20%自動返済が自動的に帳簿へ追加されます）")) {
+        if (window.confirm("第30ターン（最終ターン）が終了しました。期末決算処理を行いますか？\n（期末自動労務費・製造経費・販売費・管理費・借入金利が自動的に帳簿へ追加されます）")) {
           
           // 全プレイヤーの帳簿へ「期末自動仕訳」を追加
           setPlayers(prev => prev.map(p => {
@@ -1099,60 +1356,135 @@ function App() {
               if (entry.category === 'ナ') totalLoan -= (Number(entry.amount) || 0); // 返済
             });
             
+            // 現在の機械数（延べ台数：小型＋大型＋アタッチメント）を算出
+            let currentLarge = carryover.largeMachines || 0;
+            let currentSmall = carryover.smallMachines || 0;
+            let currentAttach = carryover.attachments || 0;
+            ledger.forEach(entry => {
+              if (entry.category === 'ケ') {
+                if (entry.memo?.includes('大型')) currentLarge += (Number(entry.quantity) || 0);
+                if (entry.memo?.includes('小型')) currentSmall += (Number(entry.quantity) || 0);
+                if (entry.memo?.includes('アタッチメント')) currentAttach += (Number(entry.quantity) || 0);
+              }
+              if (entry.category === 'イ') {
+                if (entry.memo?.includes('大型')) currentLarge -= (Number(entry.quantity) || 0);
+                if (entry.memo?.includes('小型')) currentSmall -= (Number(entry.quantity) || 0);
+                if (entry.memo?.includes('アタッチメント')) currentAttach -= (Number(entry.quantity) || 0);
+              }
+            });
+            const machineTotal = Math.max(0, currentLarge + currentSmall + currentAttach);
+
             // 現在のワーカー数とセールスマン数を算出
             let workersProdCount = carryover.workersProd !== undefined ? carryover.workersProd : 2;
             let workersSalesCount = carryover.workersSales !== undefined ? carryover.workersSales : 1;
             ledger.forEach(entry => {
-              if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+              if (entry.category === 'ソ' && entry.memo?.includes('新規採用（ワーカー）')) {
                 workersProdCount += (Number(entry.quantity) || 0);
               }
-              if (entry.category === 'シ' && entry.memo?.includes('セールスマン')) {
+              if (entry.category === 'ソ' && entry.memo?.includes('新規採用（セールスマン）')) {
+                workersSalesCount += (Number(entry.quantity) || 0);
+              }
+              if (entry.category === 'ソ' && entry.memo?.includes('配置転換（ワーカーに移動）')) {
+                workersProdCount += (Number(entry.quantity) || 0);
+                workersSalesCount -= (Number(entry.quantity) || 0);
+              }
+              if (entry.category === 'ソ' && entry.memo?.includes('配置転換（セールスマンに移動）')) {
+                workersProdCount -= (Number(entry.quantity) || 0);
                 workersSalesCount += (Number(entry.quantity) || 0);
               }
             });
-            const totalWorkers = workersProdCount + workersSalesCount;
             
             const updatedLedger = [...ledger];
             
             // すでに【期末自動】がある場合は重複追加しない
-            const hasLaborCost = ledger.some(entry => entry.memo?.includes("【期末自動】"));
+            const hasAutoSettlement = ledger.some(entry => entry.memo?.includes("【期末自動】"));
             
-            if (!hasLaborCost) {
-              // 1. 期末人件費（給料＋社会保険料）の自動仕訳
-              // 給料: 16万 + (期 - 1) * 3万
-              // 社保: 8万 + (期 - 1) * 2万
-              const salaryPerWorker = 16 + (pPeriod - 1) * 3;
-              const insurancePerWorker = 8 + (pPeriod - 1) * 2;
-              const totalCostPerWorker = salaryPerWorker + insurancePerWorker;
-              const totalLaborCost = totalWorkers * totalCostPerWorker;
+            if (!hasAutoSettlement) {
+              // ジュニア・ルール期末費用単価表
+              const JUNIOR_PERIOD_FEES = {
+                1: { workers: 15, machines: 20, sales: 15, admin: 10 },
+                2: { workers: 17, machines: 22, sales: 17, admin: 11 },
+                3: { workers: 19, machines: 24, sales: 19, admin: 12 },
+                4: { workers: 21, machines: 26, sales: 21, admin: 13 },
+                5: { workers: 23, machines: 28, sales: 23, admin: 14 }
+              };
               
+              const fees = JUNIOR_PERIOD_FEES[pPeriod] || JUNIOR_PERIOD_FEES[5];
+              
+              // 1. 労務費 (シ) 期末自動計上
+              const totalLaborCost = workersProdCount * fees.workers;
               if (totalLaborCost > 0) {
                 updatedLedger.push({
                   id: `auto_labor_${Date.now()}_${Math.random()}`,
                   category: "シ",
                   amount: totalLaborCost,
-                  quantity: totalWorkers,
-                  memo: `【期末自動】人件費(給料:${salaryPerWorker}万+社保:${insurancePerWorker}万) / ${totalWorkers}人`
+                  quantity: workersProdCount,
+                  memo: `【期末自動】労務費 (単価:${fees.workers}万 / ${workersProdCount}人)`
                 });
               }
-              
-              // 2. 借入金20%自動返済の自動仕訳
-              if (totalLoan > 0) {
-                const repaymentAmount = Math.round(totalLoan * 0.2); // 20%自動返済 (四捨五入)
-                if (repaymentAmount > 0) {
+
+              // 2. 製造経費 (ス) 期末自動計上 (機械延べ台数に基づく固定経費)
+              const totalMachineCost = machineTotal * fees.machines;
+              if (totalMachineCost > 0) {
+                updatedLedger.push({
+                  id: `auto_machine_${Date.now()}_${Math.random()}`,
+                  category: "ス",
+                  amount: totalMachineCost,
+                  quantity: machineTotal,
+                  memo: `【期末自動】製造経費 (単価:${fees.machines}万 / 延べ機械:${machineTotal}台)`
+                });
+              }
+
+              // 3. 販売費 (セ) 期末自動計上
+              const totalSalesWorkerCost = workersSalesCount * fees.sales;
+              if (totalSalesWorkerCost > 0) {
+                updatedLedger.push({
+                  id: `auto_sales_${Date.now()}_${Math.random()}`,
+                  category: "セ",
+                  amount: totalSalesWorkerCost,
+                  quantity: workersSalesCount,
+                  memo: `【期末自動】販売費人件費 (単価:${fees.sales}万 / ${workersSalesCount}人)`
+                });
+              }
+
+              // 4. 一般管理費 (ソ) 期末自動計上 (期末合計社員数に基づく固定管理費)
+              const totalWorkersTotal = workersProdCount + workersSalesCount;
+              const totalAdminCost = totalWorkersTotal * fees.admin;
+              if (totalAdminCost > 0) {
+                updatedLedger.push({
+                  id: `auto_admin_${Date.now()}_${Math.random()}`,
+                  category: "ソ",
+                  amount: totalAdminCost,
+                  quantity: totalWorkersTotal,
+                  memo: `【期末自動】一般管理費人件費 (単価:${fees.admin}万 / ${totalWorkersTotal}人)`
+                });
+              }
+
+              // 5. 借入金に対する期末金利（タ）の自動計上
+              if (totalLoan > 0 && pPeriod >= 2) {
+                const interestRate = pPeriod <= 3 ? 0.10 : 0.05;
+                const periodInterest = Math.round(totalLoan * interestRate);
+                if (periodInterest > 0) {
                   updatedLedger.push({
-                    id: `auto_loan_repay_${Date.now()}_${Math.random()}`,
-                    category: "ナ",
-                    amount: repaymentAmount,
+                    id: `auto_loan_interest_${Date.now()}_${Math.random()}`,
+                    category: "タ",
+                    amount: periodInterest,
                     quantity: 0,
-                    memo: `【期末自動】借入金20%自動返済`
+                    memo: `【期末自動】借入金期末金利支払 (残額:${totalLoan}万 / 率:${interestRate * 100}%)`
                   });
                 }
               }
             }
             
+            // 🧹 各種チップの完全返却（リセット）
             return {
               ...p,
+              rdLevel: 0,
+              adLevel: 0,
+              hasInsurance: false,
+              hasPac: false,
+              hasMerchandiser: false,
+              hasResearch: false,
               periods: {
                 ...p.periods,
                 [pPeriod]: {
@@ -1187,6 +1519,7 @@ function App() {
     setCurrentCard(null);
     setActiveRiskEvent(null);
     setPhase('ruleB');
+    setTurnStartTime(Date.now());
     playActionSound(); // 次の手番切り替え音
   };
 
@@ -1483,6 +1816,8 @@ function App() {
                 phase={phase}
                 markets={markets}
                 gameLogs={gameLogs}
+                turnOrder={turnOrder}
+                orderIndex={orderIndex}
                 onDrawCard={handleDrawCard}
                 onDrawRiskEvent={handleDrawRiskEvent}
                 onExecuteAction={handleExecuteAction}
@@ -1533,6 +1868,8 @@ function App() {
 
             {activeTab === 'periodEnd' && (
               <PeriodEndWizard 
+                players={players}
+                commonPeriod={commonPeriod}
                 carryover={currentData.carryover}
                 ledger={currentData.ledger}
                 actuals={currentData.actuals}

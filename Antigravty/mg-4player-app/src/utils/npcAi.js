@@ -12,31 +12,33 @@ export const DIFFICULTY_LEVELS = {
 
 /**
  * NPCの入札価格 (オークション) を自動決定する
+ * ジュニア・ルール: 価格が安い順に落札されるため、AIは「確実に利益が出る範囲でできるだけ安い価格」を提示する！
  */
 export function decideNpcBid(player, results, difficulty) {
   const { endingCount } = results.prod;
   if (endingCount <= 0) return 0; // 製品がない場合は入札に参加できない
 
   const cash = results.bookEndingCash;
-  const rd = player.rdLevel || 0;
-  const ad = player.adLevel || 0;
+  const rd = player.rdLevel || 0; // 青チップ枚数
 
   // 基本入札価格の決定 (万円)
-  let basePrice = 24; // デフォルト
+  // 原価：材料費 (10〜15万) ＋ 投入・完成加工費 (3万) ≒ 13〜18万
+  let basePrice = 22; // デフォルト
   
   if (difficulty === DIFFICULTY_LEVELS.EASY) {
-    basePrice = 20 + Math.floor(Math.random() * 4); // 20〜23万 (安値)
+    basePrice = 25 + Math.floor(Math.random() * 3); // 25〜27万 (高めなので落札されにくい)
   } else if (difficulty === DIFFICULTY_LEVELS.MEDIUM) {
-    basePrice = 24 + Math.floor(Math.random() * 4); // 24〜27万 (適正)
+    basePrice = 22 + Math.floor(Math.random() * 3); // 22〜24万 (適正・堅実)
   } else if (difficulty === DIFFICULTY_LEVELS.HARD) {
-    basePrice = 27 + Math.floor(Math.random() * 6); // 27〜32万 (高値・攻撃的)
+    basePrice = 19 + Math.floor(Math.random() * 3); // 19〜21万 (安値で攻めて落札を狙う)
   }
 
-  // 研究開発 (R&D) や 広告 (AD) によるボーナス補正
-  // MGルール：研究レベルが高いと付加価値の高い売り方ができる、広告があると優先権や加算がある
-  const bonus = Math.floor(rd * 1.5) + Math.floor(ad * 1.0);
+  // ジュニア・ルールにおいて、青チップ（研究開発）は「実質評価額を -2万/枚 補正する」ため、
+  // AIはその補正アドバンテージ分だけ提示価格を高くしても落札しやすくなります。
+  // そのため、青チップの枚数に応じて提示価格を少し上乗せします。
+  const rdBonus = rd * 2;
   
-  return basePrice + bonus;
+  return Math.max(18, basePrice + rdBonus);
 }
 
 /**
@@ -62,23 +64,38 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
   
   if (periodData.ledger) {
     periodData.ledger.forEach(entry => {
-      if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+      if (entry.category === 'ソ' && entry.memo?.includes('新規採用（ワーカー）')) {
         workersProd += (Number(entry.quantity) || 0);
       }
-      if (entry.category === 'シ' && entry.memo?.includes('セールスマン')) {
+      if (entry.category === 'ソ' && entry.memo?.includes('新規採用（セールスマン）')) {
+        workersSales += (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('配置転換（ワーカーに移動）')) {
+        workersProd += (Number(entry.quantity) || 0);
+        workersSales -= (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('配置転換（セールスマンに移動）')) {
+        workersProd -= (Number(entry.quantity) || 0);
         workersSales += (Number(entry.quantity) || 0);
       }
     });
   }
   const workers = workersProd + workersSales;
 
-  // ワーカー制限付きの実質的な最大生産能力 (prodCapacity) を算出
+  // ジュニア公式: ワーカー数に応じた機械の稼働判定
   let activeLarge = Math.min(largeMachines, workersProd);
   let activeSmall = Math.min(smallMachines, Math.max(0, workersProd - activeLarge));
-  const baseCapacity = (activeLarge * 2) + (activeSmall * 1);
-  const totalActive = activeLarge + activeSmall;
-  const activeAttach = Math.min(attachCount, totalActive);
-  const prodCapacity = baseCapacity + activeAttach;
+  
+  // アタッチメントは小型機械に対してのみ有効
+  const activeAttach = Math.min(attachCount, activeSmall);
+  
+  // 基本生産能力: 大型4個、小型1個、アタッチ+1個
+  const baseCapacity = (activeLarge * 4) + (activeSmall * 1) + activeAttach;
+  
+  // PAC生産性 (緑チップ) のブースト: 稼働している機械（大型+小型）1台につき+1個
+  const pacBoost = player.hasPac ? (activeLarge + activeSmall) : 0;
+  
+  const prodCapacity = baseCapacity + pacBoost;
 
 
   // デフォルトアクション (何もしない/パス)
@@ -91,7 +108,8 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       if (materialsInMarket <= 0) return passAction;
       
       let targetQty = 1;
-      let price = 1; // 仕入単価 ¥1万
+      let price = 12; // 基本仕入価格 (東京想定など)
+      if (player.hasMerchandiser) price = 10; // マーチャンチップ所持時は 2万円引き！
       
       // 仕入上限は生産能力の2倍
       const maxBuy = Math.min(materialsInMarket, prodCapacity * 2);
@@ -114,7 +132,7 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       return {
         type: CARD_TYPES.PURCHASE,
         payload: { qty: targetQty, price },
-        log: `材料を市場から ${targetQty} 個仕入れました。(¥${targetQty}万)`
+        log: `材料を市場から ${targetQty} 個仕入れました。(¥${targetQty * price}万)`
       };
     }
 
@@ -123,8 +141,8 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       // 投入 (コ) するか 完成 (サ) するかの判断
       // 原則：仕掛品があれば完成「サ」を優先、なければ投入「コ」
       
-      if (wipCount > 0 && cash >= wipCount * 10) {
-        // 完成加工 (サ) の決定
+      // 完成加工 (サ) の決定: 加工費 ¥1万/個
+      if (wipCount > 0 && cash >= wipCount * 1) {
         let qty = Math.min(wipCount, prodCapacity);
         if (difficulty === DIFFICULTY_LEVELS.EASY) {
           qty = 1;
@@ -132,21 +150,21 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
           qty = Math.min(qty, workersProd);
         }
 
-        if (cash < qty * 10) {
-          qty = Math.floor(cash / 10);
+        if (cash < qty * 1) {
+          qty = Math.floor(cash / 1);
         }
 
         if (qty > 0) {
           return {
             type: CARD_TYPES.PRODUCE,
             payload: { type: "complete", qty },
-            log: `仕掛品 ${qty} 個を製品へ完成加工しました。(加工費: ¥${qty * 10}万、最大能力: ${prodCapacity}個)`
+            log: `仕掛品 ${qty} 個を製品へ完成加工しました。(完成加工費: ¥${qty * 1}万、最大能力: ${prodCapacity}個)`
           };
         }
       }
 
-      // 材料投入 (コ) の決定
-      if (matCount > 0) {
+      // 材料投入 (コ) の決定: 加工費 ¥2万/個
+      if (matCount > 0 && cash >= matCount * 2) {
         let qty = Math.min(matCount, prodCapacity);
         if (difficulty === DIFFICULTY_LEVELS.EASY) {
           qty = 1;
@@ -154,11 +172,15 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
           qty = Math.min(qty, workersProd);
         }
 
+        if (cash < qty * 2) {
+          qty = Math.floor(cash / 2);
+        }
+
         if (qty > 0) {
           return {
             type: CARD_TYPES.PRODUCE,
             payload: { type: "input", qty },
-            log: `材料 ${qty} 個を工場ラインへ投入しました。(仕掛品化、最大能力: ${prodCapacity}個)`
+            log: `材料 ${qty} 個を工場ラインへ投入しました。(投入加工費: ¥${qty * 2}万、最大能力: ${prodCapacity}個)`
           };
         }
       }
@@ -170,9 +192,9 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
     case CARD_TYPES.SALE_DIRECT: {
       if (prodCount <= 0) return passAction;
       
-      let price = 25; // 基本単価
-      if (difficulty === DIFFICULTY_LEVELS.EASY) price = 23;
-      if (difficulty === DIFFICULTY_LEVELS.HARD) price = 27; // 強気
+      let price = 24; // 基本単価
+      if (difficulty === DIFFICULTY_LEVELS.EASY) price = 22;
+      if (difficulty === DIFFICULTY_LEVELS.HARD) price = 26; // 強気
 
       return {
         type: CARD_TYPES.SALE_DIRECT,
@@ -182,39 +204,39 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
     }
 
     // 4. 機械購入 (ケ)
+    // ジュニア単価：大型200万、小型100万、アタッチ20万
     case CARD_TYPES.BUY_MACHINE: {
-      // 現金に余裕がある場合のみ購入
       if (difficulty === DIFFICULTY_LEVELS.EASY) {
         return passAction; // イージーは機械を買わない
       }
 
-      if (difficulty === DIFFICULTY_LEVELS.MEDIUM && cash >= 150) {
+      if (difficulty === DIFFICULTY_LEVELS.MEDIUM && cash >= 200) {
         // 中級は小型機械を購入
         return {
           type: CARD_TYPES.BUY_MACHINE,
           payload: { type: "small" },
-          log: "小型機械を ¥40万 で購入し、生産能力を高めました！"
+          log: "小型機械を ¥100万 で購入し、生産能力を高めました！"
         };
       }
 
       if (difficulty === DIFFICULTY_LEVELS.HARD) {
-        if (cash >= 200) {
+        if (cash >= 350) {
           return {
             type: CARD_TYPES.BUY_MACHINE,
             payload: { type: "large" },
-            log: "大型機械を ¥80万 で電撃購入し、大量生産体制へ移行しました！"
+            log: "大型機械を ¥200万 で購入し、大量生産体制へ移行しました！"
           };
-        } else if (cash >= 100) {
+        } else if (cash >= 200) {
           return {
             type: CARD_TYPES.BUY_MACHINE,
             payload: { type: "small" },
-            log: "小型機械を ¥40万 で購入し、生産能力を拡大しました。"
+            log: "小型機械を ¥100万 で購入し、生産能力を拡大しました。"
           };
-        } else if (cash >= 50 && (largeMachines + smallMachines > 0)) {
+        } else if (cash >= 50 && smallMachines > attachCount) {
           return {
             type: CARD_TYPES.BUY_MACHINE,
             payload: { type: "attachment" },
-            log: "機械アタッチメントを ¥10万 で購入し、生産ラインを微調整しました。"
+            log: "アタッチメントを ¥20万 で購入し、小型機械をパワーアップしました。"
           };
         }
       }
@@ -222,11 +244,12 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       return passAction;
     }
 
-    // 5. 社員雇用 (シ)
+    // 5. 社員雇用 (ソ)
+    // 採用費：¥5万
     case CARD_TYPES.HIRE: {
       if (difficulty === DIFFICULTY_LEVELS.EASY) return passAction;
       
-      const limit = difficulty === DIFFICULTY_LEVELS.MEDIUM ? 120 : 80;
+      const limit = difficulty === DIFFICULTY_LEVELS.MEDIUM ? 100 : 60;
       if (cash >= limit && workers < 6) {
         // 機械の合計台数がワーカーの数より多ければ、ワーカー（prod）を優先雇用、さもなくばセールスマン（sales）
         const machineCount = largeMachines + smallMachines;
@@ -235,7 +258,7 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
         return {
           type: CARD_TYPES.HIRE,
           payload: { type: hireRole },
-          log: `社員を1名新規雇用しました (${hireRole === 'prod' ? '⚙️ワーカー' : '💼セールスマン'}、合計社員数: ${workers + 1}人)`
+          log: `社員を1名新規採用しました (${hireRole === 'prod' ? '⚙️ワーカー' : '💼セールスマン'}、採用費: ¥5万、合計社員数: ${workers + 1}人)`
         };
       }
       return passAction;
@@ -305,4 +328,140 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
     default:
       return passAction;
   }
+}
+
+/**
+ * NPCのルールB（手番前・任意アクション）の意思決定を決定する
+ * 資金や所持チップ・人員比率に応じて賢く判断し、何もしない場合は { type: "end" } を返す
+ */
+export function decideNpcRuleB(player, results, difficulty) {
+  const cash = results.bookEndingCash;
+  const currentPeriod = player.currentPeriod;
+  const periodData = player.periods[currentPeriod];
+  
+  const prodCount = results.prod.endingCount;
+  const largeMachines = results.machines.large;
+  const smallMachines = results.machines.small;
+  
+  // LEDGERから現在のワーカー数とセールスマン数を算出
+  let workersProd = periodData.carryover.workersProd !== undefined ? periodData.carryover.workersProd : 2;
+  let workersSales = periodData.carryover.workersSales !== undefined ? periodData.carryover.workersSales : 1;
+  
+  if (periodData.ledger) {
+    periodData.ledger.forEach(entry => {
+      if (entry.category === 'ソ' && entry.memo?.includes('新規採用（ワーカー）')) {
+        workersProd += (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('新規採用（セールスマン）')) {
+        workersSales += (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('配置転換（ワーカーに移動）')) {
+        workersProd += (Number(entry.quantity) || 0);
+        workersSales -= (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'ソ' && entry.memo?.includes('配置転換（セールスマンに移動）')) {
+        workersProd -= (Number(entry.quantity) || 0);
+        workersSales += (Number(entry.quantity) || 0);
+      }
+    });
+  }
+  
+  // 借入残高の算出
+  let totalLoan = periodData.carryover.loan || 0;
+  if (periodData.ledger) {
+    periodData.ledger.forEach(entry => {
+      if (entry.category === 'オ') totalLoan += (Number(entry.amount) || 0);
+      if (entry.category === 'ナ') totalLoan -= (Number(entry.amount) || 0);
+    });
+  }
+
+  // 純資産の算出
+  const netAssets = results.bs.totalNetAssets || 100;
+
+  // 1. 資金が極度に少なく、借入余力がある場合は銀行借入 (オ)
+  if (cash < 20 && currentPeriod >= 2) {
+    const loanLimit = currentPeriod <= 3 ? netAssets * 2 : netAssets * 3;
+    if (totalLoan + 50 <= loanLimit) {
+      return {
+        type: "loan",
+        payload: { amount: 50 },
+        log: "手番前資金ショートを防ぐため、銀行から ¥50万 を借入れました。"
+      };
+    }
+  }
+
+  // 2. 資金に余裕がある場合、使い捨て優秀チップを優先購入 (buy_chip)
+  if (difficulty !== DIFFICULTY_LEVELS.EASY && cash >= 40) {
+    // 保険 (黄) - 災害対策として極めて優先度が高い
+    if (!player.hasInsurance && cash >= 35) {
+      return {
+        type: "buy_chip",
+        payload: { chipType: "insurance" },
+        log: "火災や盗難に備えて、損害保険（黄チップ）を ¥5万 で購入しました。"
+      };
+    }
+    
+    // PAC生産性 (緑) - 機械が余っていてワーカーがいる場合
+    if (!player.hasPac && (largeMachines + smallMachines > workersProd) && cash >= 60) {
+      return {
+        type: "buy_chip",
+        payload: { chipType: "pac" },
+        log: "生産効率を高めるため、PAC生産性（緑チップ）を ¥10万 で購入しました。"
+      };
+    }
+
+    // マーチャンダイザー (緑) - 材料を安く買うため
+    if (!player.hasMerchandiser && cash >= 70) {
+      return {
+        type: "buy_chip",
+        payload: { chipType: "merchandiser" },
+        log: "仕入コスト削減のため、マーチャンダイザー（緑チップ）を ¥10万 で購入しました。"
+      };
+    }
+
+    // マーケットリサーチ (緑) - 落札単価+2万のため
+    if (!player.hasResearch && prodCount > 0 && cash >= 60) {
+      return {
+        type: "buy_chip",
+        payload: { chipType: "research" },
+        log: "販売単価ブーストのため、マーケットリサーチ（緑チップ）を ¥10万 で購入しました。"
+      };
+    }
+  }
+
+  // 3. 人員のミスマッチがある場合は配置転換 (transfer_worker)
+  if (difficulty === DIFFICULTY_LEVELS.HARD && cash >= 30) {
+    // 機械が稼働していないのにセールスマンが余っている場合 ➔ ワーカーへ
+    if (largeMachines + smallMachines > workersProd && workersSales >= 2) {
+      return {
+        type: "transfer_worker",
+        payload: { type: "prod" },
+        log: "稼働機械を増やすため、セールスマンをワーカーへ配置転換しました。(研修費 ¥5万)"
+      };
+    }
+    // 製品が山積み（3個以上）なのにセールスマンが0または1人しかいない場合 ➔ セールスマンへ
+    if (prodCount >= 3 && workersSales <= 1 && workersProd >= 3) {
+      return {
+        type: "transfer_worker",
+        payload: { type: "sales" },
+        log: "製品販売力をブーストするため、ワーカーをセールスマンへ配置転換しました。(研修費 ¥5万)"
+      };
+    }
+  }
+
+  // 4. 資金が極めて豊富で、借入残高がある場合は任意返済 (repay)
+  if (cash >= 180 && totalLoan >= 50) {
+    return {
+      type: "repay",
+      payload: { amount: 50 },
+      log: "利息負担を軽減するため、借入金 ¥50万 を任意返済しました。"
+    };
+  }
+
+  // 5. 実行するものがない場合は終了
+  return {
+    type: "end",
+    payload: {},
+    log: "手番前アクションを終了しました。"
+  };
 }
