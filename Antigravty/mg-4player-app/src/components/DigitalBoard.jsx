@@ -25,7 +25,7 @@ function DigitalBoard({
   const isSelf = activePlayer.id === 0;
 
   // 意思決定カードの時に選択中のアクションタイプ
-  const [selectedActionType, setSelectedActionType] = useState('purchase'); // purchase, produce, sale_direct, buy_machine, hire, loan, rd, ad
+  const [selectedActionType, setSelectedActionType] = useState('purchase'); 
 
   // アクション用パラメータ
   const [targetMarketId, setTargetMarketId] = useState('tokyo'); 
@@ -41,13 +41,13 @@ function DigitalBoard({
   const [yourBidPrice, setYourBidPrice] = useState(26);
   const [auctionQty, setAuctionQty] = useState(2);
 
-  // === 【アジェンダ②】オークションアリーナ特設演出用ステート ===
+  // オークションアリーナ特設演出用ステート
   const [arenaOpen, setArenaOpen] = useState(false);
-  const [arenaState, setArenaState] = useState('thinking'); // thinking ➔ reveal ➔ done
+  const [arenaState, setArenaState] = useState('thinking'); 
   const [arenaBids, setArenaBids] = useState({});
   const [arenaWinnerIdx, setArenaWinnerIdx] = useState(-1);
   const [arenaWinnerPrice, setArenaWinnerPrice] = useState(-1);
-  const [revealedCounts, setRevealedCounts] = useState(0); // 順次反転表示用
+  const [revealedCounts, setRevealedCounts] = useState(0); 
   const [npcThinkingValues, setNpcThinkingValues] = useState({ 1: 20, 2: 20, 3: 20 });
 
   // 最大購入可能数の計算
@@ -58,13 +58,11 @@ function DigitalBoard({
   const handleStartAuctionArena = () => {
     if (yourBidPrice <= 0 || auctionQty <= 0) return;
     
-    // アリーナを開く
     setArenaOpen(true);
     setArenaState('thinking');
     setRevealedCounts(0);
     playActionSound();
 
-    // AIの入札を裏で事前計算
     const bids = { 0: Number(yourBidPrice) };
     players.forEach((p) => {
       if (p.isNpc) {
@@ -76,7 +74,6 @@ function DigitalBoard({
     });
     setArenaBids(bids);
 
-    // 落札者の計算
     let highest = -1;
     let winner = -1;
     Object.entries(bids).forEach(([idStr, price]) => {
@@ -90,7 +87,7 @@ function DigitalBoard({
     setArenaWinnerPrice(highest);
   };
 
-  // AIが考えてカタカタと入札額が動く演出エフェクト
+  // AIが考えてカタカタと入札額が動く演出
   useEffect(() => {
     let interval;
     if (arenaOpen && arenaState === 'thinking') {
@@ -102,7 +99,6 @@ function DigitalBoard({
         });
       }, 80);
 
-      // 2.2秒後にシャッフルを止め、開票フェーズへ
       setTimeout(() => {
         clearInterval(interval);
         setArenaState('reveal');
@@ -112,23 +108,22 @@ function DigitalBoard({
     return () => clearInterval(interval);
   }, [arenaOpen, arenaState]);
 
-  // 開票時、カードを1枚ずつドン！ドン！と反転表示させる
+  // 開票時、カードを1枚ずつ反転表示させる
   useEffect(() => {
     if (arenaOpen && arenaState === 'reveal') {
       if (revealedCounts < 4) {
         const timer = setTimeout(() => {
           setRevealedCounts(prev => prev + 1);
           playActionSound();
-        }, 600); // 0.6秒間隔で反転
+        }, 600); 
         return () => clearTimeout(timer);
       } else {
-        // 全員反転が完了したら、結果決定音 (落札ファンファーレ)
         setTimeout(() => {
           setArenaState('done');
           if (arenaWinnerIdx === 0) {
-            playFanfareSound(); // あなたの勝利！
+            playFanfareSound(); 
           } else {
-            playRiskConfirmSound(); // ライバルの落札
+            playRiskConfirmSound(); 
           }
         }, 400);
       }
@@ -136,90 +131,91 @@ function DigitalBoard({
   }, [arenaOpen, arenaState, revealedCounts]);
 
   const handleApplyAuctionResult = () => {
-    // 実際の売上アクションを親コンポーネントに反映
     onNpcAuction(Number(yourBidPrice), auctionQty, targetMarketId);
     setArenaOpen(false);
   };
 
   return (
     <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: '1.15fr 0.85fr', 
-      gap: '16px', 
-      height: 'calc(100vh - 120px)', 
-      overflow: 'hidden' 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: '20px', 
+      height: 'calc(100vh - 100px)', 
+      overflowY: 'auto',
+      padding: '10px 5px'
     }}>
       
-      {/* ==================== 【左カラム】市場マップ ✕ アクション・ドロー処理 (57.5%) ==================== */}
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '12px', 
-        overflowY: 'auto', 
-        paddingRight: '6px',
-        maxHeight: '100%'
+      {/* ==================== 【上段コモンボード】(市場マップ ✕ アクション・山札) ==================== */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1.25fr 1fr',
+        gap: '16px',
+        minHeight: '260px'
       }}>
         
-        {/* 1. 日本全国6大都市市場 ✕ コモン材料倉庫 */}
-        <div className="glass-card" style={{ background: 'rgba(5, 10, 25, 0.85)', border: '1px solid var(--border-light)', marginBottom: 0, padding: '12px' }}>
-          <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: '800', margin: '0 0 10px 0', color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {/* A. 日本全国6大都市市場 (左側) */}
+        <div className="glass-card" style={{ background: 'rgba(5, 10, 25, 0.85)', border: '1px solid var(--border-light)', margin: 0, padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: '800', margin: '0 0 12px 0', color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🗺️</span> 全国6大主要都市市場 (コモンボード)
           </h4>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px', flexGrow: 1 }}>
             {Object.values(markets).map(m => {
               const isNoMaterials = m.materials === 0;
               return (
                 <div 
                   key={m.id} 
                   style={{ 
-                    background: 'rgba(255,255,255,0.01)', 
-                    border: `1px solid ${isNoMaterials ? 'rgba(255,56,56,0.3)' : 'var(--border-light)'}`, 
-                    borderRadius: '8px', 
-                    padding: '8px', 
+                    background: 'rgba(255,255,255,0.02)', 
+                    border: `1.5px solid ${isNoMaterials ? 'rgba(255,56,56,0.4)' : 'var(--border-light)'}`, 
+                    borderRadius: '10px', 
+                    padding: '10px', 
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    minHeight: '110px'
+                    minHeight: '150px',
+                    boxShadow: isNoMaterials ? 'none' : '0 4px 12px rgba(0,0,0,0.25)',
+                    transition: 'all 0.3s ease'
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <strong style={{ fontSize: '0.75rem', color: '#fff' }}>{m.name.replace("市場", "")}</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <strong style={{ fontSize: '0.95rem', color: '#fff' }}>{m.name.replace("市場", "")}</strong>
                       {m.baseFreight > 0 && (
-                        <span style={{ fontSize: '0.55rem', color: 'var(--color-pink)', fontWeight: '700' }}>
-                          運賃:+{m.baseFreight}
+                        <span style={{ fontSize: '0.65rem', color: 'var(--color-pink)', fontWeight: '800', background: 'rgba(255, 0, 127, 0.1)', padding: '1px 4px', borderRadius: '3px' }}>
+                          +{m.baseFreight}
                         </span>
                       )}
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '4px 6px', borderRadius: '4px', marginBottom: '4px' }}>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 8px', borderRadius: '6px', marginBottom: '6px' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                         <span>残数:</span>
-                        <strong style={{ color: isNoMaterials ? 'var(--color-red)' : 'var(--color-green)' }}>
+                        <strong style={{ color: isNoMaterials ? 'var(--color-red)' : 'var(--color-green)', fontSize: '0.85rem' }}>
                           {m.materials}/{m.maxMaterials}
                         </strong>
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
                         {Array.from({ length: m.materials }).map((_, i) => (
-                          <div key={i} style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-green)' }}></div>
+                          <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-green)', boxShadow: '0 0 4px var(--color-green)' }}></div>
                         ))}
-                        {isNoMaterials && <span style={{ fontSize: '0.5rem', color: 'var(--color-red)' }}>空</span>}
+                        {isNoMaterials && <span style={{ fontSize: '0.65rem', color: 'var(--color-red)', fontWeight: 'bold' }}>SOLD OUT</span>}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ borderTop: '1px dashed var(--border-light)', paddingTop: '4px', fontSize: '0.55rem' }}>
-                    <div style={{ maxHeight: '28px', overflowY: 'hidden', color: 'var(--text-muted)' }}>
+                  <div style={{ borderTop: '1px dashed var(--border-light)', paddingTop: '6px', fontSize: '0.7rem' }}>
+                    <div style={{ maxHeight: '38px', overflowY: 'hidden', color: 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>最新取引:</span>
                       {m.salesHistory && m.salesHistory.length > 0 ? (
                         m.salesHistory.slice(0, 1).map((h, i) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '30px' }}>{h.player.split(" ")[0]}</span>
-                            <span>{h.qty}個@¥{h.price}</span>
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '500' }}>
+                            <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '45px', color: '#fff' }}>{h.player.split(" ")[0]}</span>
+                            <span style={{ color: 'var(--color-yellow)' }}>{h.qty}@¥{h.price}</span>
                           </div>
                         ))
                       ) : (
-                        <span>履歴なし</span>
+                        <span style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>履歴なし</span>
                       )}
                     </div>
                   </div>
@@ -229,90 +225,91 @@ function DigitalBoard({
           </div>
         </div>
 
-        {/* 2. 山札 ✕ 意思決定・リスクカード処理パネル */}
-        <div className="glass-card" style={{ border: `2px solid ${activePlayer.color}`, background: 'rgba(10, 15, 30, 0.95)', marginBottom: 0, padding: '12px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '16px' }}>
+        {/* B. 山札 ✕ カードドロー・処理 (右側) */}
+        <div className="glass-card" style={{ border: `2.5px solid ${activePlayer.color}`, background: 'rgba(10, 15, 30, 0.95)', margin: 0, padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '20px', height: '100%', alignItems: 'center' }}>
             
             {/* 左カラム: 山札ドローボタン */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', borderRight: '1px solid var(--border-light)', paddingRight: '12px' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                山札: <strong>{deckLength}</strong> 枚 │ <strong>{commonTurn}T</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', borderRight: '1px solid var(--border-light)', paddingRight: '16px', height: '100%', justifyContent: 'center' }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                山札残高: <strong style={{ color: '#fff', fontSize: '1rem' }}>{deckLength}</strong> 枚<br />
+                現在のターン: <strong style={{ color: 'var(--color-cyan)', fontSize: '1rem' }}>{commonTurn}T</strong>
               </div>
 
               <div 
                 onClick={phase === 'draw' ? onDrawCard : null}
                 style={{ 
                   width: '100%', 
-                  height: '110px', 
-                  borderRadius: '10px', 
+                  height: '140px', 
+                  borderRadius: '12px', 
                   background: phase === 'draw' 
-                    ? `linear-gradient(135deg, ${activePlayer.color}15, #0c102b)` 
+                    ? `linear-gradient(135deg, ${activePlayer.color}25, #0c102b)` 
                     : 'rgba(255,255,255,0.01)', 
                   border: `2px dashed ${phase === 'draw' ? activePlayer.color : 'var(--border-light)'}`,
-                  boxShadow: phase === 'draw' ? `0 0 10px ${activePlayer.color}15` : 'none',
+                  boxShadow: phase === 'draw' ? `0 0 15px ${activePlayer.color}35` : 'none',
                   cursor: phase === 'draw' ? 'pointer' : 'default',
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
                   justifyContent: 'center',
                   textAlign: 'center',
-                  padding: '10px',
+                  padding: '12px',
                   transition: 'all 0.3s ease'
                 }}
               >
                 {phase === 'draw' ? (
                   <>
-                    <span style={{ fontSize: '1.8rem', marginBottom: '4px' }}>🎴</span>
-                    <strong style={{ fontSize: '0.8rem', color: '#fff' }}>カードをドロー</strong>
-                    <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>
-                      タップして引く
+                    <span style={{ fontSize: '2.5rem', marginBottom: '6px', filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.3))' }}>🎴</span>
+                    <strong style={{ fontSize: '1rem', color: '#fff' }}>カードをドロー</strong>
+                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+                      クリックして引く
                     </span>
                   </>
                 ) : (
                   <div style={{ color: 'var(--text-muted)' }}>
-                    <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '4px' }}>🔒</span>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>手番処理中</span>
+                    <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '6px' }}>🔒</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>手番アクション中</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* 右カラム: 引いたカードと意思決定/リスク処理 */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
               {phase !== 'draw' && currentCard ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   
                   {/* カード基本情報表示 */}
-                  <div style={{ background: `linear-gradient(135deg, ${currentCard.color}10, rgba(10,12,22,0.95))`, border: `1px solid ${currentCard.color}66`, borderRadius: '8px', padding: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <h4 style={{ fontSize: '0.9rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                        <span>{currentCard.icon}</span> {currentCard.title}
+                  <div style={{ background: `linear-gradient(135deg, ${currentCard.color}15, rgba(10,12,22,0.95))`, border: `1.5px solid ${currentCard.color}77`, borderRadius: '10px', padding: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                        <span style={{ fontSize: '1.3rem' }}>{currentCard.icon}</span> {currentCard.title}
                       </h4>
-                      <span className="logo-badge" style={{ background: currentCard.color, color: '#000', fontSize: '0.6rem', fontWeight: '800', padding: '2px 6px' }}>
+                      <span className="logo-badge" style={{ background: currentCard.color, color: '#000', fontSize: '0.75rem', fontWeight: '900', padding: '3px 8px', borderRadius: '4px' }}>
                         手番: {activePlayer.name.split(" ")[0]}
                       </span>
                     </div>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
                       {currentCard.description}
                     </p>
                   </div>
 
                   {/* アクション実行パネル */}
                   {phase === 'action' && (
-                    <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border-light)', padding: '10px', borderRadius: '6px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border-light)', padding: '12px', borderRadius: '8px' }}>
                       
-                      {/* A. ライバルAI (NPC) の手番の場合 ➔ 自動思考進行 */}
+                      {/* A. ライバルAI (NPC) の手番の場合 */}
                       {activePlayer.isNpc ? (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0' }}>
                           <div>
-                            <span style={{ fontSize: '0.75rem', display: 'block', fontWeight: 'bold' }}>
+                            <span style={{ fontSize: '0.9rem', display: 'block', fontWeight: 'bold', color: 'var(--color-yellow)' }}>
                               🤖 AIライバルが思考しています...
                             </span>
-                            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
-                              ({activePlayer.difficulty.toUpperCase()} AI)
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              ({activePlayer.difficulty.toUpperCase()} 経営AIモデル)
                             </span>
                           </div>
-                          <button className="btn btn-primary" onClick={onNpcPlay} style={{ padding: '0 12px', height: '32px', fontSize: '0.75rem' }}>
+                          <button className="btn btn-primary" onClick={onNpcPlay} style={{ padding: '0 16px', height: '38px', fontSize: '0.85rem', fontWeight: 'bold' }}>
                             AIのアクションを実行する ➡️
                           </button>
                         </div>
@@ -321,43 +318,41 @@ function DigitalBoard({
                         // B. あなた（ずっきー）の手番の場合
                         <div>
                           
-                          {/* B-1. 【新コマンド機能】リスクカードを引いた場合 ➔ 多段階ドロー！ */}
+                          {/* B-1. リスクカードを引いた場合 ➔ 多段階ドロー！ */}
                           {currentCard.category === CARD_CATEGORIES.RISK ? (
                             activeRiskEvent ? (
-                              // 既にドロー（開封）した場合
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ background: 'rgba(255, 56, 56, 0.05)', border: '1px solid rgba(255, 56, 56, 0.2)', padding: '8px', borderRadius: '6px' }}>
-                                  <strong style={{ color: 'var(--color-red)', fontSize: '0.8rem', display: 'block', marginBottom: '2px' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div style={{ background: 'rgba(255, 56, 56, 0.08)', border: '1.5px solid rgba(255, 56, 56, 0.3)', padding: '10px', borderRadius: '8px' }}>
+                                  <strong style={{ color: 'var(--color-red)', fontSize: '0.95rem', display: 'block', marginBottom: '4px' }}>
                                     💥 発生：{activeRiskEvent.title}
                                   </strong>
-                                  <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
                                     {activeRiskEvent.description}
                                   </p>
                                 </div>
                                 <button 
                                   className="btn btn-danger"
                                   onClick={() => onExecuteAction(activeRiskEvent.actionType, {})}
-                                  style={{ alignSelf: 'start', fontSize: '0.75rem', padding: '4px 12px' }}
+                                  style={{ alignSelf: 'start', fontSize: '0.85rem', padding: '6px 16px', fontWeight: 'bold' }}
                                 >
                                   この偶発リスクを適用する 💥
                                 </button>
                               </div>
                             ) : (
-                              // まだ開封していない場合 ➔ 「リスクをドローする」コマンドボタンを表示！
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', padding: '10px', background: 'rgba(255,56,56,0.02)', border: '1px dashed rgba(255,56,56,0.3)', borderRadius: '6px' }}>
-                                <span style={{ fontSize: '2rem' }}>🎲</span>
-                                <strong style={{ color: 'var(--color-red)', fontSize: '0.8rem' }}>リスクカードが伏せられています</strong>
-                                <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', margin: '0 0 6px 0', textAlign: 'center' }}>
-                                  ボタンを押して、具体的な偶発災害・リスクイベントをドローしてください！
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', padding: '14px', background: 'rgba(255,56,56,0.03)', border: '1.5px dashed rgba(255,56,56,0.4)', borderRadius: '8px' }}>
+                                <span style={{ fontSize: '2.5rem', animation: 'bounce 2s infinite' }}>🎲</span>
+                                <strong style={{ color: 'var(--color-red)', fontSize: '0.95rem' }}>偶発リスクイベントが伏せられています</strong>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0 0 6px 0', textAlign: 'center', lineHeight: '1.4' }}>
+                                  ボタンを押して、具体的な災害・リスクイベントをドローしてください！
                                 </p>
                                 <button 
                                   className="btn btn-danger animate-pulse"
                                   onClick={onDrawRiskEvent}
                                   style={{ 
                                     fontWeight: 'bold', 
-                                    fontSize: '0.75rem', 
-                                    padding: '6px 16px',
-                                    boxShadow: '0 0 10px rgba(255, 56, 56, 0.4)',
+                                    fontSize: '0.85rem', 
+                                    padding: '8px 24px',
+                                    boxShadow: '0 0 15px rgba(255, 56, 56, 0.5)',
                                     background: 'var(--color-red)',
                                     color: '#fff',
                                     border: 'none',
@@ -371,14 +366,14 @@ function DigitalBoard({
                             )
                           ) : (
                             
-                            // B-2. 意思決定（Decision）カードを引いた場合 ➔ 自由アクション
+                            // B-2. 意思決定（Decision）カードを引いた場合
                             <div>
-                              <div style={{ marginBottom: '10px' }}>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: '700' }}>
+                              <div style={{ marginBottom: '12px' }}>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px', fontWeight: '700' }}>
                                   💡 意思決定アクションを選択してください:
                                 </span>
                                 
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                   {[
                                     { type: 'purchase', label: '仕入(ツ)' },
                                     { type: 'produce', label: '製造(コサ)' },
@@ -394,7 +389,7 @@ function DigitalBoard({
                                       key={act.type}
                                       onClick={() => setSelectedActionType(act.type)} 
                                       className={`btn ${selectedActionType === act.type ? 'btn-primary' : ''}`}
-                                      style={{ padding: '3px 8px', fontSize: '0.65rem' }}
+                                      style={{ padding: '5px 12px', fontSize: '0.8rem', fontWeight: 'bold' }}
                                     >
                                       {act.label}
                                     </button>
@@ -402,16 +397,15 @@ function DigitalBoard({
                                 </div>
                               </div>
 
-                              {/* 各選択アクションのインプットフォーム */}
-                              <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
+                              <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
                                 
                                 {selectedActionType === 'purchase' && (
-                                  <div style={{ display: 'flex', gap: '10px', alignItems: 'end', flexWrap: 'wrap' }}>
-                                    <div className="form-group" style={{ width: '120px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>仕入先市場</label>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
+                                    <div className="form-group" style={{ width: '150px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>仕入先市場</label>
                                       <select 
                                         className="form-select" 
-                                        style={{ fontSize: '0.7rem', padding: '4px' }}
+                                        style={{ fontSize: '0.85rem', padding: '6px' }}
                                         value={targetMarketId}
                                         onChange={(e) => setTargetMarketId(e.target.value)}
                                       >
@@ -420,12 +414,12 @@ function DigitalBoard({
                                         ))}
                                       </select>
                                     </div>
-                                    <div className="form-group" style={{ width: '80px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>購入数量</label>
+                                    <div className="form-group" style={{ width: '100px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>購入数量</label>
                                       <input 
                                         type="number" 
                                         className="form-input" 
-                                        style={{ fontSize: '0.7rem', padding: '4px' }}
+                                        style={{ fontSize: '0.85rem', padding: '6px' }}
                                         min="1" 
                                         max={maxPurchaseQty}
                                         value={purchaseQty}
@@ -434,7 +428,7 @@ function DigitalBoard({
                                     </div>
                                     <button 
                                       className="btn btn-primary"
-                                      style={{ fontSize: '0.7rem', padding: '5px 10px' }}
+                                      style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }}
                                       onClick={() => onExecuteAction("purchase", { qty: purchaseQty, price: 1, marketId: targetMarketId })}
                                       disabled={maxPurchaseQty <= 0}
                                     >
@@ -444,29 +438,29 @@ function DigitalBoard({
                                 )}
 
                                 {selectedActionType === 'produce' && (
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.7rem' }}>
-                                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem' }}>
+                                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
                                         <input type="radio" name="prodType" checked={produceType === 'input'} onChange={() => setProduceType('input')} />
                                         投入 (コ)
                                       </label>
-                                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
                                         <input type="radio" name="prodType" checked={produceType === 'complete'} onChange={() => setProduceType('complete')} />
                                         完成 (サ - ¥10万/個)
                                       </label>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'end' }}>
-                                      <div className="form-group" style={{ width: '80px' }}>
+                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                      <div className="form-group" style={{ width: '100px' }}>
                                         <input 
                                           type="number" 
                                           className="form-input" 
-                                          style={{ fontSize: '0.7rem', padding: '4px' }}
+                                          style={{ fontSize: '0.85rem', padding: '6px' }}
                                           min="1" 
                                           value={produceQty}
                                           onChange={(e) => setProduceQty(Math.max(1, Number(e.target.value)))}
                                         />
                                       </div>
-                                      <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("produce", { type: produceType, qty: produceQty })}>
+                                      <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("produce", { type: produceType, qty: produceQty })}>
                                         製造開始 ⚙️
                                       </button>
                                     </div>
@@ -474,12 +468,12 @@ function DigitalBoard({
                                 )}
 
                                 {selectedActionType === 'sale_direct' && (
-                                  <div style={{ display: 'flex', gap: '10px', alignItems: 'end', flexWrap: 'wrap' }}>
-                                    <div className="form-group" style={{ width: '110px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>販売先市場</label>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
+                                    <div className="form-group" style={{ width: '140px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>販売先市場</label>
                                       <select 
                                         className="form-select" 
-                                        style={{ fontSize: '0.7rem', padding: '4px' }}
+                                        style={{ fontSize: '0.85rem', padding: '6px' }}
                                         value={targetMarketId}
                                         onChange={(e) => setTargetMarketId(e.target.value)}
                                       >
@@ -488,41 +482,41 @@ function DigitalBoard({
                                         ))}
                                       </select>
                                     </div>
-                                    <div className="form-group" style={{ width: '70px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>単価(万)</label>
-                                      <input type="number" className="form-input" style={{ fontSize: '0.7rem', padding: '4px' }} value={directSalePrice} onChange={(e) => setDirectSalePrice(Math.max(1, Number(e.target.value)))} />
+                                    <div className="form-group" style={{ width: '90px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>単価(万)</label>
+                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={directSalePrice} onChange={(e) => setDirectSalePrice(Math.max(1, Number(e.target.value)))} />
                                     </div>
-                                    <div className="form-group" style={{ width: '60px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>数量</label>
-                                      <input type="number" className="form-input" style={{ fontSize: '0.7rem', padding: '4px' }} value={directSaleQty} min="1" onChange={(e) => setDirectSaleQty(Math.max(1, Number(e.target.value)))} />
+                                    <div className="form-group" style={{ width: '80px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>数量</label>
+                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={directSaleQty} min="1" onChange={(e) => setDirectSaleQty(Math.max(1, Number(e.target.value)))} />
                                     </div>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("sale_direct", { price: directSalePrice, qty: directSaleQty, marketId: targetMarketId })}>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("sale_direct", { price: directSalePrice, qty: directSaleQty, marketId: targetMarketId })}>
                                       直販確定 💰
                                     </button>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'sale_auction' && (
-                                  <div style={{ display: 'flex', gap: '10px', alignItems: 'end', flexWrap: 'wrap' }}>
-                                    <div className="form-group" style={{ width: '100px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>開催市場</label>
-                                      <select className="form-select" style={{ fontSize: '0.7rem', padding: '4px' }} value={targetMarketId} onChange={(e) => setTargetMarketId(e.target.value)}>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
+                                    <div className="form-group" style={{ width: '130px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>開催市場</label>
+                                      <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={targetMarketId} onChange={(e) => setTargetMarketId(e.target.value)}>
                                         {Object.values(markets).map(m => (
                                           <option key={m.id} value={m.id}>{m.name.replace("市場", "")}</option>
                                         ))}
                                       </select>
                                     </div>
-                                    <div className="form-group" style={{ width: '50px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>数量</label>
-                                      <input type="number" className="form-input" style={{ fontSize: '0.7rem', padding: '4px' }} value={auctionQty} onChange={(e) => setAuctionQty(Math.max(1, Number(e.target.value)))} />
+                                    <div className="form-group" style={{ width: '70px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>数量</label>
+                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={auctionQty} onChange={(e) => setAuctionQty(Math.max(1, Number(e.target.value)))} />
                                     </div>
-                                    <div className="form-group" style={{ width: '60px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>入札額</label>
-                                      <input type="number" className="form-input" style={{ fontSize: '0.7rem', padding: '4px' }} value={yourBidPrice} onChange={(e) => setYourBidPrice(Math.max(1, Number(e.target.value)))} />
+                                    <div className="form-group" style={{ width: '80px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>入札額</label>
+                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={yourBidPrice} onChange={(e) => setYourBidPrice(Math.max(1, Number(e.target.value)))} />
                                     </div>
                                     <button 
-                                      className="btn btn-primary" 
-                                      style={{ fontSize: '0.7rem', padding: '5px 10.5px', background: 'var(--color-pink)', border: 'none', fontWeight: 'bold' }} 
+                                      className="btn btn-primary animate-pulse" 
+                                      style={{ fontSize: '0.85rem', padding: '7px 20px', background: 'var(--color-pink)', border: 'none', fontWeight: 'bold', height: '36px', color: '#fff', cursor: 'pointer' }} 
                                       onClick={handleStartAuctionArena}
                                     >
                                       アリーナ入札 ⚔️
@@ -531,54 +525,55 @@ function DigitalBoard({
                                 )}
 
                                 {selectedActionType === 'buy_machine' && (
-                                  <div style={{ display: 'flex', gap: '10px', alignItems: 'end' }}>
-                                    <div className="form-group" style={{ width: '140px' }}>
-                                      <label style={{ fontSize: '0.6rem' }}>機械タイプ</label>
-                                      <select className="form-select" style={{ fontSize: '0.7rem', padding: '4px' }} value={machineType} onChange={(e) => setMachineType(e.target.value)}>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                    <div className="form-group" style={{ width: '180px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>機械タイプ</label>
+                                      <select className="form-select" style={{ fontSize: '0.85rem', padding: '6px' }} value={machineType} onChange={(e) => setMachineType(e.target.value)}>
                                         <option value="small">小型 (¥40万)</option>
                                         <option value="large">大型 (¥80万)</option>
                                         <option value="attachment">アタッチ (¥10万)</option>
                                       </select>
                                     </div>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("buy_machine", { type: machineType })}>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("buy_machine", { type: machineType })}>
                                       購入 🏗️
                                     </button>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'hire' && (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>新規社員1名雇用 (¥30万出金)</span>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("hire", {})}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>新規社員1名雇用 (¥30万出金)</span>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("hire", {})}>
                                       雇用実行 👤
                                     </button>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'loan' && (
-                                  <div style={{ display: 'flex', gap: '10px', alignItems: 'end' }}>
-                                    <div className="form-group" style={{ width: '100px' }}>
-                                      <input type="number" className="form-input" style={{ fontSize: '0.7rem', padding: '4px' }} value={loanAmount} onChange={(e) => setLoanAmount(Math.max(10, Number(e.target.value)))} />
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                    <div className="form-group" style={{ width: '120px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>借入金額(万)</label>
+                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={loanAmount} onChange={(e) => setLoanAmount(Math.max(10, Number(e.target.value)))} />
                                     </div>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("loan", { amount: loanAmount })}>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("loan", { amount: loanAmount })}>
                                       融資を受ける 🏦
                                     </button>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'rd' && (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>研究開発費 ¥20万を支払い、技術を+1</span>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("rd", {})}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>研究開発費 ¥20万を支払い、技術を+1</span>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("rd", {})}>
                                       研究開発実行 🔬
                                     </button>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'ad' && (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>広告費 ¥10万を支払い、集客力を+1</span>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.7rem', padding: '5px 10px' }} onClick={() => onExecuteAction("ad", {})}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>広告費 ¥10万を支払い、集客力を+1</span>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("ad", {})}>
                                       広告宣伝費支払 📢
                                     </button>
                                   </div>
@@ -596,11 +591,11 @@ function DigitalBoard({
 
                   {/* ターン終了待ち */}
                   {phase === 'resolved' && (
-                    <div style={{ background: 'rgba(5, 255, 161, 0.03)', border: '1px solid rgba(5, 255, 161, 0.15)', padding: '10px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.75rem' }}>
-                        ✔️ アクション完了！仕訳完了しました。
+                    <div style={{ background: 'rgba(5, 255, 161, 0.04)', border: '1.5px solid rgba(5, 255, 161, 0.25)', padding: '12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-green)' }}>
+                        ✔️ アクション完了！帳簿に仕訳が記帳されました。
                       </span>
-                      <button className="btn btn-primary animate-pulse-neon" onClick={onEndTurn} style={{ fontSize: '0.75rem', padding: '4px 12px', background: 'var(--color-cyan)', color: '#000', border: 'none', fontWeight: 'bold' }}>
+                      <button className="btn btn-primary animate-pulse-neon" onClick={onEndTurn} style={{ fontSize: '0.85rem', padding: '6px 18px', background: 'var(--color-cyan)', color: '#000', border: 'none', fontWeight: '800', borderRadius: '5px' }}>
                         次の手番へ ➡️
                       </button>
                     </div>
@@ -608,12 +603,12 @@ function DigitalBoard({
 
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '110px', color: 'var(--text-muted)' }}>
-                  <span style={{ fontSize: '1.8rem', marginBottom: '4px' }}>🎲</span>
-                  <h4 style={{ fontWeight: '700', fontSize: '0.85rem', margin: 0 }}>手番: {activePlayer.name.split(" ")[0]}</h4>
-                  <p style={{ fontSize: '0.7rem', marginTop: '2px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '150px', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🎲</span>
+                  <h4 style={{ fontWeight: '800', fontSize: '1.1rem', color: '#fff', margin: 0 }}>現在の手番: {activePlayer.name.split(" ")[0]}</h4>
+                  <p style={{ fontSize: '0.8rem', marginTop: '6px', color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '300px', lineHeight: '1.4' }}>
                     {activePlayer.isNpc 
-                      ? "「カードをドロー」をタップして、AIに山札を引かせてください。" 
+                      ? "「カードをドロー」をタップして、ライバルAIに山札を引かせてください。" 
                       : "左側の山札をタップして、意思決定またはリスクカードを引いてください！"}
                   </p>
                 </div>
@@ -625,21 +620,19 @@ function DigitalBoard({
 
       </div>
 
-      {/* ==================== 【右カラム】4社並列・工場盤 ✕ 在庫ストッカー棚 (42.5%) ==================== */}
+      {/* ==================== 【下段4社並列工場盤】(横並び1x4グリッド・大画面表示) ==================== */}
       <div style={{ 
         display: 'flex', 
         flexDirection: 'column', 
-        gap: '12px', 
-        overflowY: 'auto', 
-        paddingRight: '6px',
-        maxHeight: '100%'
+        gap: '12px',
+        marginTop: '10px'
       }}>
-        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: '800', margin: '0', color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>🏭</span> 4社並列工場盤 ✕ 物理在庫棚
+        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: '800', margin: '0 0 4px 0', color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>🏭</span> 各プレイヤーの会社盤 ✕ 物理在庫ストッカー (4社横並びビュー)
         </h4>
 
-        {/* 2x2 の超美麗・超コンパクトグリッド構成 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+        {/* 1x4 グリッド：横幅全体を最大限に活用し、個々のボードを大きく表示！ */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
           {players.map((p) => {
             const pPeriod = p.currentPeriod;
             const pData = p.periods[pPeriod];
@@ -653,96 +646,97 @@ function DigitalBoard({
                 className="glass-card" 
                 style={{ 
                   margin: 0, 
-                  padding: '8px',
-                  border: isActive ? `2px solid ${p.color}` : '1px solid var(--border-light)',
-                  boxShadow: isActive ? `0 0 10px ${p.color}25` : 'none',
-                  background: isSelf ? 'rgba(0, 242, 254, 0.01)' : 'rgba(10, 15, 30, 0.8)',
+                  padding: '14px',
+                  border: isActive ? `3px solid ${p.color}` : '1.5px solid var(--border-light)',
+                  boxShadow: isActive ? `0 0 15px ${p.color}45` : 'none',
+                  background: isSelf ? 'rgba(0, 242, 254, 0.02)' : 'rgba(10, 15, 30, 0.85)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px',
-                  transition: 'all 0.3s ease'
+                  gap: '10px',
+                  transition: 'all 0.3s ease',
+                  minHeight: '260px'
                 }}
               >
-                {/* プレイヤー基本情報 */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {/* プレイヤーヘッダー情報 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--border-light)', paddingBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <div 
                       className={isActive ? "animate-pulse" : ""}
                       style={{ 
-                        width: '8px', 
-                        height: '8px', 
+                        width: '10px', 
+                        height: '10px', 
                         borderRadius: '50%', 
                         background: p.color,
-                        boxShadow: isActive ? `0 0 8px ${p.color}` : 'none'
+                        boxShadow: isActive ? `0 0 10px ${p.color}` : 'none'
                       }}
                     ></div>
-                    <strong style={{ fontSize: '0.75rem', color: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '70px' }}>
+                    <strong style={{ fontSize: '0.95rem', color: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '100px' }}>
                       {p.name.replace(" (あなた)", "").replace(" (ライバル/初級)", "").replace(" (ライバル/中級)", "").replace(" (ライバル/上級)", "")}
                     </strong>
                   </div>
-                  <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--color-cyan)' }}>
-                    ¥{pRes.bookEndingCash}万
+                  <span style={{ fontSize: '0.85rem', fontWeight: '900', color: 'var(--color-cyan)', background: 'rgba(0, 242, 254, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                    現預金: ¥{pRes.bookEndingCash}万
                   </span>
                 </div>
 
                 {/* 資金、自己資本、人員、技術 */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '0.6rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.01)', padding: '4px', borderRadius: '4px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px' }}>
                   <div>
-                    資本: <strong style={{ color: 'var(--color-yellow)' }}>¥{pRes.bs.totalNetAssets}万</strong>
+                    自己資本: <strong style={{ color: 'var(--color-yellow)', fontSize: '0.85rem' }}>¥{pRes.bs.totalNetAssets}万</strong>
                   </div>
                   <div>
-                    社員: <strong>{pRes.workers}名</strong>
+                    社員数: <strong style={{ color: '#fff' }}>{pRes.workers} 名</strong>
                   </div>
                   <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    設備: <strong>大{pRes.machines.large}/小{pRes.machines.small}</strong>
+                    工場設備: <strong style={{ color: 'var(--color-purple)' }}>大{pRes.machines.large}/小{pRes.machines.small}</strong>
                   </div>
                   <div>
-                    技術: <strong>L{p.rdLevel}</strong> / 広: <strong>L{p.adLevel}</strong>
+                    技術: <strong style={{ color: 'var(--color-cyan)' }}>L{p.rdLevel}</strong> │ 広告: <strong style={{ color: 'var(--color-pink)' }}>L{p.adLevel}</strong>
                   </div>
                 </div>
 
-                {/* 在庫ストッカー棚 (物理的ビジュアル表示) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                {/* 在庫ストッカー棚 (物理的ビジュアル表示) - 縦幅と丸の大きさを大幅スケールアップ！ */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', flexGrow: 1 }}>
                   
                   {/* 材料 */}
-                  <div style={{ background: 'rgba(5, 255, 161, 0.02)', border: '1px solid rgba(5, 255, 161, 0.1)', padding: '4px', borderRadius: '6px', minHeight: '52px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.5rem', color: 'var(--color-green)', fontWeight: '700' }}>①材料</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1px', margin: '2px 0' }}>
+                  <div style={{ background: 'rgba(5, 255, 161, 0.03)', border: '1px solid rgba(5, 255, 161, 0.15)', padding: '6px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-green)', fontWeight: '800', borderBottom: '1px solid rgba(5, 255, 161, 0.1)', paddingBottom: '2px' }}>①材料</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', margin: '4px 0', alignContent: 'flex-start', flexGrow: 1 }}>
                       {Array.from({ length: pRes.mat.endingCount }).map((_, i) => (
-                        <div key={i} style={{ width: '5px', height: '5px', borderRadius: '1px', background: 'var(--color-green)' }}></div>
+                        <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--color-green)', boxShadow: '0 0 3px var(--color-green)' }}></div>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.55rem', color: 'var(--text-secondary)' }}>
-                      <span><strong>{pRes.mat.endingCount}</strong>個</span>
-                      <span>¥{pRes.mat.unitCost ? pRes.mat.unitCost.toFixed(0) : 0}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px dashed rgba(5, 255, 161, 0.1)', paddingTop: '2px' }}>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{pRes.mat.endingCount} 個</span>
+                      <span style={{ color: 'var(--color-cyan)' }}>¥{pRes.mat.unitCost ? pRes.mat.unitCost.toFixed(0) : 0}</span>
                     </div>
                   </div>
 
                   {/* 仕掛品 */}
-                  <div style={{ background: 'rgba(155, 81, 224, 0.02)', border: '1px solid rgba(155, 81, 224, 0.1)', padding: '4px', borderRadius: '6px', minHeight: '52px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.5rem', color: 'var(--color-purple)', fontWeight: '700' }}>②仕掛</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1px', margin: '2px 0' }}>
+                  <div style={{ background: 'rgba(155, 81, 224, 0.03)', border: '1px solid rgba(155, 81, 224, 0.15)', padding: '6px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-purple)', fontWeight: '800', borderBottom: '1px solid rgba(155, 81, 224, 0.1)', paddingBottom: '2px' }}>②仕掛</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', margin: '4px 0', alignContent: 'flex-start', flexGrow: 1 }}>
                       {Array.from({ length: pRes.wip.endingCount }).map((_, i) => (
-                        <div key={i} style={{ width: '5px', height: '5px', borderRadius: '1px', background: 'var(--color-purple)' }}></div>
+                        <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--color-purple)', boxShadow: '0 0 3px var(--color-purple)' }}></div>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.55rem', color: 'var(--text-secondary)' }}>
-                      <span><strong>{pRes.wip.endingCount}</strong>個</span>
-                      <span>¥{pRes.wip.unitCost ? pRes.wip.unitCost.toFixed(0) : 0}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px dashed rgba(155, 81, 224, 0.1)', paddingTop: '2px' }}>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{pRes.wip.endingCount} 個</span>
+                      <span style={{ color: 'var(--color-cyan)' }}>¥{pRes.wip.unitCost ? pRes.wip.unitCost.toFixed(0) : 0}</span>
                     </div>
                   </div>
 
                   {/* 製品 */}
-                  <div style={{ background: 'rgba(255, 0, 127, 0.02)', border: '1px solid rgba(255, 0, 127, 0.1)', padding: '4px', borderRadius: '6px', minHeight: '52px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.5rem', color: 'var(--color-pink)', fontWeight: '700' }}>③製品</span>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1px', margin: '2px 0' }}>
+                  <div style={{ background: 'rgba(255, 0, 127, 0.03)', border: '1px solid rgba(255, 0, 127, 0.15)', padding: '6px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-pink)', fontWeight: '800', borderBottom: '1px solid rgba(255, 0, 127, 0.1)', paddingBottom: '2px' }}>③製品</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', margin: '4px 0', alignContent: 'flex-start', flexGrow: 1 }}>
                       {Array.from({ length: pRes.prod.endingCount }).map((_, i) => (
-                        <div key={i} style={{ width: '5px', height: '5px', borderRadius: '1px', background: 'var(--color-pink)' }}></div>
+                        <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: 'var(--color-pink)', boxShadow: '0 0 3px var(--color-pink)' }}></div>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.55rem', color: 'var(--text-secondary)' }}>
-                      <span><strong>{pRes.prod.endingCount}</strong>個</span>
-                      <span>¥{pRes.prod.unitCost ? pRes.prod.unitCost.toFixed(0) : 0}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px dashed rgba(255, 0, 127, 0.1)', paddingTop: '2px' }}>
+                      <span style={{ fontWeight: 'bold', color: '#fff' }}>{pRes.prod.endingCount} 個</span>
+                      <span style={{ color: 'var(--color-cyan)' }}>¥{pRes.prod.unitCost ? pRes.prod.unitCost.toFixed(0) : 0}</span>
                     </div>
                   </div>
 
@@ -754,7 +748,7 @@ function DigitalBoard({
         </div>
       </div>
 
-      {/* ==================== 🏆 【アジェンダ②】特設競合入札アリーナ・モーダル ==================== */}
+      {/* ==================== 🏆 特設競合入札アリーナ・モーダル ==================== */}
       {arenaOpen && (
         <div style={{
           position: 'fixed',
@@ -798,7 +792,6 @@ function DigitalBoard({
                 </div>
               </div>
               
-              {/* キャンセルボタン (決定前のみ) */}
               {arenaState === 'thinking' && (
                 <button 
                   onClick={() => setArenaOpen(false)}
@@ -817,13 +810,12 @@ function DigitalBoard({
               )}
             </div>
 
-            {/* アリーナ・ステージ (4社の入札カード) */}
+            {/* アリーナ・ステージ */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', minHeight: '180px', alignItems: 'center' }}>
               {players.map((p, i) => {
                 const isWinner = p.id === arenaWinnerIdx;
                 const isNpc = p.isNpc;
                 
-                // 表示状態の決定
                 let displayVal = "??";
                 let isRevealed = false;
                 
@@ -856,7 +848,6 @@ function DigitalBoard({
                       transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                     }}
                   >
-                    {/* アバター */}
                     <div style={{ 
                       width: '40px', 
                       height: '40px', 
@@ -873,7 +864,6 @@ function DigitalBoard({
                       {p.name.charAt(0)}
                     </div>
 
-                    {/* 会社名 */}
                     <div style={{ textAlign: 'center' }}>
                       <strong style={{ fontSize: '0.75rem', color: '#fff', display: 'block' }}>
                         {p.name.split(" ")[0]}
@@ -883,7 +873,6 @@ function DigitalBoard({
                       </span>
                     </div>
 
-                    {/* 入札金額表示パネル */}
                     <div style={{
                       background: isRevealed 
                         ? 'rgba(0,0,0,0.5)' 
@@ -941,7 +930,6 @@ function DigitalBoard({
               {arenaState === 'done' && (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                   
-                  {/* 落札アナウンス */}
                   <div style={{ 
                     background: 'rgba(5, 255, 161, 0.05)', 
                     border: '1px solid rgba(5, 255, 161, 0.2)', 
@@ -962,7 +950,6 @@ function DigitalBoard({
                     <span> で落札しました！</span>
                   </div>
 
-                  {/* 確定して適用ボタン */}
                   <button 
                     className="btn btn-primary animate-pulse-neon"
                     onClick={handleApplyAuctionResult}
