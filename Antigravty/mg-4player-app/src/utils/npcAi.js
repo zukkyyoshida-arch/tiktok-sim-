@@ -54,8 +54,32 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
   
   const largeMachines = results.machines.large;
   const smallMachines = results.machines.small;
-  const machineCapacity = (largeMachines * 3) + (smallMachines * 1); // 生産能力上限
-  const workers = results.workers;
+  const attachCount = results.machines.attachments || 0;
+  
+  // LEDGERから現在のワーカー数とセールスマン数を算出
+  let workersProd = periodData.carryover.workersProd !== undefined ? periodData.carryover.workersProd : 2;
+  let workersSales = periodData.carryover.workersSales !== undefined ? periodData.carryover.workersSales : 1;
+  
+  if (periodData.ledger) {
+    periodData.ledger.forEach(entry => {
+      if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+        workersProd += (Number(entry.quantity) || 0);
+      }
+      if (entry.category === 'シ' && entry.memo?.includes('セールスマン')) {
+        workersSales += (Number(entry.quantity) || 0);
+      }
+    });
+  }
+  const workers = workersProd + workersSales;
+
+  // ワーカー制限付きの実質的な最大生産能力 (prodCapacity) を算出
+  let activeLarge = Math.min(largeMachines, workersProd);
+  let activeSmall = Math.min(smallMachines, Math.max(0, workersProd - activeLarge));
+  const baseCapacity = (activeLarge * 2) + (activeSmall * 1);
+  const totalActive = activeLarge + activeSmall;
+  const activeAttach = Math.min(attachCount, totalActive);
+  const prodCapacity = baseCapacity + activeAttach;
+
 
   // デフォルトアクション (何もしない/パス)
   const passAction = { type: "pass", payload: {}, log: "資金温存のためパスしました。" };
@@ -69,12 +93,13 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       let targetQty = 1;
       let price = 1; // 仕入単価 ¥1万
       
-      const maxBuy = Math.min(materialsInMarket, workers * 2);
+      // 仕入上限は生産能力の2倍
+      const maxBuy = Math.min(materialsInMarket, prodCapacity * 2);
 
       if (difficulty === DIFFICULTY_LEVELS.EASY) {
         targetQty = 1;
       } else if (difficulty === DIFFICULTY_LEVELS.MEDIUM) {
-        targetQty = Math.min(maxBuy, Math.max(1, machineCapacity - matCount));
+        targetQty = Math.min(maxBuy, Math.max(1, (prodCapacity * 2) - matCount));
       } else if (difficulty === DIFFICULTY_LEVELS.HARD) {
         targetQty = maxBuy; // 買えるだけ買う
       }
@@ -100,13 +125,11 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       
       if (wipCount > 0 && cash >= wipCount * 10) {
         // 完成加工 (サ) の決定
-        let qty = wipCount;
+        let qty = Math.min(wipCount, prodCapacity);
         if (difficulty === DIFFICULTY_LEVELS.EASY) {
           qty = 1;
         } else if (difficulty === DIFFICULTY_LEVELS.MEDIUM) {
-          qty = Math.min(wipCount, workers);
-        } else {
-          qty = wipCount; // 全て完成
+          qty = Math.min(qty, workersProd);
         }
 
         if (cash < qty * 10) {
@@ -117,25 +140,25 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
           return {
             type: CARD_TYPES.PRODUCE,
             payload: { type: "complete", qty },
-            log: `仕掛品 ${qty} 個を製品へ完成加工しました。(加工費: ¥${qty * 10}万)`
+            log: `仕掛品 ${qty} 個を製品へ完成加工しました。(加工費: ¥${qty * 10}万、最大能力: ${prodCapacity}個)`
           };
         }
       }
 
       // 材料投入 (コ) の決定
       if (matCount > 0) {
-        let qty = Math.min(matCount, machineCapacity);
+        let qty = Math.min(matCount, prodCapacity);
         if (difficulty === DIFFICULTY_LEVELS.EASY) {
           qty = 1;
         } else if (difficulty === DIFFICULTY_LEVELS.MEDIUM) {
-          qty = Math.min(qty, workers);
+          qty = Math.min(qty, workersProd);
         }
 
         if (qty > 0) {
           return {
             type: CARD_TYPES.PRODUCE,
             payload: { type: "input", qty },
-            log: `材料 ${qty} 個を工場ラインへ投入しました。(仕掛品化)`
+            log: `材料 ${qty} 個を工場ラインへ投入しました。(仕掛品化、最大能力: ${prodCapacity}個)`
           };
         }
       }
@@ -179,13 +202,13 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
           return {
             type: CARD_TYPES.BUY_MACHINE,
             payload: { type: "large" },
-            log: "大型機械を ¥80万 で電撃購入し、超攻撃的な大量生産体制へ移行しました！"
+            log: "大型機械を ¥80万 で電撃購入し、大量生産体制へ移行しました！"
           };
         } else if (cash >= 100) {
           return {
             type: CARD_TYPES.BUY_MACHINE,
             payload: { type: "small" },
-            log: "小型機械を ¥40万 で購入し、地盤を強化しました。"
+            log: "小型機械を ¥40万 で購入し、生産能力を拡大しました。"
           };
         } else if (cash >= 50 && (largeMachines + smallMachines > 0)) {
           return {
@@ -205,10 +228,14 @@ export function decideNpcAction(player, results, card, difficulty, materialsInMa
       
       const limit = difficulty === DIFFICULTY_LEVELS.MEDIUM ? 120 : 80;
       if (cash >= limit && workers < 6) {
+        // 機械の合計台数がワーカーの数より多ければ、ワーカー（prod）を優先雇用、さもなくばセールスマン（sales）
+        const machineCount = largeMachines + smallMachines;
+        const hireRole = machineCount > workersProd ? 'prod' : 'sales';
+        
         return {
           type: CARD_TYPES.HIRE,
-          payload: {},
-          log: `社員を1名新規雇用しました。(現在の社員数: ${workers + 1}人)`
+          payload: { type: hireRole },
+          log: `社員を1名新規雇用しました (${hireRole === 'prod' ? '⚙️ワーカー' : '💼セールスマン'}、合計社員数: ${workers + 1}人)`
         };
       }
       return passAction;

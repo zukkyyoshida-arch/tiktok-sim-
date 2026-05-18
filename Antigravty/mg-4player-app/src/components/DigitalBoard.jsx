@@ -38,6 +38,7 @@ function DigitalBoard({
   const [directSaleQty, setDirectSaleQty] = useState(1);
   const [machineType, setMachineType] = useState('small');
   const [loanAmount, setLoanAmount] = useState(50);
+  const [hireType, setHireType] = useState('prod'); // 'prod' (ワーカー) または 'sales' (セールスマン)
 
   // オークション入札パラメータ
   const [yourBidPrice, setYourBidPrice] = useState(26);
@@ -66,8 +67,36 @@ function DigitalBoard({
   const activePeriod = activePlayer.currentPeriod;
   const pData = activePlayer.periods[activePeriod];
   const pRes = calculateFinancials(pData.carryover, pData.ledger, pData.actuals);
-  const myMachines = pRes.machines || { large: 0, small: 0, attachment: 0 };
-  const prodCapacity = (myMachines.large * 2) + (myMachines.small * 1) + (myMachines.attachment || 0);
+  const myMachines = pRes.machines || { large: 0, small: 0, attachments: 0 };
+  
+  // 今期のこれまでの仕訳から、現在のワーカー数（workersProd）とセールスマン数（workersSales）を算出
+  let myWorkersProd = pData.carryover.workersProd !== undefined ? pData.carryover.workersProd : 2;
+  let myWorkersSales = pData.carryover.workersSales !== undefined ? pData.carryover.workersSales : 1;
+  pData.ledger.forEach(entry => {
+    if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+      myWorkersProd += (Number(entry.quantity) || 0);
+    }
+    if (entry.category === 'シ' && entry.memo?.includes('セールスマン')) {
+      myWorkersSales += (Number(entry.quantity) || 0);
+    }
+  });
+
+  // ワーカー数に応じた機械の稼働判定 (大型 -> 小型 の順にワーカーを割り当て)
+  let activeLarge = 0;
+  let activeSmall = 0;
+  let remainingWorkers = myWorkersProd;
+  
+  activeLarge = Math.min(myMachines.large || 0, remainingWorkers);
+  remainingWorkers -= activeLarge;
+  
+  activeSmall = Math.min(myMachines.small || 0, remainingWorkers);
+  remainingWorkers -= activeSmall;
+  
+  const baseCapacity = (activeLarge * 2) + (activeSmall * 1);
+  const totalActiveMachines = activeLarge + activeSmall;
+  const activeAttach = Math.min(myMachines.attachments || 0, totalActiveMachines);
+  
+  const prodCapacity = baseCapacity + activeAttach;
   const maxAllowedQty = Math.max(2, prodCapacity * 2); // 最低でも2個は仕入可能
 
   // 合計仕入希望数量
@@ -112,7 +141,7 @@ function DigitalBoard({
       const isActionExec = log.includes('[仕入]') || log.includes('[投入]') || 
                            log.includes('[完成]') || log.includes('[直接販売]') || 
                            log.includes('[オークション落札]') || log.includes('[機械購入]') || 
-                           log.includes('[雇用]') || log.includes('[融資]') || 
+                           log.includes('[雇用]') || log.includes('[融資]') || log.includes('[借入金]') || 
                            log.includes('[研究開発]') || log.includes('[広告宣伝]') ||
                            log.includes('災害') || log.includes('故障') || log.includes('火災') ||
                            log.includes('パス');
@@ -454,7 +483,7 @@ function DigitalBoard({
                         </span>
                       </div>
                       <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
-                        カードを引く前に、機械購入・雇用・製造・融資などの投資アクションを何回でも実行できます。
+                        カードを引く前に、機械購入・雇用・製造・借入金などの投資アクションを何回でも実行できます。
                       </p>
                     </div>
                   ) : (
@@ -560,8 +589,8 @@ function DigitalBoard({
                                     { type: 'sale_auction', label: '競合(ネ)', hideOnRuleB: true },
                                     { type: 'buy_machine', label: '設備(ケ)' },
                                     { type: 'hire', label: '社員(シ)' },
-                                    { type: 'loan', label: '融資(オ)' },
-                                    { type: 'rd', label: '技術(チ)' },
+                                    { type: 'loan', label: '借入金(オ)' },
+                                    { type: 'rd', label: '研究開発(チ)' },
                                     { type: 'ad', label: '広告(セ)' }
                                   ]
                                   .filter(act => phase !== 'ruleB' || !act.hideOnRuleB)
@@ -665,28 +694,35 @@ function DigitalBoard({
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem' }}>
                                       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                        <input type="radio" name="prodType" checked={produceType === 'input'} onChange={() => setProduceType('input')} />
+                                        <input type="radio" name="prodType" checked={produceType === 'input'} onChange={() => { setProduceType('input'); setProduceQty(1); }} />
                                         投入 (コ)
                                       </label>
                                       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                        <input type="radio" name="prodType" checked={produceType === 'complete'} onChange={() => setProduceType('complete')} />
+                                        <input type="radio" name="prodType" checked={produceType === 'complete'} onChange={() => { setProduceType('complete'); setProduceQty(1); }} />
                                         完成 (サ - ¥10万/個)
                                       </label>
                                     </div>
                                     <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
-                                      <div className="form-group" style={{ width: '100px' }}>
+                                      <div className="form-group" style={{ width: '120px' }}>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                                          数量 (最大 {prodCapacity}個)
+                                        </label>
                                         <input 
                                           type="number" 
                                           className="form-input" 
                                           style={{ fontSize: '0.85rem', padding: '6px' }}
                                           min="1" 
+                                          max={prodCapacity}
                                           value={produceQty}
-                                          onChange={(e) => setProduceQty(Math.max(1, Number(e.target.value)))}
+                                          onChange={(e) => setProduceQty(Math.min(prodCapacity, Math.max(1, Number(e.target.value))))}
                                         />
                                       </div>
                                       <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("produce", { type: produceType, qty: produceQty })}>
                                         製造開始 ⚙️
                                       </button>
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                                      ※ 最大能力: {prodCapacity}個 (ワーカー:{myWorkersProd}人, 大型:{myMachines.large}台, 小型:{myMachines.small}台, アタッチ:{myMachines.attachments || 0}個)
                                     </div>
                                   </div>
                                 )}
@@ -765,29 +801,51 @@ function DigitalBoard({
                                 )}
 
                                 {selectedActionType === 'hire' && (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>新規社員1名雇用 (¥30万出金)</span>
-                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("hire", {})}>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                    <div className="form-group" style={{ width: '180px' }}>
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>雇用職種 (採用費: ¥5万)</label>
+                                      <select 
+                                        className="form-select" 
+                                        style={{ fontSize: '0.85rem', padding: '6px' }} 
+                                        value={hireType} 
+                                        onChange={(e) => setHireType(e.target.value)}
+                                      >
+                                        <option value="prod">⚙️ ワーカー (工場生産職人)</option>
+                                        <option value="sales">💼 セールスマン (市場営業員)</option>
+                                      </select>
+                                    </div>
+                                    <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("hire", { type: hireType })}>
                                       雇用実行 👤
                                     </button>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'loan' && (
-                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'end', flexWrap: 'wrap' }}>
                                     <div className="form-group" style={{ width: '120px' }}>
-                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>借入金額(万)</label>
-                                      <input type="number" className="form-input" style={{ fontSize: '0.85rem', padding: '6px' }} value={loanAmount} onChange={(e) => setLoanAmount(Math.max(10, Number(e.target.value)))} />
+                                      <label style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>借入金額(万円)</label>
+                                      <input 
+                                        type="number" 
+                                        className="form-input" 
+                                        style={{ fontSize: '0.85rem', padding: '6px' }} 
+                                        value={loanAmount} 
+                                        step="10"
+                                        onChange={(e) => setLoanAmount(Math.max(10, Number(e.target.value)))} 
+                                      />
                                     </div>
                                     <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("loan", { amount: loanAmount })}>
-                                      融資を受ける 🏦
+                                      借入実行 🏦
                                     </button>
+                                    <div style={{ width: '100%', fontSize: '0.7rem', color: 'var(--color-yellow)', marginTop: '4px', lineHeight: '1.4' }}>
+                                      ※ 借入時に金利即時支払 (1〜3期目10% / 4〜5期目5%) が発生し「タ」に自動計上されます。<br />
+                                      ※ 毎期の期末処理時に、借入金残高の20%が自動的に返済 (カテゴリ「ナ」) されます。
+                                    </div>
                                   </div>
                                 )}
 
                                 {selectedActionType === 'rd' && (
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>研究開発費 ¥20万を支払い、技術を+1</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>研究開発費 ¥20万を支払い、研究開発チップ(レベル)を+1</span>
                                     <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '7px 16px', fontWeight: 'bold', height: '36px' }} onClick={() => onExecuteAction("rd", {})}>
                                       研究開発実行 🔬
                                     </button>
@@ -927,19 +985,22 @@ function DigitalBoard({
                   </span>
                 </div>
 
-                {/* 資金、自己資本、人員、技術 */}
+                {/* 資金、自己資本、人員、研究開発 */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px' }}>
                   <div>
                     自己資本: <strong style={{ color: 'var(--color-yellow)', fontSize: '0.85rem' }}>¥{pRes.bs.totalNetAssets}万</strong>
                   </div>
                   <div>
                     社員数: <strong style={{ color: '#fff' }}>{pRes.workers} 名</strong>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>
+                      (⚙️{pData.carryover.workersProd !== undefined ? pData.carryover.workersProd + (pData.ledger || []).filter(e => e.category === 'シ' && e.memo?.includes('ワーカー')).reduce((sum, e) => sum + (Number(e.quantity) || 0), 0) : 2}/💼{pData.carryover.workersSales !== undefined ? pData.carryover.workersSales + (pData.ledger || []).filter(e => e.category === 'シ' && e.memo?.includes('セールスマン')).reduce((sum, e) => sum + (Number(e.quantity) || 0), 0) : 1})
+                    </span>
                   </div>
                   <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     工場設備: <strong style={{ color: 'var(--color-purple)' }}>大{pRes.machines.large}/小{pRes.machines.small}</strong>
                   </div>
                   <div>
-                    技術: <strong style={{ color: 'var(--color-cyan)' }}>L{p.rdLevel}</strong> │ 広告: <strong style={{ color: 'var(--color-pink)' }}>L{p.adLevel}</strong>
+                    研究開発: <strong style={{ color: 'var(--color-cyan)' }}>L{p.rdLevel}</strong> │ 広告: <strong style={{ color: 'var(--color-pink)' }}>L{p.adLevel}</strong>
                   </div>
                 </div>
 

@@ -582,25 +582,45 @@ function App() {
 
         case "produce":
           if (isTarget) {
+            // 生産能力の算出 (ワーカー、大型、小型、アタッチ連動)
+            const currentLarge = newCarryover.largeMachines || 0;
+            const currentSmall = newCarryover.smallMachines || 0;
+            const currentAttach = newCarryover.attachments || 0;
+            
+            let currentProdWorkers = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 2;
+            newLedger.forEach(entry => {
+              if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+                currentProdWorkers += (Number(entry.quantity) || 0);
+              }
+            });
+            
+            let activeLarge = Math.min(currentLarge, currentProdWorkers);
+            let activeSmall = Math.min(currentSmall, Math.max(0, currentProdWorkers - activeLarge));
+            const baseCap = (activeLarge * 2) + (activeSmall * 1);
+            const activeAttach = Math.min(currentAttach, activeLarge + activeSmall);
+            const activeCapacity = baseCap + activeAttach;
+            
+            const finalProduceQty = Math.min(payload.qty, activeCapacity); // 生産能力上限で切り詰め
+            
             if (payload.type === 'input') {
               newLedger.push({
                 id: generateId(),
                 category: "コ",
                 amount: 0,
-                quantity: payload.qty,
+                quantity: finalProduceQty,
                 memo: `材料投入`
               });
-              actionLogText = `⚙️ [投入] ${p.name} が材料 ${payload.qty} 個を工場ラインへ投入しました。`;
+              actionLogText = `⚙️ [投入] ${p.name} が材料 ${finalProduceQty} 個を工場ラインへ投入しました。(最大生産能力: ${activeCapacity}個)`;
             } else {
-              const totalProcessingCost = payload.qty * 10;
+              const totalProcessingCost = finalProduceQty * 10;
               newLedger.push({
                 id: generateId(),
                 category: "サ",
                 amount: totalProcessingCost,
-                quantity: payload.qty,
+                quantity: finalProduceQty,
                 memo: `完成加工費`
               });
-              actionLogText = `🏭 [完成] ${p.name} が製品を ${payload.qty} 個完成させました (加工費: ¥${totalProcessingCost}万)`;
+              actionLogText = `🏭 [完成] ${p.name} が製品を ${finalProduceQty} 個完成させました (加工費: ¥${totalProcessingCost}万、最大生産能力: ${activeCapacity}個)`;
             }
           }
           break;
@@ -712,20 +732,40 @@ function App() {
 
         case "hire":
           if (isTarget) {
-            newCarryover.workers = (newCarryover.workers || 3) + 1;
+            const currentProd = newCarryover.workersProd !== undefined ? newCarryover.workersProd : 2;
+            const currentSales = newCarryover.workersSales !== undefined ? newCarryover.workersSales : 1;
+            
+            const isProd = payload.type === 'prod';
+            
+            if (isProd) {
+              newCarryover.workersProd = currentProd + 1;
+              newCarryover.workersSales = currentSales;
+            } else {
+              newCarryover.workersProd = currentProd;
+              newCarryover.workersSales = currentSales + 1;
+            }
+            
+            newCarryover.workers = newCarryover.workersProd + newCarryover.workersSales;
+            
             newLedger.push({
               id: generateId(),
               category: "シ",
-              amount: 30,
+              amount: 5, // 採用時に5万円
               quantity: 1,
-              memo: `社員新規雇用（社員数:${newCarryover.workers}人）`
+              memo: `新規採用（${isProd ? 'ワーカー' : 'セールスマン'}）`
             });
-            actionLogText = `👤 [雇用] ${p.name} が社員を新規雇用しました。(合計: ${newCarryover.workers}人)`;
+            actionLogText = `👤 [雇用] ${p.name} が ${isProd ? '⚙️ワーカー (工場職人)' : '💼セールスマン (営業員)'} を新規採用しました。(合計: ${newCarryover.workers}人、ワーカー:${newCarryover.workersProd}人 / セールスマン:${newCarryover.workersSales}人)`;
           }
           break;
 
         case "loan":
           if (isTarget) {
+            const pPeriod = p.currentPeriod || 1;
+            const isOneToThree = pPeriod <= 3;
+            const interestRate = isOneToThree ? 0.10 : 0.05;
+            const interestAmount = Math.round(payload.amount * interestRate); // 金利(万円)
+            
+            // 1. 借入金 (オ) 入金
             newLedger.push({
               id: generateId(),
               category: "オ",
@@ -733,7 +773,19 @@ function App() {
               quantity: 0,
               memo: `資金調達（借入）`
             });
-            actionLogText = `🏦 [融資] ${p.name} が銀行から ¥${payload.amount}万 を借入しました。`;
+            
+            // 2. 金利 (タ) 即時支払
+            if (interestAmount > 0) {
+              newLedger.push({
+                id: generateId(),
+                category: "タ",
+                amount: interestAmount,
+                quantity: 0,
+                memo: `借入金利支払 (期:${pPeriod} / 率:${interestRate * 100}%)`
+              });
+            }
+            
+            actionLogText = `🏦 [借入金] ${p.name} が銀行から ¥${payload.amount}万 を借入しました。(金利 ¥${interestAmount}万 が自動発生し「タ」に即時計上されました)`;
           }
           break;
 
@@ -931,7 +983,10 @@ function App() {
   // AI対戦オークション (効果音連携)
   const handleRunAuctionWithNpcs = (yourBidPrice, qty, marketId) => {
     const bids = {};
+    const rdLevels = {};
+    
     players.forEach((p, idx) => {
+      rdLevels[idx] = p.rdLevel || 0;
       if (p.isNpc) {
         const npcData = p.periods[p.currentPeriod];
         const npcRes = calculateFinancials(npcData.carryover, npcData.ledger, npcData.actuals);
@@ -942,22 +997,80 @@ function App() {
       }
     });
 
-    let highestPrice = -1;
-    let winnerIdx = -1;
+    const parentIdx = turnOrder[orderIndex]; // 親 (現在の手番プレイヤーのインデックス)
 
-    Object.entries(bids).forEach(([idxStr, price]) => {
-      const idx = Number(idxStr);
-      if (price > highestPrice) {
-        highestPrice = price;
+    // 各プレイヤーの実質的な入札評価値を計算
+    // 研究開発チップを持っているプレイヤーは「提示額 + 2万円」の評価値アドバンテージを得る
+    const evalPrices = {};
+    players.forEach((p, idx) => {
+      const baseBid = bids[idx];
+      const hasRd = rdLevels[idx] > 0;
+      evalPrices[idx] = hasRd ? (baseBid + 2) : baseBid;
+    });
+
+    // 落札者の選定 (評価値の高い順、同評価の場合は優先順位判定)
+    let winnerIdx = -1;
+    let highestEval = -1;
+
+    players.forEach((p, idx) => {
+      const evalPrice = evalPrices[idx];
+      const isWinnerEmpty = winnerIdx === -1;
+      
+      if (isWinnerEmpty) {
+        highestEval = evalPrice;
         winnerIdx = idx;
+        return;
+      }
+
+      // 評価額が高い方が優先落札
+      if (evalPrice > highestEval) {
+        highestEval = evalPrice;
+        winnerIdx = idx;
+      } 
+      // 評価額が同点の場合の優先順位チェック
+      else if (evalPrice === highestEval) {
+        const currentWinnerRd = rdLevels[winnerIdx] || 0;
+        const thisRd = rdLevels[idx] || 0;
+        
+        // 1. 研究開発チップを持っている方が強い
+        if (thisRd > 0 && currentWinnerRd === 0) {
+          winnerIdx = idx;
+        } else if (thisRd > 0 && currentWinnerRd > 0) {
+          // 両方持っている場合は、枚数（レベル）が多い方が強い
+          if (thisRd > currentWinnerRd) {
+            winnerIdx = idx;
+          } else if (thisRd === currentWinnerRd) {
+            // 枚数も同じ場合、親（parentIdx）である方が強いが、チップ持ちは親より強い
+            // すなわち、自分が親で相手が親でないなら、自分が優先
+            if (idx === parentIdx) {
+              winnerIdx = idx;
+            }
+          }
+        } 
+        // 両方ともチップを持っていない場合
+        else if (thisRd === 0 && currentWinnerRd === 0) {
+          // 親が優先
+          if (idx === parentIdx) {
+            winnerIdx = idx;
+          }
+        }
       }
     });
 
     const marketName = INITIAL_MARKETS[marketId].name;
-    const bidInfo = players.map(p => `${p.name}: ¥${bids[p.id]}万`).join(", ");
+    const bidInfo = players.map(p => {
+      const hasRd = rdLevels[p.id] > 0;
+      const displayBid = bids[p.id];
+      const evalText = hasRd ? ` (実質評価: ¥${evalPrices[p.id]}万 / 研開発チップ有)` : "";
+      return `${p.name}: ¥${displayBid}万${evalText}`;
+    }).join(", ");
+    
     addLog(`⚔️ [${marketName}入札結果] 一覧: ${bidInfo}`);
 
-    handleExecuteAction("sale_auction", { winnerIdx, price: highestPrice, qty, marketId });
+    // 落札単価は、提示した本来の金額 (研究開発チップによる実質的な -2万円値引き落札とする)
+    const finalPrice = bids[winnerIdx];
+
+    handleExecuteAction("sale_auction", { winnerIdx, price: finalPrice, qty, marketId });
   };
 
   // 手番の終了 ➔ 次へ
@@ -968,7 +1081,88 @@ function App() {
 
     if (nextOrderIndex === 0) {
       if (commonTurn >= 30) {
-        if (window.confirm("第30ターン（最終ターン）が終了しました。期末決算処理を行いますか？")) {
+        if (window.confirm("第30ターン（最終ターン）が終了しました。期末決算処理を行いますか？\n（期末自動人件費の記帳、および借入金の20%自動返済が自動的に帳簿へ追加されます）")) {
+          
+          // 全プレイヤーの帳簿へ「期末自動仕訳」を追加
+          setPlayers(prev => prev.map(p => {
+            const pPeriod = p.currentPeriod;
+            const periodData = p.periods[pPeriod];
+            if (!periodData) return p;
+            
+            const carryover = periodData.carryover;
+            const ledger = periodData.ledger || [];
+            
+            // 現在の合計借入金を算出
+            let totalLoan = carryover.loan || 0;
+            ledger.forEach(entry => {
+              if (entry.category === 'オ') totalLoan += (Number(entry.amount) || 0); // 借入
+              if (entry.category === 'ナ') totalLoan -= (Number(entry.amount) || 0); // 返済
+            });
+            
+            // 現在のワーカー数とセールスマン数を算出
+            let workersProdCount = carryover.workersProd !== undefined ? carryover.workersProd : 2;
+            let workersSalesCount = carryover.workersSales !== undefined ? carryover.workersSales : 1;
+            ledger.forEach(entry => {
+              if (entry.category === 'シ' && entry.memo?.includes('ワーカー')) {
+                workersProdCount += (Number(entry.quantity) || 0);
+              }
+              if (entry.category === 'シ' && entry.memo?.includes('セールスマン')) {
+                workersSalesCount += (Number(entry.quantity) || 0);
+              }
+            });
+            const totalWorkers = workersProdCount + workersSalesCount;
+            
+            const updatedLedger = [...ledger];
+            
+            // すでに【期末自動】がある場合は重複追加しない
+            const hasLaborCost = ledger.some(entry => entry.memo?.includes("【期末自動】"));
+            
+            if (!hasLaborCost) {
+              // 1. 期末人件費（給料＋社会保険料）の自動仕訳
+              // 給料: 16万 + (期 - 1) * 3万
+              // 社保: 8万 + (期 - 1) * 2万
+              const salaryPerWorker = 16 + (pPeriod - 1) * 3;
+              const insurancePerWorker = 8 + (pPeriod - 1) * 2;
+              const totalCostPerWorker = salaryPerWorker + insurancePerWorker;
+              const totalLaborCost = totalWorkers * totalCostPerWorker;
+              
+              if (totalLaborCost > 0) {
+                updatedLedger.push({
+                  id: `auto_labor_${Date.now()}_${Math.random()}`,
+                  category: "シ",
+                  amount: totalLaborCost,
+                  quantity: totalWorkers,
+                  memo: `【期末自動】人件費(給料:${salaryPerWorker}万+社保:${insurancePerWorker}万) / ${totalWorkers}人`
+                });
+              }
+              
+              // 2. 借入金20%自動返済の自動仕訳
+              if (totalLoan > 0) {
+                const repaymentAmount = Math.round(totalLoan * 0.2); // 20%自動返済 (四捨五入)
+                if (repaymentAmount > 0) {
+                  updatedLedger.push({
+                    id: `auto_loan_repay_${Date.now()}_${Math.random()}`,
+                    category: "ナ",
+                    amount: repaymentAmount,
+                    quantity: 0,
+                    memo: `【期末自動】借入金20%自動返済`
+                  });
+                }
+              }
+            }
+            
+            return {
+              ...p,
+              periods: {
+                ...p.periods,
+                [pPeriod]: {
+                  ...periodData,
+                  ledger: updatedLedger
+                }
+              }
+            };
+          }));
+
           setActiveTab('periodEnd');
           return;
         }

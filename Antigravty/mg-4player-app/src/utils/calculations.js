@@ -54,7 +54,9 @@ export const DEFAULT_PERIOD_DATA = {
     largeMachines: 0,       // 大型機械台数
     smallMachines: 0,       // 小型機械台数
     attachments: 0,         // アタッチメント数
-    workers: 3              // 社員数 (標準初期値: 3名)
+    workersProd: 2,         // ワーカー（職人）数 (標準初期値: 2名)
+    workersSales: 1,        // セールスマン数 (標準初期値: 1名)
+    workers: 3              // 社員数合計 (標準初期値: 3名)
   },
   ledger: [],               // 現金出納帳
   actuals: {
