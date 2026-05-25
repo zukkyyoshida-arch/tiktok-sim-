@@ -83,7 +83,11 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         def parse_date(val):
             if not val or val == "" or val == "#REF!": return pd.NaT
             if isinstance(val, str) and "T" in val:
-                try: return pd.to_datetime(val).tz_localize(None)
+                try:
+                    dt = pd.to_datetime(val)
+                    if dt.tzinfo is not None:
+                        return dt.tz_convert('Asia/Tokyo').tz_localize(None)
+                    return dt
                 except: pass
             if isinstance(val, str):
                 clean = re.sub(r'\(.*?\)', '', val).strip()
@@ -93,7 +97,11 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
                     if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
                     return dt
                 except: pass
-            try: return pd.to_datetime(val).tz_localize(None)
+            try:
+                dt = pd.to_datetime(val)
+                if getattr(dt, 'tzinfo', None) is not None:
+                    return dt.tz_convert('Asia/Tokyo').tz_localize(None)
+                return dt
             except: return pd.NaT
 
         def get_valid_date(row):
