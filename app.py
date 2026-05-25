@@ -495,7 +495,7 @@ def main():
                 st.info("十分な試行数（3回以上）を持つ親機データがまだありません。")
             
             st.markdown("---")
-            st.markdown("### 🚨 3連続失敗アラート (親機)")
+            st.markdown("### 🚨 連続失敗アラート (親機)")
             
             if 'raw_df' in res:
                 raw_df = res['raw_df']
@@ -510,23 +510,31 @@ def main():
                             break
                         consecutive_failures += 1
                     
-                    if consecutive_failures >= 3:
-                        recent_3 = sorted_group.head(3)
-                        recent_dates = [d.strftime('%m/%d') if pd.notnull(d) else "不明" for d in recent_3['date']]
+                    if consecutive_failures >= 2:
+                        recent_n = sorted_group.head(max(3, consecutive_failures))
+                        recent_dates = [d.strftime('%m/%d') if pd.notnull(d) else "不明" for d in recent_n['date']]
+                        last_used = recent_dates[0] if recent_dates else "不明"
                         alert_parents.append({
                             "親機ID": p_id,
                             "機種": group.iloc[0]['parent_model'],
                             "連続失敗回数": f"{consecutive_failures}回",
+                            "最終利用日": last_used,
                             "直近履歴(日付)": " -> ".join(recent_dates),
                             "総試行数": len(group)
                         })
                 
                 if alert_parents:
-                    alert_df = pd.DataFrame(alert_parents).sort_values(by="連続失敗回数", ascending=False)
-                    st.error(f"⚠️ **{len(alert_parents)}台** の親機が3回以上連続で失敗しています。休止や見直しを推奨します。")
+                    alert_df = pd.DataFrame(alert_parents)
+                    alert_df['_sort_val'] = alert_df['連続失敗回数'].str.replace('回','').astype(int)
+                    alert_df = alert_df.sort_values(by=['_sort_val', '最終利用日'], ascending=[False, False]).drop(columns=['_sort_val'])
+                    
+                    c3 = len(alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) >= 3])
+                    c2 = len(alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) == 2])
+                    
+                    st.error(f"⚠️ **3連続以上**: {c3}台 / **2連続**: {c2}台 が失敗しています。最終利用日を確認して休止間隔を見直してください。")
                     st.dataframe(alert_df, use_container_width=True, hide_index=True)
                 else:
-                    st.success("✨ 現在、3回以上連続で失敗している親機はありません。")
+                    st.success("✨ 現在、2回以上連続で失敗している親機はありません。")
 
             st.markdown("---")
             best_pm, worst_pm = res['parent_model_rank'].iloc[0], res['parent_model_rank'].iloc[-1]
