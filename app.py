@@ -77,8 +77,8 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         if not raw_data: return "No Data"
         
         df = pd.DataFrame(raw_data)
-        # カラムインデックス: 5:状態, 9:機種, 11:日付1, 12:日付2, 13:親, 16:招待種類
-        f_idx, j_idx, n_idx, q_idx = 5, 9, 13, 16
+        # カラムインデックス: 3:状態, 5:機種, 7:日付1, 13:日付2, 9:親, 10:招待種類
+        f_idx, j_idx, n_idx, q_idx = 3, 5, 9, 10
         
         def parse_date(val):
             if not val or val == "" or val == "#REF!": return pd.NaT
@@ -97,10 +97,11 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
             except: return pd.NaT
 
         def get_valid_date(row):
-            d1 = parse_date(row[11])
+            d1 = parse_date(row[7])
             if pd.notnull(d1) and d1.year > 1900: return d1
-            d2 = parse_date(row[12])
-            if pd.notnull(d2) and d2.year > 1900: return d2
+            if len(row) > 13:
+                d2 = parse_date(row[13])
+                if pd.notnull(d2) and d2.year > 1900: return d2
             return pd.NaT
 
         df['date'] = df.apply(get_valid_date, axis=1)
@@ -137,7 +138,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         
         rdf['brand'] = rdf['model'].apply(get_brand)
         rdf['parent_brand'] = rdf['parent_model'].apply(get_brand)
-        rdf['child_id'] = rdf[8].fillna("未指定").astype(str) # 端末番号を子IDとして定義
+        rdf['child_id'] = rdf[4].fillna("未指定").astype(str) # 端末番号を子IDとして定義
         rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
 
         # 集計
