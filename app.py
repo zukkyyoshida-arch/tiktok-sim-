@@ -118,6 +118,10 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
             target_dt = datetime.strptime(t_month, "%Y/%m")
             rdf = rdf[(rdf['date'].dt.year == target_dt.year) & (rdf['date'].dt.month == target_dt.month)].copy()
         
+        # 🌟 追加: 未来の日付（スケジュール行など）を分析対象から除外（JST基準）
+        jst_now = datetime.utcnow() + timedelta(hours=9)
+        rdf = rdf[rdf['date'] <= jst_now].copy()
+        
         if len(rdf) == 0: return "No Data for this period"
 
         rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
