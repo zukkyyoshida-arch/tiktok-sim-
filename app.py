@@ -495,6 +495,40 @@ def main():
                 st.info("十分な試行数（3回以上）を持つ親機データがまだありません。")
             
             st.markdown("---")
+            st.markdown("### 🚨 3連続失敗アラート (親機)")
+            
+            if 'raw_df' in res:
+                raw_df = res['raw_df']
+                parent_groups = raw_df.groupby('parent_id')
+                alert_parents = []
+                for p_id, group in parent_groups:
+                    if p_id == "未指定": continue
+                    sorted_group = group.sort_values('date', ascending=False)
+                    consecutive_failures = 0
+                    for idx, row in sorted_group.iterrows():
+                        if row['is_success']:
+                            break
+                        consecutive_failures += 1
+                    
+                    if consecutive_failures >= 3:
+                        recent_3 = sorted_group.head(3)
+                        recent_dates = [d.strftime('%m/%d') if pd.notnull(d) else "不明" for d in recent_3['date']]
+                        alert_parents.append({
+                            "親機ID": p_id,
+                            "機種": group.iloc[0]['parent_model'],
+                            "連続失敗回数": f"{consecutive_failures}回",
+                            "直近履歴(日付)": " -> ".join(recent_dates),
+                            "総試行数": len(group)
+                        })
+                
+                if alert_parents:
+                    alert_df = pd.DataFrame(alert_parents).sort_values(by="連続失敗回数", ascending=False)
+                    st.error(f"⚠️ **{len(alert_parents)}台** の親機が3回以上連続で失敗しています。休止や見直しを推奨します。")
+                    st.dataframe(alert_df, use_container_width=True, hide_index=True)
+                else:
+                    st.success("✨ 現在、3回以上連続で失敗している親機はありません。")
+
+            st.markdown("---")
             best_pm, worst_pm = res['parent_model_rank'].iloc[0], res['parent_model_rank'].iloc[-1]
             p_adv = f"- <b>最強の親機</b>: 現在 <b>{best_pm['parent_model']}</b> が成功率 <b>{best_pm['成功率']:.1f}%</b> でトップ。<br>- <b>要警戒</b>: <b>{worst_pm['parent_model']}</b> は成功率 <b>{worst_pm['成功率']:.1f}%</b> に留まる傾向。"
             st.markdown(f"<div class='advice-card' style='border-color: #ffd700;'><div class='advice-title'>💡 親機戦略のアドバイス</div><div class='advice-text'>{p_adv}</div></div>", unsafe_allow_html=True)
