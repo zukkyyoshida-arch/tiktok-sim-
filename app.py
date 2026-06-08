@@ -526,10 +526,12 @@ def main():
                         recent_n = sorted_group.head(max(3, consecutive_failures))
                         recent_dates = [d.strftime('%m/%d') if pd.notnull(d) else "不明" for d in recent_n['date']]
                         last_used = recent_dates[0] if recent_dates else "不明"
+                        total_success = group['is_success'].sum()
                         alert_parents.append({
                             "親機ID": p_id,
                             "機種": group.iloc[0]['parent_model'],
                             "連続失敗回数": f"{consecutive_failures}回",
+                            "過去成功数": f"{total_success}回",
                             "最終利用日": last_used,
                             "直近履歴(日付)": " -> ".join(recent_dates),
                             "総試行数": len(group)
