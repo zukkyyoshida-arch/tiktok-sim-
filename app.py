@@ -546,7 +546,16 @@ def main():
                     c2 = len(alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) == 2])
                     
                     st.error(f"⚠️ **3連続以上**: {c3}台 / **2連続**: {c2}台 が失敗しています。最終利用日を確認して休止間隔を見直してください。")
-                    st.dataframe(alert_df, use_container_width=True, hide_index=True)
+                    
+                    if c3 > 0:
+                        st.markdown("#### 🚨 危険: 3連続以上失敗している親機 (休止推奨)")
+                        df_3 = alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) >= 3]
+                        st.dataframe(df_3, use_container_width=True, hide_index=True)
+                        
+                    if c2 > 0:
+                        st.markdown("#### 🟡 警戒: 2連続失敗している親機 (次回失敗で休止検討)")
+                        df_2 = alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) == 2]
+                        st.dataframe(df_2, use_container_width=True, hide_index=True)
                 else:
                     st.success("✨ 現在、2回以上連続で失敗している親機はありません。")
 
