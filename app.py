@@ -314,6 +314,8 @@ def main():
 
         if st.sidebar.button("💾 クラウド保存", use_container_width=True):
             if save_settings_api(): st.sidebar.success("保存完了！")
+            
+        st.sidebar.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 
     # --- 計算ロジック ---
     child_dev = total_dev - parent_dev
@@ -841,6 +843,8 @@ def main():
         st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, use_container_width=True, disabled=["チェックイン追加報酬名", "報酬額"], column_config={"出現確率(%)": st.column_config.SelectboxColumn("出現確率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}, key="ed_chk")
         if st.button("🚀 クラウドに保存", use_container_width=True):
             if save_settings_api(): st.success("スプレッドシートへ完全に同期しました！")
+            
+        st.markdown("<div style='height: 150px;'></div>", unsafe_allow_html=True)
 
     st.sidebar.markdown("---")
     st.sidebar.caption(f"Midnight Platinum v{CURRENT_VERSION} | Fully Restored")
