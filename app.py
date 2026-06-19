@@ -205,12 +205,39 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         daily_df = rdf.groupby('date').agg(成功率=('is_success','mean'), 成功数=('is_success','sum')).reset_index()
         daily_df['成功率'] = daily_df['成功率'] * 100
         daily_df = daily_df.sort_values('date')
+        # 親機の連続招待（中日）分析
+        rdf_sorted = rdf.sort_values(['parent_id', 'date']).copy()
+        rdf_sorted['prev_date'] = rdf_sorted.groupby('parent_id')['date'].shift(1)
+        rdf_sorted['days_since_last'] = (rdf_sorted['date'] - rdf_sorted['prev_date']).dt.days
+
+        def categorize_interval(days):
+            if pd.isna(days): return "初回/データなし"
+            if days <= 0: return "同日(0日)"
+            if days == 1: return "1日"
+            if days == 2: return "2日"
+            if days == 3: return "3日"
+            if days <= 5: return "4〜5日"
+            return "6日以上"
+
+        rdf_sorted['interval_category'] = rdf_sorted['days_since_last'].apply(categorize_interval)
+        
+        interval_df = rdf_sorted.groupby('interval_category').agg(
+            試行数=('is_success', 'count'),
+            成功数=('is_success', 'sum'),
+            成功率=('is_success', 'mean')
+        ).reset_index()
+        interval_df['成功率'] = np.ceil(interval_df['成功率'] * 100 * 1000) / 1000
+        
+        cat_order = ["同日(0日)", "1日", "2日", "3日", "4〜5日", "6日以上", "初回/データなし"]
+        interval_df['order'] = interval_df['interval_category'].map(lambda x: cat_order.index(x) if x in cat_order else 99)
+        interval_df = interval_df.sort_values('order').drop(columns=['order'])
 
         st.session_state.actual_res = {
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
             "parent_rank": parent_df, "parent_model_rank": p_model_df,
             "parent_brand_rank": p_brand_df, "top30_rank": top30_df,
+            "interval_trend": interval_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}",
             "raw_df": rdf # 相性・疲弊度分析用の生データフレームを格納
@@ -518,6 +545,18 @@ def main():
         st.markdown("## 👑 親機パフォーマンス分析")
         res = st.session_state.get('actual_res')
         if res and 'parent_rank' in res:
+            # 連続招待（中日）の分析を表示
+            if 'interval_trend' in res:
+                st.markdown("### ⏳ 前回の招待からの経過日数 (中日) と成功率")
+                st.write("「前回の招待（成功・失敗問わず）から何日空けて実行したか」ごとの成功率です。最適な寝かせ期間の特定に使えます。")
+                i_df = res['interval_trend']
+                fig_int = make_subplots(specs=[[{"secondary_y": True}]])
+                fig_int.add_trace(go.Bar(x=i_df['interval_category'], y=i_df['試行数'], name="試行回数", marker_color='rgba(0,191,255,0.6)'), secondary_y=False)
+                fig_int.add_trace(go.Scatter(x=i_df['interval_category'], y=i_df['成功率'], name="成功率 (%)", line=dict(color='#ffaa00', width=3), mode='lines+markers'), secondary_y=True)
+                fig_int.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=350, yaxis2=dict(range=[0, 100]))
+                st.plotly_chart(fig_int, use_container_width=True)
+                st.markdown("---")
+                
             # ブランド別集計を表示
             if 'parent_brand_rank' in res:
                 st.markdown("### 🏷️ 親機ブランド別パフォーマンス")
