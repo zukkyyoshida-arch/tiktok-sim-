@@ -77,9 +77,11 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         if not raw_data: return "No Data"
         
         df = pd.DataFrame(raw_data)
-        # カラムインデックス: 3:状態, 5:機種, 7:日付1, 13:日付2, 9:親, 10:招待種類
-        f_idx, j_idx, n_idx, q_idx = 3, 5, 9, 10
-        
+        if target_app == "original":
+            f_idx, child_idx, j_idx, auth_idx, date1_idx, date2_idx, n_idx, q_idx = 3, 4, 7, 6, 8, 9, 10, 11
+        else:
+            f_idx, child_idx, j_idx, auth_idx, date1_idx, date2_idx, n_idx, q_idx = 3, 4, 5, None, 7, 13, 9, 10
+            
         def parse_date(val):
             if not val or val == "" or val == "#REF!": return pd.NaT
             if isinstance(val, str) and "T" in val:
@@ -105,16 +107,22 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
             except: return pd.NaT
 
         def get_valid_date(row):
-            d1 = parse_date(row[7])
-            if pd.notnull(d1) and d1.year > 1900: return d1
-            if len(row) > 13:
-                d2 = parse_date(row[13])
+            if len(row) > date1_idx:
+                d1 = parse_date(row[date1_idx])
+                if pd.notnull(d1) and d1.year > 1900: return d1
+            if len(row) > date2_idx:
+                d2 = parse_date(row[date2_idx])
                 if pd.notnull(d2) and d2.year > 1900: return d2
             return pd.NaT
 
         df['date'] = df.apply(get_valid_date, axis=1)
         df['is_success'] = df[f_idx].astype(str).str.contains("成功")
-        df['model'] = df[j_idx].fillna("不明")
+        df['model'] = df[j_idx].fillna("不明") if j_idx < len(df.columns) else "不明"
+        
+        if auth_idx is not None and auth_idx < len(df.columns):
+            df['auth_method'] = df[auth_idx].fillna("不明").astype(str)
+        else:
+            df['auth_method'] = "未設定"
         
         d_raw = payload.get('terminals', [])
         d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
@@ -202,6 +210,10 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         model_df = rdf.groupby('model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         model_df['成功率'] = model_df['成功率']*100
         
+        auth_df = rdf.groupby('auth_method').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        auth_df['成功率'] = np.ceil(auth_df['成功率']*100*1000)/1000
+        auth_df = auth_df.sort_values('成功率', ascending=False)
+        
         daily_df = rdf.groupby('date').agg(成功率=('is_success','mean'), 成功数=('is_success','sum')).reset_index()
         daily_df['成功率'] = daily_df['成功率'] * 100
         daily_df = daily_df.sort_values('date')
@@ -274,6 +286,7 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
             "parent_rank": parent_df, "parent_model_rank": p_model_df,
             "parent_brand_rank": p_brand_df, "top30_rank": top30_df,
             "interval_trend": interval_df, "parent_status_trend": parent_status_df,
+            "auth_trend": auth_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}",
             "raw_df": rdf # 相性・疲弊度分析用の生データフレームを格納
@@ -539,6 +552,13 @@ def main():
             with c2: custom_metric("成功数", f"{res['success']:,}")
             with c3: custom_metric("成功率", f"{res['rate']:.3f}%")
             
+            if 'auth_trend' in res and target_app == "original":
+                st.markdown("### 🔐 子認証方法 (Google/LINE) の成功率比較")
+                a_df = res['auth_trend'].sort_values('成功率', ascending=False)
+                fig_auth = px.bar(a_df, x='成功率', y='auth_method', orientation='h', color='成功率', color_continuous_scale='Blues', text_auto='.2f')
+                fig_auth.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=200)
+                st.plotly_chart(fig_auth, use_container_width=True)
+                
             st.markdown("### 📈 キャンペーン別 成功率ランキング")
             s_df = res['summary'].sort_values('成功率', ascending=False)
             fig = px.bar(s_df, x='成功率', y=s_df.columns[0], orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.2f')
