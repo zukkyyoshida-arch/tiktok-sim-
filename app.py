@@ -131,8 +131,14 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         rdf = rdf[rdf['date'] <= jst_now].copy()
         
         if len(rdf) == 0: return "No Data for this period"
-
-        rdf['parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
+        def process_parent_id(pid):
+            pid = str(pid).strip()
+            if not pid or pid == "nan" or pid == "None": return "未指定"
+            if re.search(r'[\u4E00-\u9FFF]', pid):
+                return "個人垢"
+            return pid
+            
+        rdf['parent_id'] = rdf[n_idx].apply(process_parent_id)
         rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
 
         def get_brand(model_name):
