@@ -131,6 +131,7 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         rdf = rdf[rdf['date'] <= jst_now].copy()
         
         if len(rdf) == 0: return "No Data for this period"
+        rdf['original_parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
         def process_parent_id(pid):
             pid = str(pid).strip()
             if not pid or pid == "nan" or pid == "None": return "未指定"
@@ -138,8 +139,8 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
                 return "個人垢"
             return pid
             
-        rdf['parent_id'] = rdf[n_idx].apply(process_parent_id)
-        rdf['parent_model'] = rdf['parent_id'].map(d_map).fillna("不明")
+        rdf['parent_id'] = rdf['original_parent_id'].apply(process_parent_id)
+        rdf['parent_model'] = rdf['original_parent_id'].map(d_map).fillna("不明")
 
         def get_brand(model_name):
             m = str(model_name).upper()
@@ -164,7 +165,20 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         
         rdf['success_date'] = rdf['date'].where(rdf['is_success'])
-        parent_df = rdf.groupby(['parent_id', 'parent_model']).agg(
+        
+        # トップ30用の集計 (漢字の名前をそのまま表示)
+        top30_df = rdf.groupby(['original_parent_id', 'parent_model']).agg(
+            試行数=('is_success','count'), 
+            成功数=('is_success','sum'), 
+            成功率=('is_success','mean'),
+            最終成功日=('success_date','max')
+        ).reset_index()
+        top30_df['最終成功日'] = top30_df['最終成功日'].dt.strftime('%m/%d').fillna('-')
+        top30_df['成功率'] = np.ceil(top30_df['成功率']*100*1000)/1000
+        top30_df = top30_df.sort_values(['成功数', '成功率'], ascending=[False, False])
+        
+        # 全体分析用の集計 (漢字は個人垢としてまとめる)
+        parent_df = rdf.groupby(['parent_id']).agg(
             試行数=('is_success','count'), 
             成功数=('is_success','sum'), 
             成功率=('is_success','mean'),
@@ -172,7 +186,7 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         ).reset_index()
         parent_df['最終成功日'] = parent_df['最終成功日'].dt.strftime('%m/%d').fillna('-')
         parent_df['成功率'] = np.ceil(parent_df['成功率']*100*1000)/1000
-        parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False)
+        parent_df = parent_df.sort_values(['成功率', '成功数'], ascending=[False, False])
 
         p_model_df = rdf.groupby('parent_model').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         p_model_df['成功率'] = np.ceil(p_model_df['成功率']*100*1000)/1000
@@ -196,7 +210,7 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
             "parent_rank": parent_df, "parent_model_rank": p_model_df,
-            "parent_brand_rank": p_brand_df,
+            "parent_brand_rank": p_brand_df, "top30_rank": top30_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}",
             "raw_df": rdf # 相性・疲弊度分析用の生データフレームを格納
@@ -525,12 +539,13 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
                 
             st.markdown("### 🌟 直近で成功回数が多い端末トップ30")
-            top_30_df = res['parent_rank'].sort_values('成功数', ascending=False).head(30)
-            if not top_30_df.empty:
-                display_df = top_30_df[['parent_id', 'parent_model', '成功数', '試行数', '成功率', '最終成功日']].copy()
-                display_df.columns = ['端末ID(親機)', '機種名', '成功回数', '試行回数', '成功率(%)', '直近成功日']
-                display_df.insert(0, '順位', range(1, len(display_df) + 1))
-                st.dataframe(display_df, use_container_width=True, hide_index=True)
+            if 'top30_rank' in res:
+                top_30_df = res['top30_rank'].head(30)
+                if not top_30_df.empty:
+                    display_df = top_30_df[['original_parent_id', 'parent_model', '成功数', '試行数', '成功率', '最終成功日']].copy()
+                    display_df.columns = ['端末ID(親機)', '機種名', '成功回数', '試行回数', '成功率(%)', '直近成功日']
+                    display_df.insert(0, '順位', range(1, len(display_df) + 1))
+                    st.dataframe(display_df, use_container_width=True, hide_index=True)
             
             st.markdown("---")
             st.markdown("### ⚠️ 要警戒：低パフォーマンス親機 (ワースト10)")
