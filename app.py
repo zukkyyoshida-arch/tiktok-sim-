@@ -232,12 +232,48 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         interval_df['order'] = interval_df['interval_category'].map(lambda x: cat_order.index(x) if x in cat_order else 99)
         interval_df = interval_df.sort_values('order').drop(columns=['order'])
 
+        # 親機のステータス（連続失敗数）分析
+        consecutive_failures_list = []
+        current_streak = 0
+        current_parent = None
+        
+        for idx, row in rdf_sorted.iterrows():
+            if row['parent_id'] != current_parent:
+                current_parent = row['parent_id']
+                current_streak = 0
+            
+            # The status *before* this attempt
+            consecutive_failures_list.append(current_streak)
+            
+            # Update streak for the *next* attempt
+            if row['is_success']:
+                current_streak = 0
+            else:
+                current_streak += 1
+                
+        rdf_sorted['prev_consecutive_failures'] = consecutive_failures_list
+        def get_parent_status(failures):
+            if failures == 0: return "🟢 健全 (連続失敗0回)"
+            if failures == 1: return "🟡 注意 (連続失敗1回)"
+            if failures == 2: return "🟠 警戒 (連続失敗2回)"
+            return "🔴 危険 (連続失敗3回以上)"
+            
+        rdf_sorted['parent_status_before'] = rdf_sorted['prev_consecutive_failures'].apply(get_parent_status)
+        
+        parent_status_df = rdf_sorted.groupby('parent_status_before').agg(
+            試行数=('is_success', 'count'),
+            成功数=('is_success', 'sum'),
+            成功率=('is_success', 'mean')
+        ).reset_index()
+        parent_status_df['成功率'] = np.ceil(parent_status_df['成功率'] * 100 * 1000) / 1000
+        parent_status_df = parent_status_df.sort_values('parent_status_before')
+
         st.session_state.actual_res = {
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
             "parent_rank": parent_df, "parent_model_rank": p_model_df,
             "parent_brand_rank": p_brand_df, "top30_rank": top30_df,
-            "interval_trend": interval_df,
+            "interval_trend": interval_df, "parent_status_trend": parent_status_df,
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}",
             "raw_df": rdf # 相性・疲弊度分析用の生データフレームを格納
@@ -555,6 +591,14 @@ def main():
                 fig_int.add_trace(go.Scatter(x=i_df['interval_category'], y=i_df['成功率'], name="成功率 (%)", line=dict(color='#ffaa00', width=3), mode='lines+markers'), secondary_y=True)
                 fig_int.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=350, yaxis2=dict(range=[0, 100]))
                 st.plotly_chart(fig_int, use_container_width=True)
+                st.markdown("---")
+            
+            if 'parent_status_trend' in res:
+                st.markdown("### 🚦 招待前のステータス別 成功率")
+                st.write("親機が「直前に何回連続で失敗していたか」による成功率の表です。失敗が続いている端末をいつ見切るかの判断に使えます。")
+                ps_df = res['parent_status_trend'].copy()
+                ps_df.columns = ['ステータス(直前の連続失敗数)', '試行回数', '成功回数', '成功率(%)']
+                st.dataframe(ps_df, use_container_width=True, hide_index=True)
                 st.markdown("---")
                 
             # ブランド別集計を表示
