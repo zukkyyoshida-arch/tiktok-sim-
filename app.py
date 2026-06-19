@@ -157,7 +157,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         sum_df = rdf.groupby(q_idx).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         
-        parent_df = rdf.groupby('parent_id').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        parent_df = rdf.groupby('parent_id').agg(試行数=('is_success','count'), 成功数=('is_success','sum'), 成功率=('is_success','mean')).reset_index()
         parent_df['成功率'] = np.ceil(parent_df['成功率']*100*1000)/1000
         parent_df = parent_df[parent_df['試行数'] >= 3].sort_values('成功率', ascending=False)
 
@@ -497,6 +497,14 @@ def main():
                 fig = px.bar(res['parent_model_rank'], x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
                 st.plotly_chart(fig, use_container_width=True)
+                
+            st.markdown("### 🌟 直近で成功回数が多い端末トップ30")
+            top_30_df = res['parent_rank'].sort_values('成功数', ascending=False).head(30)
+            if not top_30_df.empty:
+                display_df = top_30_df[['parent_id', '成功数', '試行数', '成功率']].copy()
+                display_df.columns = ['端末ID(親機)', '成功回数', '試行回数', '成功率(%)']
+                display_df.insert(0, '順位', range(1, len(display_df) + 1))
+                st.dataframe(display_df, use_container_width=True, hide_index=True)
             
             st.markdown("---")
             st.markdown("### ⚠️ 要警戒：低パフォーマンス親機 (ワースト10)")
