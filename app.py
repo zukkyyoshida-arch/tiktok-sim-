@@ -57,9 +57,9 @@ def custom_metric(label, value, sub=""):
 # 3. バックエンド通信ロジック
 # ==========================================
 @st.cache_data(ttl=600)
-def fetch_api_data_raw(force_key=None):
+def fetch_api_data_raw(gas_url, force_key=None):
     try:
-        url = f"{GAS_URL}?action=get_analytics"
+        url = f"{gas_url}?action=get_analytics"
         if force_key:
             url += f"&t={force_key}"
         response = requests.get(url, timeout=15)
@@ -67,10 +67,10 @@ def fetch_api_data_raw(force_key=None):
         return response.json()
     except: return None
 
-def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
+def fetch_data_logic(gas_url, f_mode, l_days=None, t_month=None, force=False):
     try:
         f_key = str(datetime.now().timestamp()) if force else None
-        payload = fetch_api_data_raw(force_key=f_key)
+        payload = fetch_api_data_raw(gas_url, force_key=f_key)
         if not payload or "analytics" not in payload: return "Invalid API Response"
         
         raw_data = payload['analytics']
@@ -198,7 +198,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         return None
     except Exception as e: return str(e)
 
-def save_settings_api():
+def save_settings_api(gas_url):
     try:
         settings = {
             "invite_types": st.session_state.invite_types_df.to_json(orient='records'),
@@ -213,13 +213,13 @@ def save_settings_api():
             "p_gap_days": str(st.session_state.get("p_gap_days", 5)),
             "checkin_days": str(st.session_state.get("checkin_days", 14))
         }
-        requests.post(GAS_URL, data=json.dumps(settings), timeout=15)
+        requests.post(gas_url, data=json.dumps(settings), timeout=15)
         return True
     except: return False
 
-def load_settings_api():
+def load_settings_api(gas_url):
     try:
-        response = requests.get(GAS_URL, timeout=10)
+        response = requests.get(gas_url, timeout=10)
         if response.status_code == 200:
             settings = response.json()
             if not settings: return False
@@ -264,6 +264,27 @@ def main():
         st.session_state.clear()
         st.session_state.version = CURRENT_VERSION
 
+    # --- アプリ選択 (Lite / 本家) ---
+    st.sidebar.markdown("### 📊 分析対象アプリ")
+    app_mode = st.sidebar.radio("対象データ", ["TikTok Lite", "TikTok 本家"])
+    
+    if app_mode == "TikTok Lite":
+        gas_url = "https://script.google.com/macros/s/AKfycbwKESR5v8tWIU5hHHuVNIVNSwC2RhBSxwct4SlCBTmaYgPo79GDiTBTDiKvq6b3um-Svg/exec"
+    else:
+        if "gas_url_original" not in st.session_state:
+            st.session_state.gas_url_original = ""
+        st.session_state.gas_url_original = st.sidebar.text_input("本家用 GAS API URL", value=st.session_state.gas_url_original, type="password")
+        gas_url = st.session_state.gas_url_original
+
+    if st.session_state.get('current_app_mode') != app_mode:
+        st.session_state.current_app_mode = app_mode
+        st.session_state.initialized = False
+        st.session_state.actual_res = None
+
+    if not gas_url:
+        st.warning("⚠️ サイドバーからGAS API URLを入力してください。")
+        return
+
     # --- 初期化 ---
     # 常に必要な変数を定義
     default_vals = {
@@ -274,7 +295,7 @@ def main():
     for k, v in default_vals.items():
         if k not in st.session_state: st.session_state[k] = v
 
-    if 'invite_types_df' not in st.session_state:
+    if not st.session_state.get('initialized', False):
         st.session_state.invite_types_df = pd.DataFrame([
             {"キャンペーン名": "ブタ5000", "即時報酬": 5000, "完走報酬": 0, "運用比率(%)": 100.0},
             {"キャンペーン名": "ブタ2500", "即時報酬": 2500, "完走報酬": 2500, "運用比率(%)": 0.0},
@@ -294,8 +315,8 @@ def main():
             {"チェックイン追加報酬名": "ティア2", "報酬額": 2700, "出現確率(%)": 40.0},
             {"チェックイン追加報酬名": "チェックイン特別報酬", "報酬額": 6750, "出現確率(%)": 20.0}
         ])
-        load_settings_api()
-        fetch_data_logic("直近28日間", l_days=28)
+        load_settings_api(gas_url)
+        fetch_data_logic(gas_url, "直近28日間", l_days=28)
         st.session_state.initialized = True
 
     if not st.session_state.get('initialized'):
@@ -432,7 +453,7 @@ def main():
         with ac3: st.write(""); sync = st.button("同期", use_container_width=True)
         if sync:
             with st.spinner("最新データを取得中..."):
-                err = fetch_data_logic(fm, l_days=ld, t_month=tm, force=True)
+                err = fetch_data_logic(gas_url, fm, l_days=ld, t_month=tm, force=True)
                 if err: st.error(f"同期失敗: {err}")
                 else: st.success("同期成功！"); st.rerun()
         
@@ -857,7 +878,7 @@ def main():
         st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, use_container_width=True, disabled=["動画パターン名", "報酬額"], column_config=col_cfg, key="ed_vid")
         st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, use_container_width=True, disabled=["チェックイン追加報酬名", "報酬額"], column_config={"出現確率(%)": st.column_config.SelectboxColumn("出現確率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}, key="ed_chk")
         if st.button("🚀 クラウドに保存", use_container_width=True):
-            if save_settings_api(): st.success("スプレッドシートへ完全に同期しました！")
+            if save_settings_api(gas_url): st.success("スプレッドシートへ完全に同期しました！")
             
         st.markdown("<div style='height: 150px;'></div>", unsafe_allow_html=True)
 
