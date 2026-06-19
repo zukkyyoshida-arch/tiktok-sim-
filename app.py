@@ -158,7 +158,7 @@ def fetch_data_logic(f_mode, l_days=None, t_month=None, force=False):
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         
         rdf['success_date'] = rdf['date'].where(rdf['is_success'])
-        parent_df = rdf.groupby('parent_id').agg(
+        parent_df = rdf.groupby(['parent_id', 'parent_model']).agg(
             試行数=('is_success','count'), 
             成功数=('is_success','sum'), 
             成功率=('is_success','mean'),
@@ -508,8 +508,8 @@ def main():
             st.markdown("### 🌟 直近で成功回数が多い端末トップ30")
             top_30_df = res['parent_rank'].sort_values('成功数', ascending=False).head(30)
             if not top_30_df.empty:
-                display_df = top_30_df[['parent_id', '成功数', '試行数', '成功率', '最終成功日']].copy()
-                display_df.columns = ['端末ID(親機)', '成功回数', '試行回数', '成功率(%)', '直近成功日']
+                display_df = top_30_df[['parent_id', 'parent_model', '成功数', '試行数', '成功率', '最終成功日']].copy()
+                display_df.columns = ['端末ID(親機)', '機種名', '成功回数', '試行回数', '成功率(%)', '直近成功日']
                 display_df.insert(0, '順位', range(1, len(display_df) + 1))
                 st.dataframe(display_df, use_container_width=True, hide_index=True)
             
