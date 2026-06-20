@@ -151,8 +151,14 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
                     # Column 0: 管理番号, Column 1: 名前, Column 6: 機種名
                     if len(r) >= 7 and pd.notnull(r.iloc[6]) and str(r.iloc[6]).strip() != "":
                         model = str(r.iloc[6]).strip()
-                        if pd.notnull(r.iloc[0]): d_map[str(r.iloc[0]).strip()] = model
-                        if pd.notnull(r.iloc[1]): d_map[str(r.iloc[1]).strip()] = model
+                        if pd.notnull(r.iloc[0]):
+                            k0 = str(r.iloc[0]).strip()
+                            if k0.endswith('.0'): k0 = k0[:-2]
+                            d_map[k0] = model
+                        if pd.notnull(r.iloc[1]):
+                            k1 = str(r.iloc[1]).strip()
+                            if k1.endswith('.0'): k1 = k1[:-2]
+                            d_map[k1] = model
             except Exception as e:
                 print("Error fetching 個人招待ID:", e)
         
@@ -168,7 +174,7 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         rdf = rdf[rdf['date'] <= jst_now].copy()
         
         if len(rdf) == 0: return "No Data for this period"
-        rdf['original_parent_id'] = rdf[n_idx].fillna("未指定").astype(str)
+        rdf['original_parent_id'] = rdf[n_idx].fillna("未指定").astype(str).apply(lambda x: x[:-2] if x.endswith('.0') else x)
         def process_parent_id(pid):
             pid = str(pid).strip()
             if not pid or pid == "nan" or pid == "None": return "未指定"
