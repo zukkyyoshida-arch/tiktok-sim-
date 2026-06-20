@@ -132,6 +132,11 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
             df['auth_method'] = "未設定"
         
         d_raw = payload.get('terminals', [])
+        if (not d_raw or len(d_raw) == 0) and target_app == "original":
+            lite_payload = fetch_api_data_raw("lite", force_key=f_key)
+            if lite_payload:
+                d_raw = lite_payload.get('terminals', [])
+        
         d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
         
         rdf = df.copy()
