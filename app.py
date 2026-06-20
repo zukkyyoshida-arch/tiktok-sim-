@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import urllib.parse
 from datetime import datetime, timedelta
 import re
 import json
@@ -138,6 +139,22 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
                 d_raw = lite_payload.get('terminals', [])
         
         d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
+        
+        if target_app == "original":
+            # fetch 個人招待ID mapping from the new spreadsheet via csv
+            try:
+                sheet_id = "1Rg8nMTOyU_MMe7wGS1ZbeqptTUFgRXoovy27bzq2zdY"
+                sheet_name = urllib.parse.quote("個人招待ID")
+                csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
+                csv_df = pd.read_csv(csv_url)
+                for _, r in csv_df.iterrows():
+                    # Column 0: 管理番号, Column 1: 名前, Column 6: 機種名
+                    if len(r) >= 7 and pd.notnull(r.iloc[6]) and str(r.iloc[6]).strip() != "":
+                        model = str(r.iloc[6]).strip()
+                        if pd.notnull(r.iloc[0]): d_map[str(r.iloc[0]).strip()] = model
+                        if pd.notnull(r.iloc[1]): d_map[str(r.iloc[1]).strip()] = model
+            except Exception as e:
+                print("Error fetching 個人招待ID:", e)
         
         rdf = df.copy()
         if f_mode == "直近28日間": 
