@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 # ==========================================
 CURRENT_VERSION = "11.0.14"
 GAS_URL_LITE = "https://script.google.com/macros/s/AKfycbxLevaqOFWn2dAMZHw5m-SQDUaZ1pvx2iXt9bcDGwPPglybPovvBIMV0fQGDrSd-Nbeag/exec"
-GAS_URL_ORIGINAL = "" # TODO: 新しいGASのURLを設定する
+GAS_URL_ORIGINAL = "https://script.google.com/macros/s/AKfycbxFBYFFqoxpE6rWJM9a-cv6v4yKjcFzZ76JReak8ZMk-rywCc4RfkqKCgIsEcHYcbl6/exec"
 
 def get_gas_url(target_app):
     url = GAS_URL_ORIGINAL if target_app == "original" else GAS_URL_LITE
