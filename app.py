@@ -13,8 +13,13 @@ from plotly.subplots import make_subplots
 # ==========================================
 # 1. 定数・設定
 # ==========================================
-CURRENT_VERSION = "11.0.13"
-GAS_URL = "https://script.google.com/macros/s/AKfycbxLevaqOFWn2dAMZHw5m-SQDUaZ1pvx2iXt9bcDGwPPglybPovvBIMV0fQGDrSd-Nbeag/exec"
+CURRENT_VERSION = "11.0.14"
+GAS_URL_LITE = "https://script.google.com/macros/s/AKfycbxLevaqOFWn2dAMZHw5m-SQDUaZ1pvx2iXt9bcDGwPPglybPovvBIMV0fQGDrSd-Nbeag/exec"
+GAS_URL_ORIGINAL = "" # TODO: 新しいGASのURLを設定する
+
+def get_gas_url(target_app):
+    url = GAS_URL_ORIGINAL if target_app == "original" else GAS_URL_LITE
+    return url
 
 # ページ設定
 st.set_page_config(
@@ -59,7 +64,9 @@ def custom_metric(label, value, sub=""):
 @st.cache_data(ttl=600)
 def fetch_api_data_raw(target_app, force_key=None):
     try:
-        url = f"{GAS_URL}?action=get_analytics&app={target_app}"
+        base_url = get_gas_url(target_app)
+        if not base_url: return None
+        url = f"{base_url}?action=get_analytics&app={target_app}"
         if force_key:
             url += f"&t={force_key}"
         response = requests.get(url, timeout=15)
@@ -309,14 +316,18 @@ def save_settings_api(target_app):
             "p_gap_days": str(st.session_state.get("p_gap_days", 5)),
             "checkin_days": str(st.session_state.get("checkin_days", 14))
         }
-        url = f"{GAS_URL}?app={target_app}"
+        base_url = get_gas_url(target_app)
+        if not base_url: return False
+        url = f"{base_url}?app={target_app}"
         requests.post(url, data=json.dumps(settings), timeout=15)
         return True
     except: return False
 
 def load_settings_api(target_app):
     try:
-        url = f"{GAS_URL}?app={target_app}"
+        base_url = get_gas_url(target_app)
+        if not base_url: return False
+        url = f"{base_url}?app={target_app}"
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
             settings = response.json()
