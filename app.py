@@ -501,7 +501,7 @@ def main():
     per_invite_revenue = (success_p * success_rev) + ((1 - success_p) * failure_rev)
 
     # --- タブ表示 ---
-    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "📱 機種別分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
+    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
 
     # 1. ダッシュボード
     with tabs[0]:
@@ -613,26 +613,21 @@ def main():
                 fig_comb.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=450, yaxis2=dict(range=[0, 100]))
                 st.plotly_chart(fig_comb, use_container_width=True)
 
-    # 3. 機種別分析 (テーブル復元)
-    with tabs[2]:
-        res = st.session_state.get('actual_res')
-        if res:
-            st.caption(f"📊 分析対象期間: {res['period']}")
-            
-        st.markdown("## 📱 機種別パフォーマンス")
-        res = st.session_state.get('actual_res')
-        if res and 'brand' in res:
-            b_df = res['brand'].sort_values('成功率', ascending=False)
-            fig = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
-            fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
-            st.plotly_chart(fig, use_container_width=True)
-            if "model_rank" in res:
-                m_df = res['model_rank'].sort_values('成功率', ascending=False).copy()
-                m_df['成功率'] = m_df['成功率'].map('{:.2f}%'.format)
-                st.dataframe(m_df, use_container_width=True, hide_index=True)
 
-    # 4. 親機分析 (アドバイス復元)
-    with tabs[3]:
+            st.markdown("---")
+            st.markdown("## 📱 機種別パフォーマンス")
+            if 'brand' in res:
+                b_df = res['brand'].sort_values('成功率', ascending=False)
+                fig = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
+                fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
+                st.plotly_chart(fig, use_container_width=True)
+                if "model_rank" in res:
+                    m_df = res['model_rank'].sort_values('成功率', ascending=False).copy()
+                    m_df['成功率'] = m_df['成功率'].map('{:.2f}%'.format)
+                    st.dataframe(m_df, use_container_width=True, hide_index=True)
+
+    # 3. 親機分析 (アドバイス復元)
+    with tabs[2]:
         res = st.session_state.get('actual_res')
         if res:
             st.caption(f"📊 分析対象期間: {res['period']}")
@@ -652,13 +647,6 @@ def main():
                 st.plotly_chart(fig_int, use_container_width=True)
                 st.markdown("---")
             
-            if 'parent_status_trend' in res:
-                st.markdown("### 🚦 招待前のステータス別 成功率")
-                st.write("親機が「直前に何回連続で失敗していたか」による成功率の表です。失敗が続いている端末をいつ見切るかの判断に使えます。")
-                ps_df = res['parent_status_trend'].copy()
-                ps_df.columns = ['ステータス(直前の連続失敗数)', '試行回数', '成功回数', '成功率(%)']
-                st.dataframe(ps_df, use_container_width=True, hide_index=True)
-                st.markdown("---")
                 
             # ブランド別集計を表示
             if 'parent_brand_rank' in res:
@@ -769,7 +757,7 @@ def main():
             st.markdown(f"<div class='advice-card' style='border-color: #ffd700;'><div class='advice-title'>💡 親機戦略のアドバイス</div><div class='advice-text'>{p_adv}</div></div>", unsafe_allow_html=True)
 
     # 5. 相性・疲弊度分析 (新タブ)
-    with tabs[4]:
+    with tabs[3]:
         import textwrap
         res = st.session_state.get('actual_res')
         if res:
@@ -1012,7 +1000,7 @@ def main():
                     st.info("十分なデータがありません。")
 
     # 6. シミュレーション (内訳復元)
-    with tabs[5]:
+    with tabs[4]:
         st.markdown("## 🔄 稼働シミュレーション")
         st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:5px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
         c1, c2, c3 = st.columns(3)
@@ -1026,7 +1014,7 @@ def main():
         with sc2: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>❌ 失敗時</b><br>確率: {(1-success_p)*100:.1f}%<br>拘束: {(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f}日</div>", unsafe_allow_html=True)
 
     # 7. 設定 (SelectboxColumn復元)
-    with tabs[6]:
+    with tabs[5]:
         st.markdown("## ⚙️ 設定 (運用比率のみ編集可能)")
         col_cfg = {"運用比率(%)": st.column_config.SelectboxColumn("運用比率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}
         st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, use_container_width=True, disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
