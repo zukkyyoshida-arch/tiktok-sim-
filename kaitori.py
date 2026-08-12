@@ -9,6 +9,8 @@ kaitori.py — イオシス買取（https://k-tai-iosys.com/）の買取価格�
 
 このモジュールは streamlit に依存しない（キャッシュは呼び出し側の責務）。
 """
+import json
+import os
 import re
 import time
 import unicodedata
@@ -17,6 +19,13 @@ import requests
 from bs4 import BeautifulSoup
 
 from iosys import normalize_model_name
+
+# 同梱スナップショットの場所。本番（Streamlit Cloud）はAWSのIPから通信するため
+# k-tai-iosys.com に全ブランド403で弾かれる。住宅IPで取得したこのファイルを
+# フォールバックに使う（更新は tools/update_kaitori_snapshot.py）。
+SNAPSHOT_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "data_snapshots", "kaitori_snapshot.json"
+)
 
 BASE_URL = "https://k-tai-iosys.com/pricelist/smartphone"
 # iosys.co.jp 本体と同様、UA未指定だと弾かれる可能性があるためブラウザUAを指定する
@@ -387,6 +396,73 @@ def aggregate_rows(rows):
         "page_url": rows[0]["page_url"] if rows else None,
         "brand": rows[0]["brand"] if rows else None,
     }
+
+
+def load_snapshot(path=None):
+    """同梱の買取スナップショットを読み込む。
+
+    戻り値: (rows: list[dict], fetched_at: str | None)
+        読めない場合は ([], None)。スナップショットが無くてもアプリは動くべきなので、
+        例外は投げずに空で返す。
+    """
+    path = path or SNAPSHOT_PATH
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return [], None
+
+    rows = data.get("rows") or []
+    if not isinstance(rows, list):
+        return [], None
+    return rows, data.get("fetched_at")
+
+
+def fetch_all_brands_with_fallback(brands=None, snapshot_path=None):
+    """ライブ取得を試み、失敗したブランドをスナップショットで補完する。
+
+    本番環境では全ブランドが403になるため、実質スナップショットのみで動く。
+    ローカル（住宅IP）では全ブランドがライブで取れるため、スナップショットは使われない。
+
+    戻り値: (rows, errors, meta)
+        meta = {
+            "live_brands": ライブで取得できたブランド,
+            "snapshot_brands": スナップショットで補完したブランド,
+            "snapshot_fetched_at": スナップショットの取得日時（補完した場合のみ）,
+            "used_snapshot": スナップショットを1件でも使ったか,
+        }
+    """
+    live_rows, errors = fetch_all_brands(brands)
+    live_brands = sorted({r["brand"] for r in live_rows})
+
+    target_brands = list(brands) if brands is not None else list(BRANDS)
+    missing = [b for b in target_brands if b not in set(live_brands)]
+
+    meta = {
+        "live_brands": live_brands,
+        "snapshot_brands": [],
+        "snapshot_fetched_at": None,
+        "used_snapshot": False,
+    }
+
+    if not missing:
+        return live_rows, errors, meta
+
+    snapshot_rows, fetched_at = load_snapshot(snapshot_path)
+    if not snapshot_rows:
+        # スナップショットも無ければライブ分だけ返す（買取列は空になる）
+        return live_rows, errors, meta
+
+    missing_set = set(missing)
+    filled = [r for r in snapshot_rows if r.get("brand") in missing_set]
+    if not filled:
+        return live_rows, errors, meta
+
+    meta["snapshot_brands"] = sorted({r["brand"] for r in filled})
+    meta["snapshot_fetched_at"] = fetched_at
+    meta["used_snapshot"] = True
+
+    return live_rows + filled, errors, meta
 
 
 def match_models(model_names, rows):

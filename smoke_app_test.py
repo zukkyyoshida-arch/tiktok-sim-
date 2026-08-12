@@ -39,10 +39,12 @@ FAKE_KAITORI = (
 def main():
     at = AppTest.from_file("app.py", default_timeout=180)
 
-    # キャッシュ済み関数の実体を差し替える（ネットワーク遮断）
+    # キャッシュ済み関数の実体を差し替える（ネットワーク遮断）。
+    # 買取はフォールバック経路（fetch_all_brands_with_fallback）を通るため、
+    # ライブ取得側を空にしてスナップショットが使われる状態を再現する。
     with mock.patch("iosys.search_with_fallback",
                     return_value=([FAKE_SALE["AQUOS sense7"]["items"][0]], "AQUOS sense7", None)), \
-         mock.patch("kaitori.fetch_all_brands", return_value=([], [])):
+         mock.patch("kaitori.fetch_all_brands", return_value=([], ["mocked: live取得なし"])):
         at.run()
 
     if at.exception:
