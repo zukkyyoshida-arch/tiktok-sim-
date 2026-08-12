@@ -8,9 +8,11 @@ from datetime import datetime, timedelta
 import re
 import json
 import requests
+import concurrent.futures
 from streamlit_autorefresh import st_autorefresh
 from plotly.subplots import make_subplots
 import iosys
+import kaitori
 
 # ==========================================
 # 1. 定数・設定
@@ -458,14 +460,74 @@ def _collect_models_from_actual_res():
     return sorted(models)
 
 
-@st.cache_data(ttl=3600)
-def _cached_search_with_fallback(model_name):
-    return iosys.search_with_fallback(model_name, max_pages=2)
+# 販売相場の並列取得数。イオシスへの負荷配慮のため8以下に抑える
+# （iosys.PAGE_SLEEP_SEC のページ間ウェイトは各ワーカー内でそのまま効く）。
+IOSYS_MAX_WORKERS = 8
+
+
+def _fetch_one_model(model_name):
+    """1機種分の販売相場を取得する（ワーカースレッドで実行される）。
+
+    注意: この関数はスレッド内で呼ばれるため、st.* を一切呼んではいけない
+    （StreamlitのScriptRunContextはワーカースレッドに無く、警告や誤動作の原因になる）。
+    そのため @st.cache_data ではなく、素の iosys 呼び出しを使う。
+    """
+    items, used_query, error = iosys.search_with_fallback(model_name, max_pages=2)
+    strict_items = iosys.filter_strict(items, iosys.normalize_model_name(model_name))
+    return model_name, {
+        "items": strict_items,
+        "used_query": used_query,
+        "error": error,
+    }
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _fetch_sale_prices(model_names_tuple):
+    """複数機種の販売相場をまとめて並列取得する。
+
+    引数はハッシュ可能である必要があるため tuple で受け取る。
+    ThreadPoolExecutor で並列化し、スレッド内では st.* を呼ばない。
+    """
+    model_names = list(model_names_tuple)
+    if not model_names:
+        return {}
+
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=IOSYS_MAX_WORKERS) as executor:
+        futures = [executor.submit(_fetch_one_model, name) for name in model_names]
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                model_name, data = future.result()
+                results[model_name] = data
+            except Exception as e:
+                # 1機種の失敗で全体を落とさない
+                results[str(e)] = {"items": [], "used_query": "", "error": str(e)}
+
+    # 呼び出し順（元のリスト順）に整える
+    return {name: results[name] for name in model_names if name in results}
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _fetch_kaitori_prices(model_names_tuple):
+    """買取相場（イオシス買取）をブランド別価格表から一括取得し、機種ごとに集約する。
+
+    戻り値: (matched: dict[機種名, 集約結果], errors: list[str])
+    """
+    model_names = list(model_names_tuple)
+    if not model_names:
+        return {}, []
+
+    rows, errors = kaitori.fetch_all_brands()
+    matched = kaitori.match_models(model_names, rows)
+    return matched, errors
 
 
 def render_used_market_tab():
     st.markdown("## 💴 中古相場（イオシス）")
-    st.caption("運用端末の機種ごとに、株式会社イオシス（iosys.co.jp）の中古販売価格を一覧化します。")
+    st.caption(
+        "運用端末の機種ごとに、イオシスの中古販売価格（今買うといくら）と"
+        "買取価格（今売るといくら）を一覧化します。タブを開くと自動で取得します。"
+    )
 
     with st.expander("📋 機種リストの取得元", expanded=True):
         source = st.radio(
@@ -513,30 +575,36 @@ def render_used_market_tab():
             "対象機種を選択", options=candidate_models, default=candidate_models, key="iosys_selected_models"
         )
 
-    fetch_clicked = st.button("💴 相場を取得", use_container_width=True, disabled=(len(selected_models) == 0))
+    refetch_clicked = st.button(
+        "🔄 相場を再取得", use_container_width=True, disabled=(len(selected_models) == 0),
+        help="キャッシュ（1時間）を破棄して、販売・買取の相場を取り直します。",
+    )
+    if refetch_clicked:
+        _fetch_sale_prices.clear()
+        _fetch_kaitori_prices.clear()
 
-    if fetch_clicked:
-        results = {}
-        progress = st.progress(0.0, text="相場を取得しています…")
-        total = len(selected_models)
-        for i, model_name in enumerate(selected_models):
-            items, used_query, error = _cached_search_with_fallback(model_name)
-            strict_items = iosys.filter_strict(items, iosys.normalize_model_name(model_name))
-            results[model_name] = {
-                "items": strict_items,
-                "used_query": used_query,
-                "error": error,
-            }
-            progress.progress((i + 1) / total, text=f"相場を取得しています… ({i+1}/{total}) {model_name}")
-        progress.empty()
-        st.session_state.iosys_results = results
-        st.session_state.iosys_fetched_at = datetime.now()
-
-    results = st.session_state.get('iosys_results')
-    if not results:
+    if not selected_models:
+        st.info("対象機種を1つ以上選択してください。")
         return
 
-    fetched_at = st.session_state.get('iosys_fetched_at')
+    # タブを開いた時点で自動取得する（ボタン押下を必須にしない）。
+    # 結果は @st.cache_data(ttl=3600) に載るため、再描画のたびに再取得はされない。
+    models_key = tuple(selected_models)
+
+    with st.spinner(f"販売相場を取得中…（{len(selected_models)}機種・初回は1分ほどかかります）"):
+        results = _fetch_sale_prices(models_key)
+
+    with st.spinner("買取相場を取得中…（初回は10秒ほどかかります）"):
+        kaitori_map, kaitori_errors = _fetch_kaitori_prices(models_key)
+
+    st.session_state.iosys_results = results
+    fetched_at = datetime.now()
+
+    if kaitori_errors:
+        st.warning("買取価格表の一部が取得できませんでした:\n" + "\n".join(f"- {e}" for e in kaitori_errors))
+
+    if not results:
+        return
 
     def _rank_bucket(rank_str):
         r = rank_str or ""
@@ -575,6 +643,9 @@ def render_used_market_tab():
         median_price = prices[len(prices)//2] if prices else None
         search_url = f"https://iosys.co.jp/items?q={urllib.parse.quote(data['used_query'])}"
 
+        # 買取価格表に該当が無い機種（BASIO・Libero・android one 等）は None のままにする
+        kaitori_data = kaitori_map.get(model_name) or {}
+
         summary_rows.append({
             "機種名": model_name,
             "検索語": data["used_query"],
@@ -587,6 +658,10 @@ def render_used_market_tab():
             "Bランク最安": rank_min["Bランク"],
             "Cランク最安": rank_min["Cランク"],
             "検索ページ": search_url,
+            "未使用買取": kaitori_data.get("unused_price"),
+            "中古買取上限": kaitori_data.get("used_max"),
+            "中古買取下限": kaitori_data.get("used_min"),
+            "買取表ページ": kaitori_data.get("page_url"),
         })
 
     if summary_rows:
@@ -605,6 +680,10 @@ def render_used_market_tab():
                 "Bランク最安": st.column_config.NumberColumn("Bランク最安", format="¥%d"),
                 "Cランク最安": st.column_config.NumberColumn("Cランク最安", format="¥%d"),
                 "検索ページ": st.column_config.LinkColumn("イオシス検索ページ", display_text="開く"),
+                "未使用買取": st.column_config.NumberColumn("未使用買取", format="¥%d"),
+                "中古買取上限": st.column_config.NumberColumn("中古買取上限", format="¥%d"),
+                "中古買取下限": st.column_config.NumberColumn("中古買取下限", format="¥%d"),
+                "買取表ページ": st.column_config.LinkColumn("買取表ページ", display_text="開く"),
             }
         )
 
@@ -624,10 +703,25 @@ def render_used_market_tab():
         )
         st.session_state.iosys_qty_df = qty_df
 
-        merged = qty_df.merge(summary_df[["機種名", "中央値"]], on="機種名", how="left")
+        merged = qty_df.merge(summary_df[["機種名", "中央値", "中古買取上限"]], on="機種名", how="left")
         merged["評価額"] = merged["中央値"].fillna(0) * merged["保有台数"].fillna(0)
+        merged["買取評価額"] = merged["中古買取上限"].fillna(0) * merged["保有台数"].fillna(0)
         total_value = int(merged["評価額"].sum())
-        custom_metric("資産評価額の合計（中央値×台数）", f"¥{total_value:,}")
+        total_kaitori_value = int(merged["買取評価額"].sum())
+
+        # 「今買い揃えるといくら」と「今手放すといくら」を並べて見せる
+        kaitori_known = merged["中古買取上限"].notna().sum()
+        v1, v2 = st.columns(2)
+        with v1:
+            custom_metric(
+                "買い揃える場合（販売中央値×台数）", f"¥{total_value:,}",
+                sub="イオシス販売価格の中央値ベース",
+            )
+        with v2:
+            custom_metric(
+                "売却する場合（買取上限×台数）", f"¥{total_kaitori_value:,}",
+                sub=f"イオシス買取上限ベース・買取価格が判明した {kaitori_known}/{len(merged)} 機種のみ合計",
+            )
 
         st.markdown("### 機種ごとの個別商品一覧")
         for model_name, data in results.items():
@@ -656,7 +750,10 @@ def render_used_market_tab():
         )
 
     if fetched_at:
-        st.caption(f"出典: イオシス（iosys.co.jp）・価格は税込・取得: {fetched_at.strftime('%Y-%m-%d %H:%M:%S')}")
+        st.caption(
+            "出典: 販売価格=イオシス（iosys.co.jp）／買取価格=イオシス買取（k-tai-iosys.com）"
+            f"・価格は税込・取得: {fetched_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
 
 
 def save_settings_api(target_app):
