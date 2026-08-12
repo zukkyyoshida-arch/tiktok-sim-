@@ -15,7 +15,7 @@ import iosys
 # ==========================================
 # 1. 定数・設定
 # ==========================================
-CURRENT_VERSION = "11.0.14"
+CURRENT_VERSION = "11.1.0"
 GAS_URL_LITE = "https://script.google.com/macros/s/AKfycbxLevaqOFWn2dAMZHw5m-SQDUaZ1pvx2iXt9bcDGwPPglybPovvBIMV0fQGDrSd-Nbeag/exec"
 GAS_URL_ORIGINAL = "https://script.google.com/macros/s/AKfycby9jacqr0U-jJ2QPdexit9g_RiBiUIyeQajZSVoiSW2HcLC445xiJMHyDfMjcCvL1Ob/exec"
 
@@ -336,6 +336,33 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
 DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/1Rg8nMTOyU_MMe7wGS1ZbeqptTUFgRXoovy27bzq2zdY/edit"
 MODEL_LIST_COLUMN_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+# 運用端末の機種リスト（オーナー提供・2026-08-12。表示前に normalize_model_name で正規化・重複除去される）
+BUILTIN_MODEL_LIST = [
+    "★arrows We", "Xperia5 Ⅳ", "Xperia 10 IV SO-52C", "AQUOS sense7", "AQUOS wish",
+    "OPPO Reno7 A", "AQUOS R6", "Xperia10 II (A001SO)", "★AQUOS sense5G", "Xperia SOG04",
+    "AQUOS sense6", "Galaxy A32 5G", "Galaxy A41 (SC-41A)", "OPPO Reno9 A", "★Galaxy A22 5G(SC-56B)",
+    "Xperia 10 IV SOG07", "AQUOS R5G", "OPPO A55s 5G", "OPPO reno 5 A", "AQUOS sense4",
+    "Xperia 5 III", "BASIO　SHG09", "AQUOS wish2", "Galaxy A23 5G", "Galaxy A30",
+    "Xperia 10 IV SO-53B", "Xperia SO-41A", "★arrows We2", "OPPO A54 5G", "Xperia SO-41B",
+    "Pixcel 4a", "Xperia 10 IV A202SO", "Xperia SOG08", "AQUOS sense6S", "Galaxy A25 5G",
+    "AQUOS wish3", "Galaxy A51 5G", "Xperia SOG05", "Galaxy A21", "Galaxy SCG07",
+    "Libero 5G IV (A302ZT)", "OPPO reno3 A", "Xperia Ace Ⅱ", "AQUOS SHG04", "AQUOS zero6",
+    "Galaxy SCG18", "HUAWEI P30 lite", "Xperia1", "AQUOS sense3", "AQUOS sense4 basic",
+    "Galaxy SC-56C", "HUAWEI P20 lite", "OPPO Reno A", "Pixel 6", "Redmi 12 5G",
+    "Redmi Note 10 T", "Xiaomi Redmi 14C", "Xperia Ace III", "Xperia SOV43", "Xperia10 Ⅴ",
+    "android one s9", "BASIO 4", "Galaxy A06", "Galaxy S10", "Galaxy SCG08",
+    "Libero 5G Ⅲ", "OPPO A77", "OPPO A79 5G", "Pixel 5", "Pixel 5a",
+    "Redmi Note 10 JE", "Xperia A001SO", "Xperia J9260", "Xperia SO-52B", "Xperia SO-53C",
+    "Xperia SOG02", "Xperia5", "★OPPO A73 5G", "A203ZT", "AQUOS sense3 basic",
+    "AQUOS sense3 plus", "AQUOS sense7 plus", "AQUOS SH-51C", "AQUOS wish4", "AQUOS zero2",
+    "arrows 5G", "arrows Be4 Plus", "arrows FCG01", "arrows We2", "arrowsRX",
+    "Galaxy  A20", "Google Pixel 4a", "Google Pixel 6a", "iPhone 11", "iPhone 11 pro",
+    "iPhone 12", "iPhone 12 mini", "iPhone 8", "iPhone SE2", "iPhone SE3",
+    "iPhone X", "iPhone XR", "iPhone XS", "moto g9 play", "OPPO A73",
+    "Pixel 6a", "Redmi 9T", "Xperia 8", "Xperia SO-01L", "Xperia XZ2",
+    "Xperia XZ3", "Xperia1 IV", "Xperia10 III",
+]
+
 
 def _extract_sheet_id(url_or_id):
     m = re.search(r'/d/([a-zA-Z0-9_-]+)', url_or_id)
@@ -441,41 +468,41 @@ def render_used_market_tab():
     st.caption("運用端末の機種ごとに、株式会社イオシス（iosys.co.jp）の中古販売価格を一覧化します。")
 
     with st.expander("📋 機種リストの取得元", expanded=True):
-        sheet_url = st.text_input("スプレッドシートURL / ID", value=DEFAULT_SHEET_URL, key="iosys_sheet_url")
-        c1, c2 = st.columns(2)
-        with c1:
-            sheet_tab_name = st.text_input("タブ名", value="機種リスト", key="iosys_sheet_tab")
-        with c2:
-            column_letter = st.text_input("列（アルファベット）", value="C", key="iosys_sheet_col", max_chars=2)
+        source = st.radio(
+            "取得元", ["内蔵リスト", "スプレッドシート", "実績データ"],
+            horizontal=True, key="iosys_model_source",
+        )
 
-        use_actual_fallback = st.toggle("実績データから機種を拾う", value=False, key="iosys_use_actual_fallback",
-                                         help="スプレッドシートから機種リストが読めない場合に、実績分析で取得済みのデータ（model/parent_model列）から機種一覧を作ります。")
-
-        sheet_models = []
-        sheet_warning = None
-        sheet_id = _extract_sheet_id(sheet_url.strip()) if sheet_url.strip() else None
-
-        if sheet_id:
-            col_letter_clean = (column_letter.strip().upper() or "C")[:1]
-            sheet_models, sheet_warning = _fetch_model_list_from_sheet(sheet_id, sheet_tab_name.strip(), col_letter_clean)
-            if sheet_warning:
-                st.warning(sheet_warning)
-        else:
-            st.warning("スプレッドシートURL / IDを正しく入力してください。")
-
-        candidate_models = list(sheet_models)
-        if use_actual_fallback:
-            actual_models = _collect_models_from_actual_res()
-            for m in actual_models:
-                if m not in candidate_models:
-                    candidate_models.append(m)
-            if not actual_models:
-                st.caption("（実績データにはまだ機種情報がありません）")
+        candidate_models = []
+        if source == "内蔵リスト":
+            seen = set()
+            for name in BUILTIN_MODEL_LIST:
+                norm = iosys.normalize_model_name(name)
+                if norm and norm not in seen:
+                    seen.add(norm)
+                    candidate_models.append(norm)
+        elif source == "スプレッドシート":
+            sheet_url = st.text_input("スプレッドシートURL / ID", value=DEFAULT_SHEET_URL, key="iosys_sheet_url")
+            c1, c2 = st.columns(2)
+            with c1:
+                sheet_tab_name = st.text_input("タブ名", value="機種リスト", key="iosys_sheet_tab")
+            with c2:
+                column_letter = st.text_input("列（アルファベット）", value="C", key="iosys_sheet_col", max_chars=2)
+            sheet_id = _extract_sheet_id(sheet_url.strip()) if sheet_url.strip() else None
+            if sheet_id:
+                col_letter_clean = (column_letter.strip().upper() or "C")[:1]
+                candidate_models, sheet_warning = _fetch_model_list_from_sheet(sheet_id, sheet_tab_name.strip(), col_letter_clean)
+                if sheet_warning:
+                    st.warning(sheet_warning)
+            else:
+                st.warning("スプレッドシートURL / IDを正しく入力してください。")
+        else:  # 実績データ
+            candidate_models = _collect_models_from_actual_res()
 
         if candidate_models:
             st.caption(f"機種リストを {len(candidate_models)} 件検出しました。")
         else:
-            st.info("機種リストが取得できていません。スプレッドシートの設定を確認するか、「実績データから機種を拾う」をONにしてください。")
+            st.info("機種リストが取得できていません。取得元を切り替えて確認してください。")
 
         # 機種リストが後から読み込まれた場合もデフォルト全選択が効くよう、
         # 候補が変わったらウィジェットの保持状態を破棄して default を再適用する
