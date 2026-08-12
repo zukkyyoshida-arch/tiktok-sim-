@@ -4,6 +4,11 @@ test_kaitori.py — kaitori.py の機種名マッチング・価格パースの�
 ネットワーク不要（実HTMLから採取したフィクスチャのみを使う）。
 実行: python3 -m pytest test_kaitori.py -q  /  python3 test_kaitori.py
 """
+import json
+import os
+import tempfile
+from unittest import mock
+
 import kaitori
 
 # 実際の k-tai-iosys.com から採取した行名（2026-08-12取得）
@@ -191,6 +196,91 @@ def test_match_models_end_to_end():
     # mini / Pro / Pro Max / SE を除いた3行
     assert result["iPhone 12"]["matched_count"] == 3
     assert "存在しない機種XYZ" not in result
+
+
+def test_bundled_snapshot_is_loadable():
+    """同梱スナップショットが実際に読め、マッチングに使える形であること。
+    本番はこのファイルだけが買取価格の供給源になるため、壊れていたら即気づきたい。
+    """
+    rows, fetched_at = kaitori.load_snapshot()
+    assert rows, "同梱スナップショットが読めない、または空です"
+    assert fetched_at, "fetched_at が記録されていません"
+    assert len(rows) > 1000, f"行数が少なすぎます: {len(rows)}"
+
+    required = {"name", "unused_price", "used_max", "used_min", "brand", "page_url"}
+    assert required.issubset(rows[0].keys())
+
+    # スナップショット由来の行でも機種マッチングが成立する
+    matched = kaitori.match_models(["AQUOS sense7", "iPhone 12"], rows)
+    assert "AQUOS sense7" in matched
+    assert matched["AQUOS sense7"]["used_max"] is not None
+    assert "iPhone 12" in matched
+
+
+def test_load_snapshot_missing_file_is_safe():
+    """スナップショットが無くても例外を投げない（アプリは動き続けるべき）。"""
+    rows, fetched_at = kaitori.load_snapshot("/nonexistent/path/snapshot.json")
+    assert rows == []
+    assert fetched_at is None
+
+
+def test_fallback_uses_snapshot_when_live_fails():
+    """本番の再現: 全ブランドが403で落ちたらスナップショットで補完される。"""
+    with mock.patch.object(kaitori, "fetch_all_brands",
+                           return_value=([], ["iphone: HTTP 403", "aquos: HTTP 403"])):
+        rows, errors, meta = kaitori.fetch_all_brands_with_fallback()
+
+    assert meta["used_snapshot"] is True
+    assert meta["snapshot_fetched_at"]
+    assert len(meta["snapshot_brands"]) == len(kaitori.BRANDS)
+    assert rows, "スナップショットから1行も補完されていません"
+
+    matched = kaitori.match_models(["AQUOS sense7"], rows)
+    assert "AQUOS sense7" in matched
+
+
+def test_fallback_prefers_live_when_available():
+    """ライブで全ブランド取れた場合はスナップショットを使わない。"""
+    live = [
+        {"name": "docomo版SIMフリー AQUOS sense7 SH-53C docomo版",
+         "unused_price": 1, "used_max": 1, "used_min": 1,
+         "brand": b, "page_url": kaitori.brand_page_url(b)}
+        for b in kaitori.BRANDS
+    ]
+    with mock.patch.object(kaitori, "fetch_all_brands", return_value=(live, [])):
+        rows, errors, meta = kaitori.fetch_all_brands_with_fallback()
+
+    assert meta["used_snapshot"] is False
+    assert meta["snapshot_brands"] == []
+    assert len(rows) == len(kaitori.BRANDS)
+
+
+def test_fallback_fills_only_missing_brands():
+    """一部ブランドだけ失敗した場合、そのブランドだけスナップショットで補う。"""
+    live = [
+        {"name": "docomo版SIMフリー AQUOS sense7 SH-53C docomo版",
+         "unused_price": 1, "used_max": 1, "used_min": 1,
+         "brand": "aquos", "page_url": kaitori.brand_page_url("aquos")}
+    ]
+    with mock.patch.object(kaitori, "fetch_all_brands",
+                           return_value=(live, ["iphone: HTTP 403"])):
+        rows, errors, meta = kaitori.fetch_all_brands_with_fallback()
+
+    assert meta["used_snapshot"] is True
+    assert "aquos" not in meta["snapshot_brands"], "ライブで取れたブランドを上書きしている"
+    assert "iphone" in meta["snapshot_brands"]
+    # ライブのaquos行はそのまま残る
+    assert any(r["brand"] == "aquos" and r["unused_price"] == 1 for r in rows)
+
+
+def test_snapshot_json_has_expected_shape():
+    """同梱JSONのメタ情報が揃っていること（更新スクリプトの出力契約）。"""
+    with open(kaitori.SNAPSHOT_PATH, encoding="utf-8") as f:
+        data = json.load(f)
+    for key in ("fetched_at", "source", "brands", "row_count", "rows"):
+        assert key in data, f"{key} がスナップショットにありません"
+    assert data["row_count"] == len(data["rows"])
+    assert len(data["brands"]) == len(kaitori.BRANDS)
 
 
 if __name__ == "__main__":

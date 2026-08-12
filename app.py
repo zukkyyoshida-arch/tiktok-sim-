@@ -460,9 +460,13 @@ def _collect_models_from_actual_res():
     return sorted(models)
 
 
-# 販売相場の並列取得数。イオシスへの負荷配慮のため8以下に抑える
-# （iosys.PAGE_SLEEP_SEC のページ間ウェイトは各ワーカー内でそのまま効く）。
-IOSYS_MAX_WORKERS = 8
+# 販売相場の並列取得数。本番（Streamlit Cloud）で112機種×8並列を撃ったところ、
+# 在庫があるはずの機種まで HTTP 200 のまま0件応答になる事象が出たため4へ下げた。
+# （iosys.PAGE_SLEEP_SEC のページ間ウェイトと _jitter_sleep は各ワーカー内で効く）
+IOSYS_MAX_WORKERS = 4
+
+# 0件だった機種の再試行時の並列数。イオシス側に絞られている前提なので直列で撃つ。
+IOSYS_RETRY_WORKERS = 1
 
 
 def _fetch_one_model(model_name):
@@ -494,14 +498,36 @@ def _fetch_sale_prices(model_names_tuple):
 
     results = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=IOSYS_MAX_WORKERS) as executor:
-        futures = [executor.submit(_fetch_one_model, name) for name in model_names]
-        for future in concurrent.futures.as_completed(futures):
+        future_map = {executor.submit(_fetch_one_model, name): name for name in model_names}
+        for future in concurrent.futures.as_completed(future_map):
+            name = future_map[future]
             try:
                 model_name, data = future.result()
                 results[model_name] = data
             except Exception as e:
                 # 1機種の失敗で全体を落とさない
-                results[str(e)] = {"items": [], "used_query": "", "error": str(e)}
+                results[name] = {"items": [], "used_query": name, "error": str(e)}
+
+    # 1回目で0件だった機種だけ、全体完了後に直列で1回だけ再試行する。
+    # 一斉アクセスで絞られただけなら、間隔を空けた再試行で取れることがある。
+    zero_hit = [
+        name for name in model_names
+        if name in results and not results[name]["items"] and not results[name]["error"]
+    ]
+    if zero_hit:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=IOSYS_RETRY_WORKERS) as executor:
+            retry_map = {executor.submit(_fetch_one_model, name): name for name in zero_hit}
+            for future in concurrent.futures.as_completed(retry_map):
+                name = retry_map[future]
+                try:
+                    model_name, data = future.result()
+                    # 再試行で取れた場合だけ採用する（0件のままなら1回目の結果を残す）
+                    if data["items"]:
+                        data["retried"] = True
+                        results[model_name] = data
+                except Exception:
+                    # 再試行の失敗は1回目の結果を維持するだけでよい
+                    pass
 
     # 呼び出し順（元のリスト順）に整える
     return {name: results[name] for name in model_names if name in results}
@@ -509,17 +535,21 @@ def _fetch_sale_prices(model_names_tuple):
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def _fetch_kaitori_prices(model_names_tuple):
-    """買取相場（イオシス買取）をブランド別価格表から一括取得し、機種ごとに集約する。
+    """買取相場（イオシス買取）を取得し、機種ごとに集約する。
 
-    戻り値: (matched: dict[機種名, 集約結果], errors: list[str])
+    本番（Streamlit Cloud）はAWSのIPから通信するため k-tai-iosys.com に
+    全ブランド403で弾かれる。その場合は同梱スナップショットで補完する。
+
+    戻り値: (matched: dict[機種名, 集約結果], errors: list[str], meta: dict)
     """
     model_names = list(model_names_tuple)
     if not model_names:
-        return {}, []
+        return {}, [], {"used_snapshot": False, "snapshot_fetched_at": None,
+                        "live_brands": [], "snapshot_brands": []}
 
-    rows, errors = kaitori.fetch_all_brands()
+    rows, errors, meta = kaitori.fetch_all_brands_with_fallback()
     matched = kaitori.match_models(model_names, rows)
-    return matched, errors
+    return matched, errors, meta
 
 
 def render_used_market_tab():
@@ -595,12 +625,23 @@ def render_used_market_tab():
         results = _fetch_sale_prices(models_key)
 
     with st.spinner("買取相場を取得中…（初回は10秒ほどかかります）"):
-        kaitori_map, kaitori_errors = _fetch_kaitori_prices(models_key)
+        kaitori_map, kaitori_errors, kaitori_meta = _fetch_kaitori_prices(models_key)
 
     st.session_state.iosys_results = results
     fetched_at = datetime.now()
 
-    if kaitori_errors:
+    # スナップショットで補完した場合は、その旨と基準日を明示する
+    snapshot_date = None
+    if kaitori_meta.get("used_snapshot"):
+        raw = kaitori_meta.get("snapshot_fetched_at") or ""
+        snapshot_date = raw[:10] or "取得日不明"
+        st.info(
+            f"買取価格は **{snapshot_date} 時点のスナップショット** です"
+            "（本番環境からはイオシス買取へ直接アクセスできないため、"
+            "同梱データを使用しています）。"
+        )
+    elif kaitori_errors:
+        # ライブで一部だけ落ち、スナップショットでも補えなかった場合
         st.warning("買取価格表の一部が取得できませんでした:\n" + "\n".join(f"- {e}" for e in kaitori_errors))
 
     if not results:
@@ -750,8 +791,13 @@ def render_used_market_tab():
         )
 
     if fetched_at:
+        kaitori_note = (
+            f"買取価格=イオシス買取（k-tai-iosys.com）の {snapshot_date} 時点スナップショット"
+            if snapshot_date
+            else "買取価格=イオシス買取（k-tai-iosys.com）"
+        )
         st.caption(
-            "出典: 販売価格=イオシス（iosys.co.jp）／買取価格=イオシス買取（k-tai-iosys.com）"
+            f"出典: 販売価格=イオシス（iosys.co.jp）／{kaitori_note}"
             f"・価格は税込・取得: {fetched_at.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 

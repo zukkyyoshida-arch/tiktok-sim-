@@ -5,6 +5,7 @@ iosys.py — 株式会社イオシス（https://iosys.co.jp/）の中古スマ�
 app.py の肥大化を避けるため、機種名の正規化・検索・フィルタリングのロジックを
 このモジュールに切り出している。
 """
+import random
 import re
 import time
 import unicodedata
@@ -22,6 +23,17 @@ USER_AGENT = (
 )
 REQUEST_TIMEOUT = 10
 PAGE_SLEEP_SEC = 0.4
+
+# 本番（Streamlit Cloud）で多数機種を一斉取得すると、HTTP 200のまま
+# 0件応答が返る機種が出る（イオシス側の絞り込みとみられる）。
+# リクエストを等間隔で撃たないよう、各リクエスト前に小さなランダムウェイトを入れる。
+JITTER_MIN_SEC = 0.2
+JITTER_MAX_SEC = 0.5
+
+
+def _jitter_sleep():
+    """リクエスト前のランダムウェイト（0.2〜0.5秒程度）。"""
+    time.sleep(random.uniform(JITTER_MIN_SEC, JITTER_MAX_SEC))
 
 # ローマ数字 → アラビア数字（Ⅳ→IV等の全角ローマ数字を半角英字表記へ変換）
 _ROMAN_MAP = {
@@ -145,6 +157,7 @@ def search_iosys(keyword: str, max_pages: int = 2):
             if page > 1:
                 url += f"&page={page}"
 
+            _jitter_sleep()
             resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
             if resp.status_code != 200:
                 if page == 1:
