@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-12T13:52:06+09:00",
+ "fetched_at": "2026-08-12T17:11:31+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
