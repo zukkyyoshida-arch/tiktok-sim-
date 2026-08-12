@@ -171,6 +171,11 @@ def search_iosys(keyword: str, max_pages: int = 2):
         return [], f"検索処理中に予期しないエラーが発生しました: {e}"
 
 
+# 「iPhone SE2」「iPhoneSE3」等の世代表記。イオシスの商品名は「【第3世代】 iPhoneSE ...」形式のため、
+# 検索語・絞り込みとも「第n世代」へ読み替える必要がある
+_SE_PATTERN = re.compile(r"^iphone\s*se\s*(\d)$", re.IGNORECASE)
+
+
 def _split_alpha_digit(text: str):
     """英字と数字の間にスペースを入れる変種を作る（例: 'Xperia5' → 'Xperia 5'）。
     既にスペースがある箇所は変化しない。型番(SOG04等)まで過剰分割される可能性があるため、
@@ -210,6 +215,10 @@ def search_with_fallback(model_name: str, max_pages: int = 2):
         return [], model_name, "機種名が空です"
 
     candidates = [normalized]
+
+    se_match = _SE_PATTERN.match(normalized)
+    if se_match:
+        candidates.insert(0, f"iPhone SE 第{se_match.group(1)}世代")
 
     split_variant = _split_alpha_digit(normalized)
     if split_variant and split_variant != normalized:
@@ -254,10 +263,17 @@ def filter_strict(items, query: str):
     if not query_nospace:
         return items
 
+    # iPhone SE系はイオシス側が「【第n世代】 iPhoneSE ...」表記のため、
+    # 「iphonese」と「第n世代」の両方を含むかで判定する
+    se_match = _SE_PATTERN.match(query_norm)
+
     filtered = []
     for item in items:
         name_norm = normalize_model_name(item.get("name", "")).lower()
         name_nospace = re.sub(r"\s+", "", name_norm)
-        if query_nospace in name_nospace:
+        if se_match:
+            if "iphonese" in name_nospace and f"第{se_match.group(1)}世代" in name_nospace:
+                filtered.append(item)
+        elif query_nospace in name_nospace:
             filtered.append(item)
     return filtered
