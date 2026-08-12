@@ -335,9 +335,6 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
 # ==========================================
 # 3.5 中古相場タブ（イオシス連携）
 # ==========================================
-DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/1Rg8nMTOyU_MMe7wGS1ZbeqptTUFgRXoovy27bzq2zdY/edit"
-MODEL_LIST_COLUMN_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
 # 運用端末の機種リスト（オーナー提供・2026-08-12。表示前に normalize_model_name で正規化・重複除去される）
 BUILTIN_MODEL_LIST = [
     "★arrows We", "Xperia5 Ⅳ", "Xperia 10 IV SO-52C", "AQUOS sense7", "AQUOS wish",
@@ -364,100 +361,6 @@ BUILTIN_MODEL_LIST = [
     "Pixel 6a", "Redmi 9T", "Xperia 8", "Xperia SO-01L", "Xperia XZ2",
     "Xperia XZ3", "Xperia1 IV", "Xperia10 III",
 ]
-
-
-def _extract_sheet_id(url_or_id):
-    m = re.search(r'/d/([a-zA-Z0-9_-]+)', url_or_id)
-    if m:
-        return m.group(1)
-    # すでにID単体が渡された場合
-    if re.match(r'^[a-zA-Z0-9_-]+$', url_or_id.strip()):
-        return url_or_id.strip()
-    return None
-
-
-@st.cache_data(ttl=600)
-def _fetch_sheet_tab_names(sheet_id):
-    """htmlview経由でスプレッドシート内の全タブ名を取得する（gvizの黙ったフォールバック対策）。
-    非公開等で取得できない場合は None を返す（検証スキップの合図）。
-    """
-    try:
-        url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/htmlview"
-        resp = requests.get(url, timeout=10)
-        if resp.status_code != 200:
-            return None
-        names = re.findall(r'items\.push\(\{name:\s*"((?:[^"\\]|\\.)*)"', resp.text)
-        if not names:
-            return None
-        # レスポンスは既にUTF-8の実文字（"Tik管理_本家"等）でエスケープされていないため、
-        # unicode_escapeデコードは不要（適用すると文字化けする）。
-        # "\/" のようなJS向けスラッシュエスケープのみ元に戻す。
-        return [n.replace('\\/', '/') for n in names]
-    except Exception:
-        return None
-
-
-@st.cache_data(ttl=600)
-def _fetch_model_list_from_sheet(sheet_id, sheet_tab_name, column_letter):
-    """指定シート・指定タブ・指定列から機種名一覧を取得する。
-    戻り値: (models: list[str], warning: str | None)
-    """
-    warning = None
-    tab_names = _fetch_sheet_tab_names(sheet_id)
-    if tab_names is not None and sheet_tab_name not in tab_names:
-        warning = f"シートに『{sheet_tab_name}』タブが見つかりません。存在するタブ: {', '.join(tab_names)}"
-        return [], warning
-
-    try:
-        encoded_tab = urllib.parse.quote(sheet_tab_name)
-        csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={encoded_tab}"
-        df = pd.read_csv(csv_url, header=None)
-    except Exception as e:
-        return [], f"スプレッドシートの読み込みに失敗しました: {e}"
-
-    col_idx = MODEL_LIST_COLUMN_LETTERS.index(column_letter.upper())
-    if col_idx >= len(df.columns):
-        return [], f"指定列（{column_letter}列）がシートに存在しません"
-
-    raw_values = df.iloc[:, col_idx].dropna().astype(str).tolist()
-
-    # 1行目がヘッダらしき値なら除外
-    header_like = {"機種", "機種名", "モデル", "model", "端末", "端末機種"}
-    if raw_values and raw_values[0].strip() in header_like:
-        raw_values = raw_values[1:]
-
-    models = []
-    seen = set()
-    for v in raw_values:
-        norm = iosys.normalize_model_name(v)
-        if not norm or norm in seen:
-            continue
-        seen.add(norm)
-        models.append(norm)
-
-    return models, warning
-
-
-def _collect_models_from_actual_res():
-    """実績分析で既に取得済みの生データフレーム（st.session_state.actual_res['raw_df']）から
-    機種一覧を作るフォールバック。'model' と 'parent_model' の両列のユニーク値を使う。
-    """
-    res = st.session_state.get('actual_res')
-    if not res or 'raw_df' not in res:
-        return []
-    rdf = res['raw_df']
-    models = set()
-    for col in ('model', 'parent_model'):
-        if col in rdf.columns:
-            for v in rdf[col].dropna().astype(str).tolist():
-                norm = iosys.normalize_model_name(v)
-                if not norm or norm in ("不明", "未指定"):
-                    continue
-                # 管理番号・ID等の数字のみの値はノイズとして除外（機種名にはアルファベットが含まれるはず）
-                if not re.search(r'[A-Za-zぁ-んァ-ン一-龥]', norm):
-                    continue
-                models.add(norm)
-    return sorted(models)
 
 
 # 販売相場の並列取得数。本番（Streamlit Cloud）で112機種×8並列を撃ったところ、
@@ -555,48 +458,21 @@ def _fetch_kaitori_prices(model_names_tuple):
 def render_used_market_tab():
     st.markdown("## 💴 中古相場（イオシス）")
     st.caption(
-        "運用端末の機種ごとに、イオシスの中古販売価格（今買うといくら）と"
-        "買取価格（今売るといくら）を一覧化します。タブを開くと自動で取得します。"
+        "運用端末ごとの中古販売価格（今買うといくら）と買取価格（今売るといくら）。"
+        "タブを開くと自動で取得します。"
     )
 
-    with st.expander("📋 機種リストの取得元", expanded=True):
-        source = st.radio(
-            "取得元", ["内蔵リスト", "スプレッドシート", "実績データ"],
-            horizontal=True, key="iosys_model_source",
-        )
+    # 機種リストは内蔵リスト（BUILTIN_MODEL_LIST）のみ
+    candidate_models = []
+    seen = set()
+    for name in BUILTIN_MODEL_LIST:
+        norm = iosys.normalize_model_name(name)
+        if norm and norm not in seen:
+            seen.add(norm)
+            candidate_models.append(norm)
 
-        candidate_models = []
-        if source == "内蔵リスト":
-            seen = set()
-            for name in BUILTIN_MODEL_LIST:
-                norm = iosys.normalize_model_name(name)
-                if norm and norm not in seen:
-                    seen.add(norm)
-                    candidate_models.append(norm)
-        elif source == "スプレッドシート":
-            sheet_url = st.text_input("スプレッドシートURL / ID", value=DEFAULT_SHEET_URL, key="iosys_sheet_url")
-            c1, c2 = st.columns(2)
-            with c1:
-                sheet_tab_name = st.text_input("タブ名", value="機種リスト", key="iosys_sheet_tab")
-            with c2:
-                column_letter = st.text_input("列（アルファベット）", value="C", key="iosys_sheet_col", max_chars=2)
-            sheet_id = _extract_sheet_id(sheet_url.strip()) if sheet_url.strip() else None
-            if sheet_id:
-                col_letter_clean = (column_letter.strip().upper() or "C")[:1]
-                candidate_models, sheet_warning = _fetch_model_list_from_sheet(sheet_id, sheet_tab_name.strip(), col_letter_clean)
-                if sheet_warning:
-                    st.warning(sheet_warning)
-            else:
-                st.warning("スプレッドシートURL / IDを正しく入力してください。")
-        else:  # 実績データ
-            candidate_models = _collect_models_from_actual_res()
-
-        if candidate_models:
-            st.caption(f"機種リストを {len(candidate_models)} 件検出しました。")
-        else:
-            st.info("機種リストが取得できていません。取得元を切り替えて確認してください。")
-
-        # 機種リストが後から読み込まれた場合もデフォルト全選択が効くよう、
+    with st.expander(f"⚙️ 対象機種の絞り込み・再取得（内蔵リスト {len(candidate_models)} 機種）", expanded=False):
+        # 内蔵リストが更新された場合もデフォルト全選択が効くよう、
         # 候補が変わったらウィジェットの保持状態を破棄して default を再適用する
         if st.session_state.get('iosys_model_options') != candidate_models:
             st.session_state.iosys_model_options = candidate_models
@@ -604,14 +480,12 @@ def render_used_market_tab():
         selected_models = st.multiselect(
             "対象機種を選択", options=candidate_models, default=candidate_models, key="iosys_selected_models"
         )
-
-    refetch_clicked = st.button(
-        "🔄 相場を再取得", use_container_width=True, disabled=(len(selected_models) == 0),
-        help="キャッシュ（1時間）を破棄して、販売・買取の相場を取り直します。",
-    )
-    if refetch_clicked:
-        _fetch_sale_prices.clear()
-        _fetch_kaitori_prices.clear()
+        if st.button(
+            "🔄 相場を再取得", disabled=(len(selected_models) == 0),
+            help="キャッシュ（1時間）を破棄して、販売・買取の相場を取り直します。",
+        ):
+            _fetch_sale_prices.clear()
+            _fetch_kaitori_prices.clear()
 
     if not selected_models:
         st.info("対象機種を1つ以上選択してください。")
@@ -630,16 +504,11 @@ def render_used_market_tab():
     st.session_state.iosys_results = results
     fetched_at = datetime.now()
 
-    # スナップショットで補完した場合は、その旨と基準日を明示する
+    # スナップショットで補完した場合は基準日を控えておき、末尾の出典表記で明示する
     snapshot_date = None
     if kaitori_meta.get("used_snapshot"):
         raw = kaitori_meta.get("snapshot_fetched_at") or ""
         snapshot_date = raw[:10] or "取得日不明"
-        st.info(
-            f"買取価格は **{snapshot_date} 時点のスナップショット** です"
-            "（本番環境からはイオシス買取へ直接アクセスできないため、"
-            "同梱データを使用しています）。"
-        )
     elif kaitori_errors:
         # ライブで一部だけ落ち、スナップショットでも補えなかった場合
         st.warning("買取価格表の一部が取得できませんでした:\n" + "\n".join(f"- {e}" for e in kaitori_errors))
@@ -707,51 +576,38 @@ def render_used_market_tab():
 
     if summary_rows:
         summary_df = pd.DataFrame(summary_rows)
+
+        # メイン表: 必要最小限の列 + 保有台数（保有台数だけ編集可）
         st.markdown("### 相場サマリ")
-        st.dataframe(
-            summary_df,
+        qty_map = st.session_state.get('iosys_qty_map', {})
+        main_df = summary_df[["機種名", "中央値", "最安値", "中古買取上限", "検索ページ"]].copy()
+        main_df.insert(1, "保有台数", [int(qty_map.get(m, 1)) for m in main_df["機種名"]])
+
+        # 機種の顔ぶれが変わったら編集状態を破棄する（行ずれ防止）
+        if st.session_state.get('iosys_main_models') != list(main_df["機種名"]):
+            st.session_state.iosys_main_models = list(main_df["機種名"])
+            st.session_state.pop('iosys_main_editor', None)
+
+        edited_df = st.data_editor(
+            main_df,
             use_container_width=True,
             hide_index=True,
+            disabled=["機種名", "中央値", "最安値", "中古買取上限", "検索ページ"],
             column_config={
-                "最安値": st.column_config.NumberColumn("最安値", format="¥%d"),
-                "中央値": st.column_config.NumberColumn("中央値", format="¥%d"),
-                "最高値": st.column_config.NumberColumn("最高値", format="¥%d"),
-                "未使用最安": st.column_config.NumberColumn("未使用最安", format="¥%d"),
-                "Aランク最安": st.column_config.NumberColumn("Aランク最安", format="¥%d"),
-                "Bランク最安": st.column_config.NumberColumn("Bランク最安", format="¥%d"),
-                "Cランク最安": st.column_config.NumberColumn("Cランク最安", format="¥%d"),
-                "検索ページ": st.column_config.LinkColumn("イオシス検索ページ", display_text="開く"),
-                "未使用買取": st.column_config.NumberColumn("未使用買取", format="¥%d"),
-                "中古買取上限": st.column_config.NumberColumn("中古買取上限", format="¥%d"),
-                "中古買取下限": st.column_config.NumberColumn("中古買取下限", format="¥%d"),
-                "買取表ページ": st.column_config.LinkColumn("買取表ページ", display_text="開く"),
-            }
+                "保有台数": st.column_config.NumberColumn("保有台数", min_value=0, step=1),
+                "中央値": st.column_config.NumberColumn("販売中央値", format="¥%d"),
+                "最安値": st.column_config.NumberColumn("販売最安", format="¥%d"),
+                "中古買取上限": st.column_config.NumberColumn("買取上限", format="¥%d"),
+                "検索ページ": st.column_config.LinkColumn("イオシス", display_text="開く"),
+            },
+            key="iosys_main_editor",
         )
-
-        st.markdown("### 保有台数と資産評価額")
-        if 'iosys_qty_df' not in st.session_state or set(st.session_state.iosys_qty_df["機種名"]) != set(summary_df["機種名"]):
-            st.session_state.iosys_qty_df = pd.DataFrame({
-                "機種名": summary_df["機種名"],
-                "保有台数": 1,
-            })
-        qty_df = st.data_editor(
-            st.session_state.iosys_qty_df,
-            use_container_width=True,
-            disabled=["機種名"],
-            column_config={"保有台数": st.column_config.NumberColumn("保有台数", min_value=0, step=1)},
-            key="iosys_qty_editor",
-            hide_index=True,
-        )
-        st.session_state.iosys_qty_df = qty_df
-
-        merged = qty_df.merge(summary_df[["機種名", "中央値", "中古買取上限"]], on="機種名", how="left")
-        merged["評価額"] = merged["中央値"].fillna(0) * merged["保有台数"].fillna(0)
-        merged["買取評価額"] = merged["中古買取上限"].fillna(0) * merged["保有台数"].fillna(0)
-        total_value = int(merged["評価額"].sum())
-        total_kaitori_value = int(merged["買取評価額"].sum())
+        st.session_state.iosys_qty_map = dict(zip(edited_df["機種名"], edited_df["保有台数"]))
 
         # 「今買い揃えるといくら」と「今手放すといくら」を並べて見せる
-        kaitori_known = merged["中古買取上限"].notna().sum()
+        total_value = int((edited_df["中央値"].fillna(0) * edited_df["保有台数"].fillna(0)).sum())
+        total_kaitori_value = int((edited_df["中古買取上限"].fillna(0) * edited_df["保有台数"].fillna(0)).sum())
+        kaitori_known = edited_df["中古買取上限"].notna().sum()
         v1, v2 = st.columns(2)
         with v1:
             custom_metric(
@@ -761,34 +617,52 @@ def render_used_market_tab():
         with v2:
             custom_metric(
                 "売却する場合（買取上限×台数）", f"¥{total_kaitori_value:,}",
-                sub=f"イオシス買取上限ベース・買取価格が判明した {kaitori_known}/{len(merged)} 機種のみ合計",
+                sub=f"イオシス買取上限ベース・買取価格が判明した {kaitori_known}/{len(edited_df)} 機種のみ合計",
             )
 
-        st.markdown("### 機種ごとの個別商品一覧")
-        for model_name, data in results.items():
-            items = data["items"]
-            if not items:
-                continue
-            with st.expander(f"{model_name}（{len(items)}件）"):
-                detail_df = pd.DataFrame([
-                    {"商品名": it["name"], "ランク": it["rank"], "税込価格": it["price"], "商品ページ": it["url"]}
-                    for it in items
-                ])
-                st.dataframe(
-                    detail_df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "税込価格": st.column_config.NumberColumn("税込価格", format="¥%d"),
-                        "商品ページ": st.column_config.LinkColumn("商品ページ", display_text="開く"),
-                    }
-                )
+        with st.expander("📊 詳細データ（ランク別最安・買取内訳）", expanded=False):
+            st.dataframe(
+                summary_df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "最安値": st.column_config.NumberColumn("最安値", format="¥%d"),
+                    "中央値": st.column_config.NumberColumn("中央値", format="¥%d"),
+                    "最高値": st.column_config.NumberColumn("最高値", format="¥%d"),
+                    "未使用最安": st.column_config.NumberColumn("未使用最安", format="¥%d"),
+                    "Aランク最安": st.column_config.NumberColumn("Aランク最安", format="¥%d"),
+                    "Bランク最安": st.column_config.NumberColumn("Bランク最安", format="¥%d"),
+                    "Cランク最安": st.column_config.NumberColumn("Cランク最安", format="¥%d"),
+                    "検索ページ": st.column_config.LinkColumn("イオシス検索ページ", display_text="開く"),
+                    "未使用買取": st.column_config.NumberColumn("未使用買取", format="¥%d"),
+                    "中古買取上限": st.column_config.NumberColumn("中古買取上限", format="¥%d"),
+                    "中古買取下限": st.column_config.NumberColumn("中古買取下限", format="¥%d"),
+                    "買取表ページ": st.column_config.LinkColumn("買取表ページ", display_text="開く"),
+                }
+            )
+
+        models_with_items = [m for m, d in results.items() if d["items"]]
+        if models_with_items:
+            with st.expander("🔍 機種ごとの個別商品一覧", expanded=False):
+                pick = st.selectbox("機種を選択", models_with_items, key="iosys_detail_model")
+                if pick and pick in results:
+                    detail_df = pd.DataFrame([
+                        {"商品名": it["name"], "ランク": it["rank"], "税込価格": it["price"], "商品ページ": it["url"]}
+                        for it in results[pick]["items"]
+                    ])
+                    st.dataframe(
+                        detail_df,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "税込価格": st.column_config.NumberColumn("税込価格", format="¥%d"),
+                            "商品ページ": st.column_config.LinkColumn("商品ページ", display_text="開く"),
+                        }
+                    )
 
     if zero_hit_models:
-        st.warning(
-            "以下の機種は該当商品が0件でした。機種名の表記を調整して再取得してください:\n"
-            + "\n".join(f"- {m}" for m in zero_hit_models)
-        )
+        with st.expander(f"⚠️ 該当商品が0件だった機種（{len(zero_hit_models)}件）", expanded=False):
+            st.markdown("\n".join(f"- {m}" for m in zero_hit_models))
 
     if fetched_at:
         kaitori_note = (
