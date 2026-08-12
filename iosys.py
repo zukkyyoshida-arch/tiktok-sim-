@@ -30,10 +30,34 @@ PAGE_SLEEP_SEC = 0.4
 JITTER_MIN_SEC = 0.2
 JITTER_MAX_SEC = 0.5
 
+# 通信例外・5xx発生時のリトライ設定（1回だけ）。
+RETRY_BACKOFF_MIN_SEC = 1.5
+RETRY_BACKOFF_MAX_SEC = 3.0
+
 
 def _jitter_sleep():
     """リクエスト前のランダムウェイト（0.2〜0.5秒程度）。"""
     time.sleep(random.uniform(JITTER_MIN_SEC, JITTER_MAX_SEC))
+
+
+def _get_with_retry(url, headers, timeout):
+    """requests.get を実行し、通信例外または5xx応答の場合のみ1回だけ再試行する。
+
+    200での0件応答・204等はリトライ対象外（呼び出し側でそのまま扱う）。
+    2回目も失敗した場合は、例外はそのまま送出し、5xx応答はそのままResponseを返す
+    （呼び出し側の既存のステータスコード判定に委ねる）。
+    """
+    try:
+        resp = requests.get(url, headers=headers, timeout=timeout)
+    except requests.RequestException:
+        time.sleep(random.uniform(RETRY_BACKOFF_MIN_SEC, RETRY_BACKOFF_MAX_SEC))
+        return requests.get(url, headers=headers, timeout=timeout)
+
+    if 500 <= resp.status_code < 600:
+        time.sleep(random.uniform(RETRY_BACKOFF_MIN_SEC, RETRY_BACKOFF_MAX_SEC))
+        resp = requests.get(url, headers=headers, timeout=timeout)
+
+    return resp
 
 # ローマ数字 → アラビア数字（Ⅳ→IV等の全角ローマ数字を半角英字表記へ変換）
 _ROMAN_MAP = {
@@ -158,7 +182,7 @@ def search_iosys(keyword: str, max_pages: int = 2):
                 url += f"&page={page}"
 
             _jitter_sleep()
-            resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            resp = _get_with_retry(url, headers, REQUEST_TIMEOUT)
             if resp.status_code != 200:
                 if page == 1:
                     return [], f"イオシスへのアクセスに失敗しました（HTTP {resp.status_code}）"

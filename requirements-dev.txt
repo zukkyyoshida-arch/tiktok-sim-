@@ -1,0 +1,2 @@
+# 開発・テスト用依存。本番(requirements.txt)とは別
+pytest

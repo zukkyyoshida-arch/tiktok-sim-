@@ -9,6 +9,7 @@ import re
 import json
 import requests
 import concurrent.futures
+import sys
 from streamlit_autorefresh import st_autorefresh
 from plotly.subplots import make_subplots
 import iosys
@@ -30,7 +31,7 @@ st.set_page_config(
     page_title="Tik分析アプリ",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 # 10分ごとに自動更新 (600,000ミリ秒)
@@ -76,7 +77,35 @@ def fetch_api_data_raw(target_app, force_key=None):
         response = requests.get(url, timeout=15)
         if response.status_code != 200: return None
         return response.json()
-    except: return None
+    except Exception as e:
+        print(f"[fetch_api_data_raw] {target_app}: {e}", file=sys.stderr)
+        return None
+
+@st.cache_data(ttl=600)
+def _fetch_invite_id_map():
+    """個人招待IDシート(CSV)から 管理番号/名前 -> 機種名 のマッピングを取得する。
+    本体データより更新頻度が低いため10分キャッシュする。"""
+    d_map_extra = {}
+    try:
+        sheet_id = "1Rg8nMTOyU_MMe7wGS1ZbeqptTUFgRXoovy27bzq2zdY"
+        sheet_name = urllib.parse.quote("個人招待ID")
+        csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
+        csv_df = pd.read_csv(csv_url)
+        for _, r in csv_df.iterrows():
+            # Column 0: 管理番号, Column 1: 名前, Column 6: 機種名
+            if len(r) >= 7 and pd.notnull(r.iloc[6]) and str(r.iloc[6]).strip() != "":
+                model = str(r.iloc[6]).strip()
+                if pd.notnull(r.iloc[0]):
+                    k0 = str(r.iloc[0]).strip()
+                    if k0.endswith('.0'): k0 = k0[:-2]
+                    d_map_extra[k0] = model
+                if pd.notnull(r.iloc[1]):
+                    k1 = str(r.iloc[1]).strip()
+                    if k1.endswith('.0'): k1 = k1[:-2]
+                    d_map_extra[k1] = model
+    except Exception as e:
+        print("Error fetching 個人招待ID:", e)
+    return d_map_extra
 
 def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False):
     try:
@@ -142,28 +171,10 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
                 d_raw = lite_payload.get('terminals', [])
         
         d_map = {str(row[3]): str(row[5]) for row in d_raw if len(row) > 5}
-        
+
         if target_app == "original":
-            # fetch 個人招待ID mapping from the new spreadsheet via csv
-            try:
-                sheet_id = "1Rg8nMTOyU_MMe7wGS1ZbeqptTUFgRXoovy27bzq2zdY"
-                sheet_name = urllib.parse.quote("個人招待ID")
-                csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
-                csv_df = pd.read_csv(csv_url)
-                for _, r in csv_df.iterrows():
-                    # Column 0: 管理番号, Column 1: 名前, Column 6: 機種名
-                    if len(r) >= 7 and pd.notnull(r.iloc[6]) and str(r.iloc[6]).strip() != "":
-                        model = str(r.iloc[6]).strip()
-                        if pd.notnull(r.iloc[0]):
-                            k0 = str(r.iloc[0]).strip()
-                            if k0.endswith('.0'): k0 = k0[:-2]
-                            d_map[k0] = model
-                        if pd.notnull(r.iloc[1]):
-                            k1 = str(r.iloc[1]).strip()
-                            if k1.endswith('.0'): k1 = k1[:-2]
-                            d_map[k1] = model
-            except Exception as e:
-                print("Error fetching 個人招待ID:", e)
+            # fetch 個人招待ID mapping from the new spreadsheet via csv (cached)
+            d_map.update(_fetch_invite_id_map())
         
         rdf = df.copy()
         if f_mode == "直近28日間": 
@@ -590,7 +601,7 @@ def render_used_market_tab():
 
         edited_df = st.data_editor(
             main_df,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             disabled=["機種名", "中央値", "最安値", "中古買取上限", "検索ページ"],
             column_config={
@@ -623,7 +634,7 @@ def render_used_market_tab():
         with st.expander("📊 詳細データ（ランク別最安・買取内訳）", expanded=False):
             st.dataframe(
                 summary_df,
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "最安値": st.column_config.NumberColumn("最安値", format="¥%d"),
@@ -652,7 +663,7 @@ def render_used_market_tab():
                     ])
                     st.dataframe(
                         detail_df,
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                         column_config={
                             "税込価格": st.column_config.NumberColumn("税込価格", format="¥%d"),
@@ -696,7 +707,9 @@ def save_settings_api(target_app):
         url = f"{base_url}?app={target_app}"
         requests.post(url, data=json.dumps(settings), timeout=15)
         return True
-    except: return False
+    except Exception as e:
+        st.error(f"設定の保存に失敗しました: {e}")
+        return False
 
 def load_settings_api(target_app):
     try:
@@ -736,7 +749,9 @@ def load_settings_api(target_app):
             st.session_state.p_gap_days_val = int(settings.get("p_gap_days", 5))
             st.session_state.checkin_days_val = int(settings.get("checkin_days", 14))
             return True
-    except: return False
+    except Exception as e:
+        st.error(f"設定の読み込みに失敗しました: {e}")
+        return False
     return False
 
 # ==========================================
@@ -814,7 +829,7 @@ def main():
             p_gap_days = st.number_input("親端末 使用間隔 (中n日)", value=st.session_state.p_gap_days_val, step=1, key="p_gap_days")
             checkin_days = st.number_input("チェックイン期間 (日間)", value=st.session_state.checkin_days_val, step=1, key="checkin_days")
 
-        if st.sidebar.button("💾 クラウド保存", use_container_width=True):
+        if st.sidebar.button("💾 クラウド保存", width="stretch"):
             if save_settings_api(target_app): st.sidebar.success("保存完了！")
             
         st.sidebar.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
@@ -924,7 +939,7 @@ def main():
         with ac2:
             if fm == "直近28日間": ld, tm = 28, None
             else: tm = st.selectbox("対象月", [(datetime.now() - timedelta(days=30*i)).strftime("%Y/%m") for i in range(12)]); ld = None
-        with ac3: st.write(""); sync = st.button("同期", use_container_width=True)
+        with ac3: st.write(""); sync = st.button("同期", width="stretch")
         if sync:
             with st.spinner("最新データを取得中..."):
                 err = fetch_data_logic(target_app, fm, l_days=ld, t_month=tm, force=True)
@@ -943,13 +958,13 @@ def main():
                 a_df = res['auth_trend'].sort_values('成功率', ascending=False)
                 fig_auth = px.bar(a_df, x='成功率', y='auth_method', orientation='h', color='成功率', color_continuous_scale='Blues', text_auto='.2f')
                 fig_auth.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=200)
-                st.plotly_chart(fig_auth, use_container_width=True)
+                st.plotly_chart(fig_auth, width="stretch")
                 
             st.markdown("### 📈 キャンペーン別 成功率ランキング")
             s_df = res['summary'].sort_values('成功率', ascending=False)
             fig = px.bar(s_df, x='成功率', y=s_df.columns[0], orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.2f')
             fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=max(300, len(s_df)*40))
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
             if "daily_trend" in res:
                 st.markdown("### 📈 日次パフォーマンス・トレンド (成功数 × 成功率)")
@@ -958,7 +973,7 @@ def main():
                 fig_comb.add_trace(go.Bar(x=d_df['date'], y=d_df['成功数'], name="成功数 (台)", marker_color='rgba(0,136,255,0.6)'), secondary_y=False)
                 fig_comb.add_trace(go.Scatter(x=d_df['date'], y=d_df['成功率'], name="成功率 (%)", line=dict(color='#00ff88', width=3), mode='lines+markers'), secondary_y=True)
                 fig_comb.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=450, yaxis2=dict(range=[0, 100]))
-                st.plotly_chart(fig_comb, use_container_width=True)
+                st.plotly_chart(fig_comb, width="stretch")
 
 
             st.markdown("---")
@@ -967,11 +982,11 @@ def main():
                 b_df = res['brand'].sort_values('成功率', ascending=False)
                 fig = px.bar(b_df, x='成功率', y='brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.3f')
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0")
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
                 if "model_rank" in res:
                     m_df = res['model_rank'].sort_values('成功率', ascending=False).copy()
                     m_df['成功率'] = m_df['成功率'].map('{:.2f}%'.format)
-                    st.dataframe(m_df, use_container_width=True, hide_index=True)
+                    st.dataframe(m_df, width="stretch", hide_index=True)
 
     # 3. 親機分析 (アドバイス復元)
     with tabs[2]:
@@ -991,7 +1006,7 @@ def main():
                 fig_int.add_trace(go.Bar(x=i_df['interval_category'], y=i_df['試行数'], name="試行回数", marker_color='rgba(0,191,255,0.6)'), secondary_y=False)
                 fig_int.add_trace(go.Scatter(x=i_df['interval_category'], y=i_df['成功率'], name="成功率 (%)", line=dict(color='#ffaa00', width=3), mode='lines+markers'), secondary_y=True)
                 fig_int.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=350, yaxis2=dict(range=[0, 100]))
-                st.plotly_chart(fig_int, use_container_width=True)
+                st.plotly_chart(fig_int, width="stretch")
                 st.markdown("---")
             
                 
@@ -1001,19 +1016,19 @@ def main():
                 pb_df = res['parent_brand_rank'].sort_values('成功率', ascending=False)
                 fig_pb = px.bar(pb_df, x='成功率', y='parent_brand', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.1f')
                 fig_pb.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=300)
-                st.plotly_chart(fig_pb, use_container_width=True)
+                st.plotly_chart(fig_pb, width="stretch")
             
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown("### 🏆 個体別 (TOP10)")
                 fig = px.bar(res['parent_rank'].head(10), x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             with c2:
                 st.markdown("### 📱 機種別パフォーマンス (全体)")
                 fig = px.bar(res['parent_model_rank'], x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
                 
             st.markdown("### 🌟 直近で成功回数が多い端末トップ30")
             if 'top30_rank' in res:
@@ -1022,7 +1037,7 @@ def main():
                     display_df = top_30_df[['original_parent_id', 'parent_model', '成功数', '試行数', '成功率', '最終成功日']].copy()
                     display_df.columns = ['端末ID(親機)', '機種名', '成功回数', '試行回数', '成功率(%)', '直近成功日']
                     display_df.insert(0, '順位', range(1, len(display_df) + 1))
-                    st.dataframe(display_df, use_container_width=True, hide_index=True)
+                    st.dataframe(display_df, width="stretch", hide_index=True)
             
             st.markdown("---")
             st.markdown("### ⚠️ 要警戒：低パフォーマンス親機 (ワースト10)")
@@ -1030,7 +1045,7 @@ def main():
             low_p_df = res['parent_model_rank'][res['parent_model_rank']['試行数'] >= 3].sort_values('成功率', ascending=True).head(10).copy()
             if not low_p_df.empty:
                 low_p_df['成功率'] = low_p_df['成功率'].map('{:.1f}%'.format)
-                st.dataframe(low_p_df, use_container_width=True, hide_index=True)
+                st.dataframe(low_p_df, width="stretch", hide_index=True)
             else:
                 st.info("十分な試行数（3回以上）を持つ親機データがまだありません。")
             
@@ -1089,12 +1104,12 @@ def main():
                     if c3 > 0:
                         st.markdown("#### 🚨 危険: 3連続以上失敗している親機 (休止推奨)")
                         df_3 = alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) >= 3]
-                        st.dataframe(df_3, use_container_width=True, hide_index=True)
+                        st.dataframe(df_3, width="stretch", hide_index=True)
                         
                     if c2 > 0:
                         st.markdown("#### 🟡 警戒: 2連続失敗している親機 (次回失敗で休止検討)")
                         df_2 = alert_df[alert_df['連続失敗回数'].str.replace('回','').astype(int) == 2]
-                        st.dataframe(df_2, use_container_width=True, hide_index=True)
+                        st.dataframe(df_2, width="stretch", hide_index=True)
                 else:
                     st.success("✨ 現在、2回以上連続で失敗している親機はありません。")
 
@@ -1171,7 +1186,7 @@ def main():
                         height=400,
                         margin=dict(t=30, b=30, l=30, r=30)
                     )
-                    st.plotly_chart(fig_heat, use_container_width=True)
+                    st.plotly_chart(fig_heat, width="stretch")
                     
                     st.markdown("---")
                     st.markdown("#### 📊 相性ピボット詳細テーブル")
@@ -1185,7 +1200,7 @@ def main():
                             else:
                                 styled_pivot.at[parent, child] = f"{rate:.1f}% ({count}回)"
                                 
-                    st.dataframe(styled_pivot, use_container_width=True)
+                    st.dataframe(styled_pivot, width="stretch")
                     
                     # 試行数3以上のペアを抽出してアドバイス
                     valid_pairs = affinity_df[affinity_df['試行数'] >= 3].sort_values('成功率', ascending=False)
@@ -1303,7 +1318,7 @@ def main():
                     
                     st.dataframe(
                         disp_df,
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                         column_config={
                             "危険度スコア": st.column_config.TextColumn("シャドウバン危険度", help="高いほどシャドウバン確率が高い"),
@@ -1368,10 +1383,10 @@ def main():
     with tabs[6]:
         st.markdown("## ⚙️ 設定 (運用比率のみ編集可能)")
         col_cfg = {"運用比率(%)": st.column_config.SelectboxColumn("運用比率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}
-        st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, use_container_width=True, disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
-        st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, use_container_width=True, disabled=["動画パターン名", "報酬額"], column_config=col_cfg, key="ed_vid")
-        st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, use_container_width=True, disabled=["チェックイン追加報酬名", "報酬額"], column_config={"出現確率(%)": st.column_config.SelectboxColumn("出現確率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}, key="ed_chk")
-        if st.button("🚀 クラウドに保存", use_container_width=True):
+        st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, width="stretch", disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
+        st.session_state.video_rewards_df = st.data_editor(st.session_state.video_rewards_df, width="stretch", disabled=["動画パターン名", "報酬額"], column_config=col_cfg, key="ed_vid")
+        st.session_state.checkin_rewards_df = st.data_editor(st.session_state.checkin_rewards_df, width="stretch", disabled=["チェックイン追加報酬名", "報酬額"], column_config={"出現確率(%)": st.column_config.SelectboxColumn("出現確率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}, key="ed_chk")
+        if st.button("🚀 クラウドに保存", width="stretch"):
             if save_settings_api(target_app): st.success("スプレッドシートへ完全に同期しました！")
             
         st.markdown("<div style='height: 150px;'></div>", unsafe_allow_html=True)

@@ -11,6 +11,7 @@ kaitori.py — イオシス買取（https://k-tai-iosys.com/）の買取価格�
 """
 import json
 import os
+import random
 import re
 import time
 import unicodedata
@@ -35,6 +36,16 @@ USER_AGENT = (
 )
 REQUEST_TIMEOUT = 15
 PAGE_SLEEP_SEC = 0.4
+
+# 通信例外・429・5xx発生時のリトライ設定（1回だけ）。
+# 403はリトライしない（本番のAWS IPで恒常的に出る想定内の応答のため。即諦めてスナップショットに任せる）。
+RETRY_BACKOFF_MIN_SEC = 1.5
+RETRY_BACKOFF_MAX_SEC = 3.0
+
+
+def _is_retryable_status(status_code: int) -> bool:
+    """リトライ対象のHTTPステータスか（429・5xxのみ。403は対象外）。"""
+    return status_code == 429 or 500 <= status_code < 600
 
 # 買取価格表が存在するブランドのスラッグ（2026-08-12時点で全て200応答・パース可能を実測確認）
 BRANDS = [
@@ -153,6 +164,26 @@ def parse_pricelist_html(html: str, brand: str):
     return rows
 
 
+def _get_with_retry(url, headers, timeout):
+    """requests.get を実行し、通信例外または429/5xx応答の場合のみ1回だけ再試行する。
+
+    403はリトライ対象外（本番のAWS IPで恒常的に出る想定内の応答のため）。
+    2回目も失敗した場合は、例外はそのまま送出し、429/5xx応答はそのままResponseを返す
+    （呼び出し側の既存のステータスコード判定に委ねる）。
+    """
+    try:
+        resp = requests.get(url, headers=headers, timeout=timeout)
+    except requests.RequestException:
+        time.sleep(random.uniform(RETRY_BACKOFF_MIN_SEC, RETRY_BACKOFF_MAX_SEC))
+        return requests.get(url, headers=headers, timeout=timeout)
+
+    if _is_retryable_status(resp.status_code):
+        time.sleep(random.uniform(RETRY_BACKOFF_MIN_SEC, RETRY_BACKOFF_MAX_SEC))
+        resp = requests.get(url, headers=headers, timeout=timeout)
+
+    return resp
+
+
 def fetch_brand(brand: str):
     """1ブランドの買取価格表を取得してパースする。
 
@@ -160,7 +191,7 @@ def fetch_brand(brand: str):
     """
     url = brand_page_url(brand)
     try:
-        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=REQUEST_TIMEOUT)
+        resp = _get_with_retry(url, {"User-Agent": USER_AGENT}, REQUEST_TIMEOUT)
         if resp.status_code != 200:
             return [], f"{brand}: 買取価格表の取得に失敗しました（HTTP {resp.status_code}）"
         rows = parse_pricelist_html(resp.text, brand)
