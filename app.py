@@ -717,7 +717,8 @@ def load_settings_api(target_app):
         base_url = get_gas_url(target_app)
         if not base_url: return False
         url = f"{base_url}?app={target_app}"
-        response = requests.get(url, timeout=10)
+        # GAS(WebApp)はコールドスタートで10秒を超えることがあるため長めに取る
+        response = requests.get(url, timeout=25)
         if response.status_code == 200:
             settings = response.json()
             if not settings: return False
@@ -752,7 +753,8 @@ def load_settings_api(target_app):
             st.session_state.checkin_days_val = int(settings.get("checkin_days", 14))
             return True
     except Exception as e:
-        st.error(f"設定の読み込みに失敗しました: {e}")
+        # 起動時に毎回呼ばれるため、一過性のネットワーク失敗は警告に留める（既定値で動作は継続する）
+        st.warning(f"クラウド設定の読み込みに失敗したため、既定値で表示しています（再読み込みで再試行されます）: {e}")
         return False
     return False
 
