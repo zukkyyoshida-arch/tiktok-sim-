@@ -10,6 +10,7 @@ import json
 import requests
 from streamlit_autorefresh import st_autorefresh
 from plotly.subplots import make_subplots
+import iosys
 
 # ==========================================
 # 1. 定数・設定
@@ -24,8 +25,8 @@ def get_gas_url(target_app):
 
 # ページ設定
 st.set_page_config(
-    page_title="Midnight Analytics Platinum v11.0",
-    page_icon="🕶️",
+    page_title="Tik分析アプリ",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -329,6 +330,308 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         return None
     except Exception as e: return str(e)
 
+# ==========================================
+# 3.5 中古相場タブ（イオシス連携）
+# ==========================================
+DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/1Rg8nMTOyU_MMe7wGS1ZbeqptTUFgRXoovy27bzq2zdY/edit"
+MODEL_LIST_COLUMN_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+
+def _extract_sheet_id(url_or_id):
+    m = re.search(r'/d/([a-zA-Z0-9_-]+)', url_or_id)
+    if m:
+        return m.group(1)
+    # すでにID単体が渡された場合
+    if re.match(r'^[a-zA-Z0-9_-]+$', url_or_id.strip()):
+        return url_or_id.strip()
+    return None
+
+
+@st.cache_data(ttl=600)
+def _fetch_sheet_tab_names(sheet_id):
+    """htmlview経由でスプレッドシート内の全タブ名を取得する（gvizの黙ったフォールバック対策）。
+    非公開等で取得できない場合は None を返す（検証スキップの合図）。
+    """
+    try:
+        url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/htmlview"
+        resp = requests.get(url, timeout=10)
+        if resp.status_code != 200:
+            return None
+        names = re.findall(r'items\.push\(\{name:\s*"((?:[^"\\]|\\.)*)"', resp.text)
+        if not names:
+            return None
+        # レスポンスは既にUTF-8の実文字（"Tik管理_本家"等）でエスケープされていないため、
+        # unicode_escapeデコードは不要（適用すると文字化けする）。
+        # "\/" のようなJS向けスラッシュエスケープのみ元に戻す。
+        return [n.replace('\\/', '/') for n in names]
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=600)
+def _fetch_model_list_from_sheet(sheet_id, sheet_tab_name, column_letter):
+    """指定シート・指定タブ・指定列から機種名一覧を取得する。
+    戻り値: (models: list[str], warning: str | None)
+    """
+    warning = None
+    tab_names = _fetch_sheet_tab_names(sheet_id)
+    if tab_names is not None and sheet_tab_name not in tab_names:
+        warning = f"シートに『{sheet_tab_name}』タブが見つかりません。存在するタブ: {', '.join(tab_names)}"
+        return [], warning
+
+    try:
+        encoded_tab = urllib.parse.quote(sheet_tab_name)
+        csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={encoded_tab}"
+        df = pd.read_csv(csv_url, header=None)
+    except Exception as e:
+        return [], f"スプレッドシートの読み込みに失敗しました: {e}"
+
+    col_idx = MODEL_LIST_COLUMN_LETTERS.index(column_letter.upper())
+    if col_idx >= len(df.columns):
+        return [], f"指定列（{column_letter}列）がシートに存在しません"
+
+    raw_values = df.iloc[:, col_idx].dropna().astype(str).tolist()
+
+    # 1行目がヘッダらしき値なら除外
+    header_like = {"機種", "機種名", "モデル", "model", "端末", "端末機種"}
+    if raw_values and raw_values[0].strip() in header_like:
+        raw_values = raw_values[1:]
+
+    models = []
+    seen = set()
+    for v in raw_values:
+        norm = iosys.normalize_model_name(v)
+        if not norm or norm in seen:
+            continue
+        seen.add(norm)
+        models.append(norm)
+
+    return models, warning
+
+
+def _collect_models_from_actual_res():
+    """実績分析で既に取得済みの生データフレーム（st.session_state.actual_res['raw_df']）から
+    機種一覧を作るフォールバック。'model' と 'parent_model' の両列のユニーク値を使う。
+    """
+    res = st.session_state.get('actual_res')
+    if not res or 'raw_df' not in res:
+        return []
+    rdf = res['raw_df']
+    models = set()
+    for col in ('model', 'parent_model'):
+        if col in rdf.columns:
+            for v in rdf[col].dropna().astype(str).tolist():
+                norm = iosys.normalize_model_name(v)
+                if not norm or norm in ("不明", "未指定"):
+                    continue
+                # 管理番号・ID等の数字のみの値はノイズとして除外（機種名にはアルファベットが含まれるはず）
+                if not re.search(r'[A-Za-zぁ-んァ-ン一-龥]', norm):
+                    continue
+                models.add(norm)
+    return sorted(models)
+
+
+@st.cache_data(ttl=3600)
+def _cached_search_with_fallback(model_name):
+    return iosys.search_with_fallback(model_name, max_pages=2)
+
+
+def render_used_market_tab():
+    st.markdown("## 💴 中古相場（イオシス）")
+    st.caption("運用端末の機種ごとに、株式会社イオシス（iosys.co.jp）の中古販売価格を一覧化します。")
+
+    with st.expander("📋 機種リストの取得元", expanded=True):
+        sheet_url = st.text_input("スプレッドシートURL / ID", value=DEFAULT_SHEET_URL, key="iosys_sheet_url")
+        c1, c2 = st.columns(2)
+        with c1:
+            sheet_tab_name = st.text_input("タブ名", value="機種リスト", key="iosys_sheet_tab")
+        with c2:
+            column_letter = st.text_input("列（アルファベット）", value="C", key="iosys_sheet_col", max_chars=2)
+
+        use_actual_fallback = st.toggle("実績データから機種を拾う", value=False, key="iosys_use_actual_fallback",
+                                         help="スプレッドシートから機種リストが読めない場合に、実績分析で取得済みのデータ（model/parent_model列）から機種一覧を作ります。")
+
+        sheet_models = []
+        sheet_warning = None
+        sheet_id = _extract_sheet_id(sheet_url.strip()) if sheet_url.strip() else None
+
+        if sheet_id:
+            col_letter_clean = (column_letter.strip().upper() or "C")[:1]
+            sheet_models, sheet_warning = _fetch_model_list_from_sheet(sheet_id, sheet_tab_name.strip(), col_letter_clean)
+            if sheet_warning:
+                st.warning(sheet_warning)
+        else:
+            st.warning("スプレッドシートURL / IDを正しく入力してください。")
+
+        candidate_models = list(sheet_models)
+        if use_actual_fallback:
+            actual_models = _collect_models_from_actual_res()
+            for m in actual_models:
+                if m not in candidate_models:
+                    candidate_models.append(m)
+            if not actual_models:
+                st.caption("（実績データにはまだ機種情報がありません）")
+
+        if candidate_models:
+            st.caption(f"機種リストを {len(candidate_models)} 件検出しました。")
+        else:
+            st.info("機種リストが取得できていません。スプレッドシートの設定を確認するか、「実績データから機種を拾う」をONにしてください。")
+
+        # 機種リストが後から読み込まれた場合もデフォルト全選択が効くよう、
+        # 候補が変わったらウィジェットの保持状態を破棄して default を再適用する
+        if st.session_state.get('iosys_model_options') != candidate_models:
+            st.session_state.iosys_model_options = candidate_models
+            st.session_state.pop('iosys_selected_models', None)
+        selected_models = st.multiselect(
+            "対象機種を選択", options=candidate_models, default=candidate_models, key="iosys_selected_models"
+        )
+
+    fetch_clicked = st.button("💴 相場を取得", use_container_width=True, disabled=(len(selected_models) == 0))
+
+    if fetch_clicked:
+        results = {}
+        progress = st.progress(0.0, text="相場を取得しています…")
+        total = len(selected_models)
+        for i, model_name in enumerate(selected_models):
+            items, used_query, error = _cached_search_with_fallback(model_name)
+            strict_items = iosys.filter_strict(items, iosys.normalize_model_name(model_name))
+            results[model_name] = {
+                "items": strict_items,
+                "used_query": used_query,
+                "error": error,
+            }
+            progress.progress((i + 1) / total, text=f"相場を取得しています… ({i+1}/{total}) {model_name}")
+        progress.empty()
+        st.session_state.iosys_results = results
+        st.session_state.iosys_fetched_at = datetime.now()
+
+    results = st.session_state.get('iosys_results')
+    if not results:
+        return
+
+    fetched_at = st.session_state.get('iosys_fetched_at')
+
+    def _rank_bucket(rank_str):
+        r = rank_str or ""
+        if "未使用" in r:
+            return "未使用"
+        if "Aランク" in r or re.search(r'(?<![A-Za-z])A(?![A-Za-z])', r):
+            return "Aランク"
+        if "Bランク" in r or re.search(r'(?<![A-Za-z])B(?![A-Za-z])', r):
+            return "Bランク"
+        if "Cランク" in r or re.search(r'(?<![A-Za-z])C(?![A-Za-z])', r):
+            return "Cランク"
+        return "その他"
+
+    summary_rows = []
+    zero_hit_models = []
+    for model_name, data in results.items():
+        items = data["items"]
+        error = data["error"]
+        if error:
+            zero_hit_models.append(f"{model_name}（エラー: {error}）")
+            continue
+        if not items:
+            zero_hit_models.append(model_name)
+            continue
+
+        prices = sorted([it["price"] for it in items if it["price"] is not None])
+        rank_min = {"未使用": None, "Aランク": None, "Bランク": None, "Cランク": None}
+        for it in items:
+            if it["price"] is None:
+                continue
+            bucket = _rank_bucket(it.get("rank"))
+            if bucket in rank_min:
+                if rank_min[bucket] is None or it["price"] < rank_min[bucket]:
+                    rank_min[bucket] = it["price"]
+
+        median_price = prices[len(prices)//2] if prices else None
+        search_url = f"https://iosys.co.jp/items?q={urllib.parse.quote(data['used_query'])}"
+
+        summary_rows.append({
+            "機種名": model_name,
+            "検索語": data["used_query"],
+            "ヒット件数": len(items),
+            "最安値": prices[0] if prices else None,
+            "中央値": median_price,
+            "最高値": prices[-1] if prices else None,
+            "未使用最安": rank_min["未使用"],
+            "Aランク最安": rank_min["Aランク"],
+            "Bランク最安": rank_min["Bランク"],
+            "Cランク最安": rank_min["Cランク"],
+            "検索ページ": search_url,
+        })
+
+    if summary_rows:
+        summary_df = pd.DataFrame(summary_rows)
+        st.markdown("### 相場サマリ")
+        st.dataframe(
+            summary_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "最安値": st.column_config.NumberColumn("最安値", format="¥%d"),
+                "中央値": st.column_config.NumberColumn("中央値", format="¥%d"),
+                "最高値": st.column_config.NumberColumn("最高値", format="¥%d"),
+                "未使用最安": st.column_config.NumberColumn("未使用最安", format="¥%d"),
+                "Aランク最安": st.column_config.NumberColumn("Aランク最安", format="¥%d"),
+                "Bランク最安": st.column_config.NumberColumn("Bランク最安", format="¥%d"),
+                "Cランク最安": st.column_config.NumberColumn("Cランク最安", format="¥%d"),
+                "検索ページ": st.column_config.LinkColumn("イオシス検索ページ", display_text="開く"),
+            }
+        )
+
+        st.markdown("### 保有台数と資産評価額")
+        if 'iosys_qty_df' not in st.session_state or set(st.session_state.iosys_qty_df["機種名"]) != set(summary_df["機種名"]):
+            st.session_state.iosys_qty_df = pd.DataFrame({
+                "機種名": summary_df["機種名"],
+                "保有台数": 1,
+            })
+        qty_df = st.data_editor(
+            st.session_state.iosys_qty_df,
+            use_container_width=True,
+            disabled=["機種名"],
+            column_config={"保有台数": st.column_config.NumberColumn("保有台数", min_value=0, step=1)},
+            key="iosys_qty_editor",
+            hide_index=True,
+        )
+        st.session_state.iosys_qty_df = qty_df
+
+        merged = qty_df.merge(summary_df[["機種名", "中央値"]], on="機種名", how="left")
+        merged["評価額"] = merged["中央値"].fillna(0) * merged["保有台数"].fillna(0)
+        total_value = int(merged["評価額"].sum())
+        custom_metric("資産評価額の合計（中央値×台数）", f"¥{total_value:,}")
+
+        st.markdown("### 機種ごとの個別商品一覧")
+        for model_name, data in results.items():
+            items = data["items"]
+            if not items:
+                continue
+            with st.expander(f"{model_name}（{len(items)}件）"):
+                detail_df = pd.DataFrame([
+                    {"商品名": it["name"], "ランク": it["rank"], "税込価格": it["price"], "商品ページ": it["url"]}
+                    for it in items
+                ])
+                st.dataframe(
+                    detail_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "税込価格": st.column_config.NumberColumn("税込価格", format="¥%d"),
+                        "商品ページ": st.column_config.LinkColumn("商品ページ", display_text="開く"),
+                    }
+                )
+
+    if zero_hit_models:
+        st.warning(
+            "以下の機種は該当商品が0件でした。機種名の表記を調整して再取得してください:\n"
+            + "\n".join(f"- {m}" for m in zero_hit_models)
+        )
+
+    if fetched_at:
+        st.caption(f"出典: イオシス（iosys.co.jp）・価格は税込・取得: {fetched_at.strftime('%Y-%m-%d %H:%M:%S')}")
+
+
 def save_settings_api(target_app):
     try:
         settings = {
@@ -447,7 +750,7 @@ def main():
         st.session_state.initialized = True
 
     if not st.session_state.get('initialized'):
-        st.markdown("<h3 style='text-align:center; margin-top:100px;'>🕶️ Midnight Analytics 起動中...</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align:center; margin-top:100px;'>📊 Tik分析アプリ 起動中...</h3>", unsafe_allow_html=True)
         st.stop()
 
     apply_custom_styles()
@@ -468,7 +771,7 @@ def main():
             checkin_days = st.number_input("チェックイン期間 (日間)", value=st.session_state.checkin_days_val, step=1, key="checkin_days")
 
         if st.sidebar.button("💾 クラウド保存", use_container_width=True):
-            if save_settings_api(): st.sidebar.success("保存完了！")
+            if save_settings_api(target_app): st.sidebar.success("保存完了！")
             
         st.sidebar.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
 
@@ -501,7 +804,7 @@ def main():
     per_invite_revenue = (success_p * success_rev) + ((1 - success_p) * failure_rev)
 
     # --- タブ表示 ---
-    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "⚙️ 設定"])
+    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "💴 中古相場", "⚙️ 設定"])
 
     # 1. ダッシュボード
     with tabs[0]:
@@ -1013,8 +1316,12 @@ def main():
         with sc1: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>✅ 成功時</b><br>確率: {success_p*100:.1f}%<br>拘束: {prep_d+check_d:.1f}日</div>", unsafe_allow_html=True)
         with sc2: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>❌ 失敗時</b><br>確率: {(1-success_p)*100:.1f}%<br>拘束: {(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f}日</div>", unsafe_allow_html=True)
 
-    # 7. 設定 (SelectboxColumn復元)
+    # 7. 中古相場
     with tabs[5]:
+        render_used_market_tab()
+
+    # 8. 設定 (SelectboxColumn復元)
+    with tabs[6]:
         st.markdown("## ⚙️ 設定 (運用比率のみ編集可能)")
         col_cfg = {"運用比率(%)": st.column_config.SelectboxColumn("運用比率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}
         st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, use_container_width=True, disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
@@ -1026,7 +1333,7 @@ def main():
         st.markdown("<div style='height: 150px;'></div>", unsafe_allow_html=True)
 
     st.sidebar.markdown("---")
-    st.sidebar.caption(f"Midnight Platinum v{CURRENT_VERSION} | Fully Restored")
+    st.sidebar.caption(f"Tik分析アプリ v{CURRENT_VERSION}")
 
 if __name__ == "__main__":
     main()
