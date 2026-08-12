@@ -4,6 +4,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import urllib.parse
+import io
 from datetime import datetime, timedelta
 import re
 import json
@@ -723,7 +724,8 @@ def load_settings_api(target_app):
             
             def sync_ratio_local(df, cloud_json, key_col):
                 if not cloud_json: return df
-                cloud_df = pd.read_json(cloud_json)
+                # pandas 2系はread_jsonへの生JSON文字列をファイルパス扱いするためStringIOで包む
+                cloud_df = pd.read_json(io.StringIO(cloud_json))
                 if key_col not in cloud_df.columns or "運用比率(%)" not in cloud_df.columns: return df
                 ratios = dict(zip(cloud_df[key_col], cloud_df["運用比率(%)"]))
                 df["運用比率(%)"] = df[key_col].map(ratios).fillna(0.0)
@@ -734,7 +736,7 @@ def load_settings_api(target_app):
             if "video_rewards" in settings:
                 st.session_state.video_rewards_df = sync_ratio_local(st.session_state.video_rewards_df, settings["video_rewards"], "動画パターン名")
             if "checkin_rewards" in settings:
-                cloud_checkin = pd.read_json(settings["checkin_rewards"])
+                cloud_checkin = pd.read_json(io.StringIO(settings["checkin_rewards"]))
                 if not cloud_checkin.empty:
                     key = "チェックイン追加報酬名" if "チェックイン追加報酬名" in cloud_checkin.columns else "報酬名"
                     ratios = dict(zip(cloud_checkin[key], cloud_checkin["出現確率(%)"]))
