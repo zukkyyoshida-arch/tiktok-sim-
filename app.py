@@ -19,7 +19,7 @@ import kaitori
 # ==========================================
 # 1. 定数・設定
 # ==========================================
-CURRENT_VERSION = "11.1.0"
+CURRENT_VERSION = "11.2.0"
 GAS_URL_LITE = "https://script.google.com/macros/s/AKfycbxLevaqOFWn2dAMZHw5m-SQDUaZ1pvx2iXt9bcDGwPPglybPovvBIMV0fQGDrSd-Nbeag/exec"
 GAS_URL_ORIGINAL = "https://script.google.com/macros/s/AKfycby9jacqr0U-jJ2QPdexit9g_RiBiUIyeQajZSVoiSW2HcLC445xiJMHyDfMjcCvL1Ob/exec"
 
@@ -108,21 +108,134 @@ def _fetch_invite_id_map():
         print("Error fetching 個人招待ID:", e)
     return d_map_extra
 
+# analytics行列のフォールバック用固定列インデックス。
+# ヘッダ行が検出できない場合にのみ使う従来の決め打ち値（挙動は旧実装と完全一致させる）。
+FALLBACK_ANALYTICS_COLUMNS = {
+    "original": {"f": 3, "child": 4, "auth": 6, "j": 7, "date1": 8, "date2": 9, "n": 10, "q": 11,
+                 "parent_type": None, "child_type": None, "work_hours": None},
+    "lite": {"f": 3, "child": 4, "j": 5, "auth": None, "date1": 7, "date2": 13, "n": 9, "q": 10,
+             "parent_type": None, "child_type": None, "work_hours": None},
+}
+
+
+def _resolve_analytics_columns(header_row, target_app):
+    """analyticsの先頭行（ヘッダ行）から列位置を「名前」で解決する。
+
+    シート側の列の追加・入れ替えがあっても、列名が同じなら正しい列を掴めるようにする。
+    先頭行に「状態」と「機種」が両方無ければヘッダ行とみなさず None を返す。
+    必須列（状態/端末番号/機種/親/Tik開始）が欠けている場合も None を返す
+    （呼び出し側で FALLBACK_ANALYTICS_COLUMNS に倒す）。
+    """
+    if not header_row:
+        return None
+    cells = [str(c).strip() for c in header_row]
+
+    def find(name, start=0):
+        for i in range(start, len(cells)):
+            if cells[i] == name:
+                return i
+        return None
+
+    # ヘッダ行の検出: 「状態」と「機種」が両方あることを条件とする
+    if find("状態") is None or find("機種") is None:
+        return None
+
+    cols = {
+        "f": find("状態"),
+        "child": find("端末番号"),
+        "j": find("機種"),
+        "n": find("親"),
+        "q": find("招待種類"),
+        # 認証方法: originalは「子認証方法」、liteは「招待方法」
+        "auth": find("子認証方法") if target_app == "original" else find("招待方法"),
+        "date1": find("Tik開始"),
+        "parent_type": find("親の種類"),   # liteにのみ存在
+        "child_type": find("子種別"),      # originalにのみ存在
+        "work_hours": find("稼働時間"),
+    }
+    # 「時刻」は同名2列があり得るため、「Tik開始」より後ろの最初の「時刻」を
+    # 日付フォールバック列（date2）とする
+    cols["date2"] = find("時刻", start=cols["date1"] + 1) if cols["date1"] is not None else None
+
+    # 必須列が1つでも欠けていたらフォールバックへ倒す
+    if any(cols[k] is None for k in ("f", "child", "j", "n", "date1")):
+        return None
+    return cols
+
+
+def _axis_summary(raw_df, col):
+    r"""カテゴリ軸1本の 試行数/成功率 サマリを返す共通ヘルパー。
+
+    値はstr化し、数字のみの値（^\d+$）はシートの入力ノイズとして除外する。
+    成功率は既存集計と同じ流儀（np.ceilで小数3位切り上げ）。
+    work_hours_band だけは帯の数値開始で昇順ソートし、それ以外は成功率降順。
+    """
+    vals = raw_df[col].astype(str).str.strip()
+    mask = ~vals.str.match(r'^\d+$')
+    tmp = raw_df[mask].copy()
+    if tmp.empty:
+        return pd.DataFrame(columns=[col, '試行数', '成功率'])
+    tmp[col] = vals[mask]
+    axis_df = tmp.groupby(col).agg(試行数=('is_success', 'count'),
+                                   成功率=('is_success', 'mean')).reset_index()
+    axis_df['成功率'] = np.ceil(axis_df['成功率'] * 100 * 1000) / 1000
+    if col == 'work_hours_band':
+        def _band_start(v):
+            m = re.match(r'^(\d+)', str(v))
+            return int(m.group(1)) if m else float('inf')
+        axis_df = axis_df.sort_values(col, key=lambda s: s.map(_band_start))
+    else:
+        axis_df = axis_df.sort_values('成功率', ascending=False)
+    return axis_df.reset_index(drop=True)
+
+
+def _parent_type_map(raw_df):
+    r"""parent_idごとの「親の種類」（parent_typeの最頻値）の辞書を返す。
+
+    数字のみのノイズ値（^\d+$）を除外してから最頻値を取る。
+    対応が無いparent_idは呼び出し側で「未設定」に倒す。
+    """
+    if 'parent_type' not in raw_df.columns:
+        return {}
+    vals = raw_df['parent_type'].astype(str).str.strip()
+    sub = raw_df[~vals.str.match(r'^\d+$')]
+    if sub.empty:
+        return {}
+    return sub.groupby('parent_id')['parent_type'].agg(lambda s: s.mode().iloc[0]).to_dict()
+
+
 def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False):
     try:
         f_key = str(datetime.now().timestamp()) if force else None
         payload = fetch_api_data_raw(target_app, force_key=f_key)
         if not payload or "analytics" not in payload: return "Invalid API Response"
-        
+
         raw_data = payload['analytics']
         if not raw_data: return "No Data"
-        
-        df = pd.DataFrame(raw_data)
-        if target_app == "original":
-            f_idx, child_idx, j_idx, auth_idx, date1_idx, date2_idx, n_idx, q_idx = 3, 4, 7, 6, 8, 9, 10, 11
+
+        cols = _resolve_analytics_columns(raw_data[0], target_app)
+        if cols is not None:
+            # ヘッダ行を明示的に除いたデータ行だけをDataFrame化し、列数はヘッダ幅に揃える
+            data_rows = raw_data[1:]
+            if not data_rows: return "No Data"
+            df = pd.DataFrame(data_rows)
+            df = df.reindex(columns=range(len(raw_data[0])))
         else:
-            f_idx, child_idx, j_idx, auth_idx, date1_idx, date2_idx, n_idx, q_idx = 3, 4, 5, None, 7, 13, 9, 10
-            
+            # ヘッダが検出できない場合: 従来の固定インデックス・全行処理（挙動維持）
+            print(f"[fetch_data_logic] {target_app}: analyticsのヘッダ行を検出できないため、"
+                  f"従来の固定列インデックスにフォールバックします", file=sys.stderr)
+            cols = dict(FALLBACK_ANALYTICS_COLUMNS[target_app])
+            df = pd.DataFrame(raw_data)
+
+        f_idx = cols["f"]
+        child_idx = cols["child"]
+        j_idx = cols["j"]
+        auth_idx = cols["auth"]
+        date1_idx = cols["date1"]
+        date2_idx = cols["date2"]
+        n_idx = cols["n"]
+        q_idx = cols["q"]
+
         def parse_date(val):
             if not val or val == "" or val == "#REF!": return pd.NaT
             if isinstance(val, str) and "T" in val:
@@ -151,17 +264,28 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
             if len(row) > date1_idx:
                 d1 = parse_date(row[date1_idx])
                 if pd.notnull(d1) and d1.year > 1900: return d1
-            if len(row) > date2_idx:
+            if date2_idx is not None and len(row) > date2_idx:
                 d2 = parse_date(row[date2_idx])
                 if pd.notnull(d2) and d2.year > 1900: return d2
             return pd.NaT
 
         df['date'] = df.apply(get_valid_date, axis=1)
         df['is_success'] = df[f_idx].astype(str).str.contains("成功")
-        df['model'] = df[j_idx].fillna("不明") if j_idx < len(df.columns) else "不明"
-        
-        if auth_idx is not None and auth_idx < len(df.columns):
-            df['auth_method'] = df[auth_idx].fillna("不明").astype(str)
+        if j_idx in df.columns:
+            # 実データに「AQUOS sense7 」のような末尾空白があり、ランキングが分裂するためstripする
+            df['model'] = df[j_idx].fillna("不明").astype(str).str.strip()
+        else:
+            df['model'] = "不明"
+
+        if auth_idx is not None and auth_idx in df.columns:
+            if target_app == "original":
+                df['auth_method'] = df[auth_idx].fillna("不明").astype(str)
+            else:
+                # liteの「招待方法」は「Google認証」「LINE認証」表記のため、末尾の「認証」を
+                # 除去してoriginalの表記（Google/LINE）に揃える。空欄は「未設定」に寄せる
+                auth_series = df[auth_idx].fillna("不明").astype(str).str.strip()
+                auth_series = auth_series.str.replace(r'認証$', '', regex=True)
+                df['auth_method'] = auth_series.where(auth_series != "", "未設定")
         else:
             df['auth_method'] = "未設定"
         
@@ -215,11 +339,28 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         
         rdf['brand'] = rdf['model'].apply(get_brand)
         rdf['parent_brand'] = rdf['parent_model'].apply(get_brand)
-        rdf['child_id'] = rdf[4].fillna("未指定").astype(str) # 端末番号を子IDとして定義
-        rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
+        rdf['child_id'] = rdf[child_idx].fillna("未指定").astype(str) # 端末番号を子IDとして定義
 
-        # 集計
-        sum_df = rdf.groupby(q_idx).agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        # 招待種類: 行フィルタ（^\d{4}$ の除外）は従来どおり。加えて名前付き列 invite_type を持たせる
+        if q_idx is not None:
+            rdf = rdf[~rdf[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
+            invite_vals = rdf[q_idx].fillna("").astype(str).str.strip()
+            rdf['invite_type'] = invite_vals.where(invite_vals != "", "未設定")
+        else:
+            rdf['invite_type'] = "未設定"
+
+        # 追加の名前付き列（その列を持つシートにだけ作る）
+        for src_key, col_name in (("parent_type", "parent_type"),
+                                  ("child_type", "child_type"),
+                                  ("work_hours", "work_hours_band")):
+            src_idx = cols[src_key]
+            if src_idx is not None:
+                vals = rdf[src_idx].fillna("").astype(str).str.strip()
+                rdf[col_name] = vals.where(vals != "", "未設定")
+
+        # 集計（キャンペーン別）: 名前付き列 invite_type を軸にし、表示列名は「招待種類」に統一
+        sum_df = rdf.groupby('invite_type').agg(試行数=('is_success','count'), 成功率=('is_success','mean')).reset_index()
+        sum_df = sum_df.rename(columns={'invite_type': '招待種類'})
         sum_df['成功率'] = np.ceil(sum_df['成功率']*100*1000)/1000
         
         rdf['success_date'] = rdf['date'].where(rdf['is_success'])
@@ -330,6 +471,15 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         parent_status_df['成功率'] = np.ceil(parent_status_df['成功率'] * 100 * 1000) / 1000
         parent_status_df = parent_status_df.sort_values('parent_status_before')
 
+        # 分析軸の候補: 表示ラベル → raw_df の名前付き列名（存在する列だけ入れる）
+        axis_options = {}
+        for label, col_name in (("招待種類", "invite_type"), ("親の種類", "parent_type"),
+                                ("子種別", "child_type"), ("認証方法", "auth_method"),
+                                ("稼働時間帯", "work_hours_band"), ("親ブランド", "parent_brand"),
+                                ("子ブランド", "brand"), ("機種", "model"), ("親機種", "parent_model")):
+            if col_name in rdf.columns:
+                axis_options[label] = col_name
+
         st.session_state.actual_res = {
             "summary": sum_df, "rate": np.ceil(rdf['is_success'].mean()*100*1000)/1000,
             "brand": brand_df, "model_rank": model_df, "daily_trend": daily_df,
@@ -337,6 +487,8 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
             "parent_brand_rank": p_brand_df, "top30_rank": top30_df,
             "interval_trend": interval_df, "parent_status_trend": parent_status_df,
             "auth_trend": auth_df,
+            "axis_options": axis_options,
+            "status_col": f_idx, # raw_df内の「状態」列の位置（名前解決済み）
             "total": len(rdf), "success": rdf['is_success'].sum(),
             "period": f"{rdf['date'].min().strftime('%Y/%m/%d')} - {rdf['date'].max().strftime('%m/%d')}",
             "raw_df": rdf # 相性・疲弊度分析用の生データフレームを格納
@@ -924,7 +1076,7 @@ def main():
                 best_c = s_df.loc[s_df['EV'].idxmax()]
                 if best_c['EV'] > (actual_s_rate * per_invite_revenue) * 1.05:
                     boost = int(actual_daily_invites * 30 * (best_c['EV'] - (actual_s_rate * per_invite_revenue)))
-                    advice.append(f"🎯 <b>戦略の転換推奨</b>: 現在 <b>{best_c.iloc[0]}</b> が最も効率的。シフトにより月間 <b>¥{boost:,}</b> 底上げ可能。")
+                    advice.append(f"🎯 <b>戦略の転換推奨</b>: 現在 <b>{best_c['招待種類']}</b> が最も効率的。シフトにより月間 <b>¥{boost:,}</b> 底上げ可能。")
 
             yield_val = int(rev / total_dev)
             advice.append(f"💰 <b>収益効率 (Yield)</b>: 端末1台あたり月間 <b>¥{yield_val:,}</b> を稼ぎ出しています。")
@@ -966,9 +1118,31 @@ def main():
                 
             st.markdown("### 📈 キャンペーン別 成功率ランキング")
             s_df = res['summary'].sort_values('成功率', ascending=False)
-            fig = px.bar(s_df, x='成功率', y=s_df.columns[0], orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.2f')
+            fig = px.bar(s_df, x='成功率', y='招待種類', orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.2f')
             fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=max(300, len(s_df)*40))
             st.plotly_chart(fig, width="stretch")
+
+            # 🧭 軸別分析: 低カーディナリティ軸を選んで成功率を比較する
+            axis_opts = res.get('axis_options', {})
+            low_card_labels = [l for l in ("招待種類", "親の種類", "子種別", "認証方法", "稼働時間帯") if l in axis_opts]
+            if low_card_labels and 'raw_df' in res:
+                st.markdown("### 🧭 軸別分析")
+                axis_label = st.selectbox("分析軸", low_card_labels, key="axis_analysis_axis")
+                ax_df = _axis_summary(res['raw_df'], axis_opts[axis_label])
+                if len(ax_df) <= 1:
+                    only_val = ax_df.iloc[0][axis_opts[axis_label]] if len(ax_df) == 1 else "データなし"
+                    st.caption(f"この軸は現在「{only_val}」の1種類のみです。種類が増えると自動で比較できるようになります。")
+                else:
+                    disp_ax = ax_df.rename(columns={axis_opts[axis_label]: axis_label})
+                    fig_ax = px.bar(disp_ax, x='成功率', y=axis_label, orientation='h', color='成功率', color_continuous_scale='RdYlGn', text_auto='.2f')
+                    fig_ax.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=max(300, len(disp_ax)*40))
+                    # key必須: 分析軸=招待種類のとき上のキャンペーン別グラフと同一パラメータになりIDが衝突するため
+                    st.plotly_chart(fig_ax, width="stretch", key="axis_analysis_chart")
+                    st.dataframe(
+                        disp_ax, width="stretch", hide_index=True,
+                        column_config={"成功率": st.column_config.NumberColumn("成功率", format="%.3f")},
+                        key="axis_analysis_table",
+                    )
 
             if "daily_trend" in res:
                 st.markdown("### 📈 日次パフォーマンス・トレンド (成功数 × 成功率)")
@@ -1001,6 +1175,11 @@ def main():
         st.markdown("## 👑 親機パフォーマンス分析")
         res = st.session_state.get('actual_res')
         if res and 'parent_rank' in res:
+            # 親の種類（parent_type列を持つliteのみ）: parent_id -> 最頻値。列が無いアプリ(original)ではNoneのまま
+            ptype_map = None
+            if 'raw_df' in res and 'parent_type' in res['raw_df'].columns:
+                ptype_map = _parent_type_map(res['raw_df'])
+
             # 連続招待（中日）の分析を表示
             if 'interval_trend' in res:
                 st.markdown("### ⏳ 前回の招待からの経過日数 (中日) と成功率")
@@ -1028,6 +1207,16 @@ def main():
                 fig = px.bar(res['parent_rank'].head(10), x='成功率', y='parent_id', orientation='h', color='成功率', color_continuous_scale='Viridis', text_auto=True)
                 fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=400)
                 st.plotly_chart(fig, width="stretch")
+                if ptype_map is not None:
+                    # 親の種類列を持つアプリ(lite)だけ、TOP10の内訳表を添える
+                    top10_df = res['parent_rank'].head(10)[['parent_id', '試行数', '成功数', '成功率']].copy()
+                    top10_df.insert(1, '親の種類', top10_df['parent_id'].map(lambda p: ptype_map.get(p, "未設定")))
+                    top10_df = top10_df.rename(columns={'parent_id': '親機ID'})
+                    st.dataframe(
+                        top10_df, width="stretch", hide_index=True,
+                        column_config={"成功率": st.column_config.NumberColumn("成功率", format="%.3f")},
+                        key="parent_top10_type_table",
+                    )
             with c2:
                 st.markdown("### 📱 機種別パフォーマンス (全体)")
                 fig = px.bar(res['parent_model_rank'], x='成功率', y='parent_model', orientation='h', color='成功率', color_continuous_scale='Magma', text_auto=True)
@@ -1085,15 +1274,21 @@ def main():
                                 
                         if not is_initialized:
                             total_success = group['is_success'].sum()
-                            alert_parents.append({
+                            entry = {
                                 "親機ID": p_id,
                                 "機種": group.iloc[0]['parent_model'],
+                            }
+                            if ptype_map is not None:
+                                # 親の種類列を持つアプリ(lite)だけ列を足す（originalは従来どおり）
+                                entry["親の種類"] = ptype_map.get(p_id, "未設定")
+                            entry.update({
                                 "連続失敗回数": f"{consecutive_failures}回",
                                 "過去成功数": f"{total_success}回",
                                 "最終利用日": last_used,
                                 "直近履歴(日付)": " -> ".join(recent_dates),
                                 "総試行数": len(group)
                             })
+                            alert_parents.append(entry)
                 
                 if alert_parents:
                     alert_df = pd.DataFrame(alert_parents)
@@ -1144,17 +1339,44 @@ def main():
                 st.markdown("### 🧩 親機ブランド × 子機ブランド 相性マトリクス")
                 st.write("親機ブランドと子機ブランドの組み合わせごとの成功率を表示します（赤：低成功率、緑：高成功率）。")
                 
-                if not raw_df.empty:
-                    # 相性集計
-                    affinity_df = raw_df.groupby(['parent_brand', 'brand']).agg(
+                # 軸の切り替え（既定は従来どおり 親ブランド×子ブランド）
+                heat_axis_opts = res.get('axis_options') or {"親ブランド": "parent_brand", "子ブランド": "brand"}
+                heat_labels = [l for l in ("親ブランド", "子ブランド", "親の種類", "子種別", "招待種類", "認証方法", "稼働時間帯") if l in heat_axis_opts]
+                hx1, hx2 = st.columns(2)
+                with hx1:
+                    y_label = st.selectbox("縦軸", heat_labels,
+                                           index=heat_labels.index("親ブランド") if "親ブランド" in heat_labels else 0,
+                                           key="affinity_axis_y")
+                with hx2:
+                    x_label = st.selectbox("横軸", heat_labels,
+                                           index=heat_labels.index("子ブランド") if "子ブランド" in heat_labels else 0,
+                                           key="affinity_axis_x")
+                y_col, x_col = heat_axis_opts[y_label], heat_axis_opts[x_label]
+
+                if raw_df.empty:
+                    st.info("十分なデータがありません。")
+                elif y_col == x_col:
+                    st.info("縦軸と横軸が同じです。別の軸を選んでください。")
+                else:
+                    # アドバイス文の呼び名（従来のデフォルト選択時と文言を一致させる）
+                    y_word = "親機" if y_col == "parent_brand" else y_label
+                    x_word = "子機" if x_col == "brand" else x_label
+                    # 相性集計（数字のみの入力ノイズ値は両軸から除外）
+                    y_vals = raw_df[y_col].astype(str).str.strip()
+                    x_vals = raw_df[x_col].astype(str).str.strip()
+                    noise_mask = ~y_vals.str.match(r'^\d+$') & ~x_vals.str.match(r'^\d+$')
+                    heat_df = raw_df[noise_mask].copy()
+                    heat_df[y_col] = y_vals[noise_mask]
+                    heat_df[x_col] = x_vals[noise_mask]
+                    affinity_df = heat_df.groupby([y_col, x_col]).agg(
                         試行数=('is_success', 'count'),
                         成功率=('is_success', 'mean')
                     ).reset_index()
                     affinity_df['成功率'] = affinity_df['成功率'] * 100
                     
                     # ピボット化
-                    pivot_rate = affinity_df.pivot(index='parent_brand', columns='brand', values='成功率')
-                    pivot_count = affinity_df.pivot(index='parent_brand', columns='brand', values='試行数').fillna(0).astype(int)
+                    pivot_rate = affinity_df.pivot(index=y_col, columns=x_col, values='成功率')
+                    pivot_count = affinity_df.pivot(index=y_col, columns=x_col, values='試行数').fillna(0).astype(int)
                     
                     y_labels = list(pivot_rate.index)
                     x_labels = list(pivot_rate.columns)
@@ -1218,7 +1440,7 @@ def main():
                             <div class="advice-card" style="border-color: #00ff88;">
                                 <div class="advice-title">🚀 推奨組み合わせ (試行数3回以上)</div>
                                 <div class="advice-text">
-                                    親機 <b>{best_pair['parent_brand']}</b> × 子機 <b>{best_pair['brand']}</b> が現在、成功率 <b>{best_pair['成功率']:.1f}%</b>（試行数: {best_pair['試行数']}回）で<b>トップ</b>です。この組み合わせを優先的に配置してください。
+                                    {y_word} <b>{best_pair[y_col]}</b> × {x_word} <b>{best_pair[x_col]}</b> が現在、成功率 <b>{best_pair['成功率']:.1f}%</b>（試行数: {best_pair['試行数']}回）で<b>トップ</b>です。この組み合わせを優先的に配置してください。
                                 </div>
                             </div>
                         """)
@@ -1227,22 +1449,22 @@ def main():
                                 <div class="advice-card" style="border-color: #ff3333; margin-top: 15px;">
                                     <div class="advice-title">⚠️ 警戒組み合わせ (試行数3回以上)</div>
                                     <div class="advice-text">
-                                        親機 <b>{worst_pair['parent_brand']}</b> × 子機 <b>{worst_pair['brand']}</b> は成功率が <b>{worst_pair['成功率']:.1f}%</b>（試行数: {worst_pair['試行数']}回）と<b>著しく低迷</b>しています。この組み合わせでの運用は避けることを強く推奨します。
+                                        {y_word} <b>{worst_pair[y_col]}</b> × {x_word} <b>{worst_pair[x_col]}</b> は成功率が <b>{worst_pair['成功率']:.1f}%</b>（試行数: {worst_pair['試行数']}回）と<b>著しく低迷</b>しています。この組み合わせでの運用は避けることを強く推奨します。
                                     </div>
                                 </div>
                             """)
                         st.markdown(advice_html, unsafe_allow_html=True)
                     else:
                         st.info("相性推奨アドバイスを表示するには、試行数3回以上の組み合わせデータが必要です。")
-                else:
-                    st.info("十分なデータがありません。")
             
             # Sub-tab 2: 子端末 疲弊度・シャドウバン警告
             with sub_tabs[1]:
                 st.markdown("### 📱 子端末 疲弊度・シャドウバン警告")
                 st.write("子端末ごとの連続失敗回数と全体成功率から、シャドウバンの危険度を算出します。")
                 
-                f_idx = 5 # 状態カラムのインデックス
+                # 状態カラムの位置は fetch_data_logic がヘッダ名から解決した値を使う
+                # （5 は旧実装の決め打ち値。古いセッション残骸へのフォールバック）
+                f_idx = res.get('status_col', 5)
                 if not raw_df.empty and 'child_id' in raw_df.columns:
                     child_groups = raw_df.groupby('child_id')
                     child_data = []
