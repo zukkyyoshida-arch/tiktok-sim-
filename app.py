@@ -134,9 +134,11 @@ def _fetch_invite_id_map():
 # ヘッダ行が検出できない場合にのみ使う従来の決め打ち値（挙動は旧実装と完全一致させる）。
 FALLBACK_ANALYTICS_COLUMNS = {
     "original": {"f": 3, "child": 4, "auth": 6, "j": 7, "date1": 8, "date2": 9, "n": 10, "q": 11,
-                 "parent_type": None, "child_type": None, "work_hours": None},
+                 "parent_type": None, "child_type": None, "work_hours": None, "verify2": None,
+                 "weekday_raw": None, "hour_label": None},
     "lite": {"f": 3, "child": 4, "j": 5, "auth": None, "date1": 7, "date2": 13, "n": 9, "q": 10,
-             "parent_type": None, "child_type": None, "work_hours": None},
+             "parent_type": None, "child_type": None, "work_hours": None, "verify2": None,
+             "weekday_raw": None, "hour_label": None},
 }
 
 
@@ -174,6 +176,12 @@ def _resolve_analytics_columns(header_row, target_app):
         "parent_type": find("親の種類"),   # liteにのみ存在
         "child_type": find("子種別"),      # originalにのみ存在
         "work_hours": find("稼働時間"),
+        "verify2": find("検証2"),          # liteにのみ存在（数珠つなぎ運用の判定列）
+        "weekday_raw": find("曜日"),       # 実測値: 月/火/水/木/金/土/日 の日本語文字列
+        # 実測値: 「Tik開始」列（date1）はISO日時だが時刻部分が常に00:00:00固定で
+        # 時刻情報を持たない。実際の時刻(hour)は先頭寄りの「時刻」列（"14時"のような
+        # 文字列）にあるため、「Tik開始」より前の最初の「時刻」を hour_label として掴む
+        "hour_label": find("時刻"),
     }
     # 「時刻」は同名2列があり得るため、「Tik開始」より後ろの最初の「時刻」を
     # 日付フォールバック列（date2）とする
@@ -209,6 +217,55 @@ def _axis_summary(raw_df, col):
     else:
         axis_df = axis_df.sort_values('成功率', ascending=False)
     return axis_df.reset_index(drop=True)
+
+
+def _wilson_ci(successes, n, z=1.96):
+    r"""Wilson score interval（95%信頼区間、既定z=1.96）を返す。scipy非依存の自前実装。
+
+    n=0のときは (0.0, 0.0) を返す（呼び出し側で「データなし」表示に倒す想定）。
+    戻り値は成功率と同じ0〜1スケール（呼び出し側で×100する）。
+    """
+    if n <= 0:
+        return 0.0, 0.0
+    p = successes / n
+    denom = 1 + (z ** 2) / n
+    center = p + (z ** 2) / (2 * n)
+    margin = z * np.sqrt((p * (1 - p) / n) + (z ** 2) / (4 * n ** 2))
+    lo = (center - margin) / denom
+    hi = (center + margin) / denom
+    return max(0.0, lo), min(1.0, hi)
+
+
+def _rate_summary_with_ci(df, group_col, success_col='is_success', failure_col='is_failure'):
+    r"""成功+失敗のみを分母とした 試行数/成功数/成功率/Wilson95%CI のカテゴリ集計を返す。
+
+    数珠分析タブ専用。df は事前に対象範囲（例: 検証2=='数珠'）へ絞り込み済みのものを渡す。
+    進行不可・空（success_col/failure_colどちらもFalse）の行は分母から除外する。
+    """
+    cols = [group_col, '試行数', '成功数', '成功率', 'CI下限', 'CI上限']
+    if df.empty or group_col not in df.columns:
+        return pd.DataFrame(columns=cols)
+    sub = df[df[success_col] | df[failure_col]].copy()
+    if sub.empty:
+        return pd.DataFrame(columns=cols)
+    vals = sub[group_col].astype(str).str.strip()
+    sub[group_col] = vals
+    g = sub.groupby(group_col).agg(試行数=(success_col, 'count'), 成功数=(success_col, 'sum')).reset_index()
+    g['成功率'] = (g['成功数'] / g['試行数'] * 100).round(1)
+    ci = g.apply(lambda r: _wilson_ci(r['成功数'], r['試行数']), axis=1)
+    g['CI下限'] = ci.map(lambda t: round(t[0] * 100, 1))
+    g['CI上限'] = ci.map(lambda t: round(t[1] * 100, 1))
+    return g[cols]
+
+
+def _overall_rate_with_ci(df, success_col='is_success', failure_col='is_failure'):
+    r"""df全体（成功+失敗のみ）の 試行数/成功数/成功率/Wilson95%CI をタプルで返す。"""
+    sub = df[df[success_col] | df[failure_col]]
+    n = len(sub)
+    s = int(sub[success_col].sum())
+    rate = (s / n * 100) if n > 0 else 0.0
+    lo, hi = _wilson_ci(s, n)
+    return n, s, round(rate, 1), round(lo * 100, 1), round(hi * 100, 1)
 
 
 def _parent_type_map(raw_df):
@@ -376,7 +433,8 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         # 追加の名前付き列（その列を持つシートにだけ作る）
         for src_key, col_name in (("parent_type", "parent_type"),
                                   ("child_type", "child_type"),
-                                  ("work_hours", "work_hours_band")):
+                                  ("work_hours", "work_hours_band"),
+                                  ("verify2", "verify2")):
             src_idx = cols[src_key]
             if src_idx is not None:
                 vals = rdf[src_idx].fillna("").astype(str).str.strip()
@@ -519,6 +577,150 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
         }
         return None
     except Exception as e: return str(e)
+
+# ==========================================
+# 3.4 数珠分析タブ用データ取得（liteのみ・全期間）
+# ==========================================
+def fetch_juzu_raw_df(force=False):
+    r"""数珠つなぎ運用（検証2列）の分析専用に、liteの全期間データを取得・整形する。
+
+    「🔗 数珠分析」タブは対象アプリ選択（サイドバー）に関わらず常にliteデータを見る
+    （数珠つなぎ運用はliteにのみ存在するため）。fetch_data_logicとは別に
+    st.session_state.actual_res を汚さない独立関数として持つ。
+    期間フィルタは行わない（全期間）。未来日付の除外のみ行う。
+    戻り値: (raw_df または None, エラー文字列またはNone)
+    """
+    try:
+        f_key = str(datetime.now().timestamp()) if force else None
+        payload = fetch_api_data_raw("lite", force_key=f_key)
+        if payload is None:
+            return None, "APIに接続できませんでした（初回はサーバー起動に時間がかかります）。もう一度同期してください"
+        if "analytics" not in payload:
+            return None, "Invalid API Response"
+
+        raw_data = payload['analytics']
+        if not raw_data:
+            return None, "No Data"
+
+        cols = _resolve_analytics_columns(raw_data[0], "lite")
+        if cols is not None:
+            data_rows = raw_data[1:]
+            if not data_rows:
+                return None, "No Data"
+            df = pd.DataFrame(data_rows)
+            df = df.reindex(columns=range(len(raw_data[0])))
+        else:
+            cols = dict(FALLBACK_ANALYTICS_COLUMNS["lite"])
+            df = pd.DataFrame(raw_data)
+
+        if cols.get("verify2") is None:
+            return None, "検証2列が見つかりません（liteシートのヘッダ構成が想定と異なります）"
+
+        f_idx = cols["f"]
+        j_idx = cols["j"]
+        auth_idx = cols["auth"]
+        date1_idx = cols["date1"]
+        date2_idx = cols["date2"]
+        q_idx = cols["q"]
+        verify2_idx = cols["verify2"]
+        work_hours_idx = cols["work_hours"]
+
+        def parse_date(val):
+            if not val or val == "" or val == "#REF!": return pd.NaT
+            if isinstance(val, str) and "T" in val:
+                try:
+                    dt = pd.to_datetime(val)
+                    if dt.tzinfo is not None:
+                        return dt.tz_convert('Asia/Tokyo').tz_localize(None)
+                    return dt
+                except: pass
+            if isinstance(val, str):
+                clean = re.sub(r'\(.*?\)', '', val).strip()
+                try:
+                    if "月" in clean and "/" not in clean: return pd.NaT
+                    dt = datetime.strptime(f"{datetime.now().year}/{clean}", "%Y/%m/%d")
+                    if dt > datetime.now() + timedelta(days=1): dt = dt.replace(year=dt.year-1)
+                    return dt
+                except: pass
+            try:
+                dt = pd.to_datetime(val)
+                if getattr(dt, 'tzinfo', None) is not None:
+                    return dt.tz_convert('Asia/Tokyo').tz_localize(None)
+                return dt
+            except: return pd.NaT
+
+        def get_valid_date(row):
+            if len(row) > date1_idx:
+                d1 = parse_date(row[date1_idx])
+                if pd.notnull(d1) and d1.year > 1900: return d1
+            if date2_idx is not None and len(row) > date2_idx:
+                d2 = parse_date(row[date2_idx])
+                if pd.notnull(d2) and d2.year > 1900: return d2
+            return pd.NaT
+
+        df['date'] = df.apply(get_valid_date, axis=1)
+        status_series = df[f_idx].astype(str).str.strip()
+        df['status'] = status_series
+        df['is_success'] = status_series.str.contains("成功")
+        df['is_failure'] = status_series.str.contains("失敗")
+        df['model'] = df[j_idx].fillna("不明").astype(str).str.strip() if j_idx in df.columns else "不明"
+
+        if auth_idx is not None and auth_idx in df.columns:
+            auth_series = df[auth_idx].fillna("不明").astype(str).str.strip()
+            auth_series = auth_series.str.replace(r'認証$', '', regex=True)
+            df['auth_method'] = auth_series.where(auth_series != "", "未設定")
+        else:
+            df['auth_method'] = "未設定"
+
+        verify2_series = df[verify2_idx].fillna("").astype(str).str.strip()
+        df['verify2'] = verify2_series.where(verify2_series != "", "未設定")
+
+        if q_idx is not None and q_idx in df.columns:
+            df = df[~df[q_idx].astype(str).str.match(r'^\d{4}$')].copy()
+            invite_vals = df[q_idx].fillna("").astype(str).str.strip()
+            df['invite_type'] = invite_vals.where(invite_vals != "", "未設定")
+        else:
+            df['invite_type'] = "未設定"
+
+        if work_hours_idx is not None and work_hours_idx in df.columns:
+            wh_vals = df[work_hours_idx].fillna("").astype(str).str.strip()
+            df['work_hours_band'] = wh_vals.where(wh_vals != "", "未設定")
+        else:
+            df['work_hours_band'] = "未設定"
+
+        # 実測値: 「Tik開始」(date1)はISO日時だが時刻部分が常に00:00:00固定で
+        # 時刻(hour)情報を持たない。実際の曜日・時刻は別の生列から取る:
+        #   weekday_raw列 = 月/火/水/木/金/土/日 の日本語文字列（そのまま使う）
+        #   hour_label列 = "14時" のような文字列（先頭の数字を時として取り出す）
+        weekday_idx = cols.get("weekday_raw")
+        if weekday_idx is not None and weekday_idx in df.columns:
+            df['weekday_jp'] = df[weekday_idx].fillna("").astype(str).str.strip()
+        else:
+            df['weekday_jp'] = df['date'].dt.dayofweek.map(
+                lambda i: ['月', '火', '水', '木', '金', '土', '日'][i] if pd.notnull(i) else None
+            )
+
+        hour_idx = cols.get("hour_label")
+        if hour_idx is not None and hour_idx in df.columns:
+            hour_raw = df[hour_idx].fillna("").astype(str).str.strip()
+            df['hour_of_day'] = hour_raw.str.extract(r'(\d+)').iloc[:, 0]
+            df['hour_of_day'] = pd.to_numeric(df['hour_of_day'], errors='coerce')
+        else:
+            df['hour_of_day'] = df['date'].dt.hour
+
+        # 未来日付（スケジュール行など）を除外（JST基準）
+        jst_now = datetime.utcnow() + timedelta(hours=9)
+        df = df[df['date'] <= jst_now].copy()
+        # 状態が「成功/失敗」以外（進行不可・空など）は成功率の分母から外れるが、
+        # 件数系の表示のために行自体は残す。ここでは日付未確定行のみ除外する。
+        df = df[df['date'].notna()].copy()
+
+        if df.empty:
+            return None, "No Data"
+
+        return df, None
+    except Exception as e:
+        return None, str(e)
 
 # ==========================================
 # 3.5 中古相場タブ（イオシス連携）
@@ -1056,7 +1258,7 @@ def main():
     per_invite_revenue = (success_p * success_rev) + ((1 - success_p) * failure_rev)
 
     # --- タブ表示 ---
-    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "💴 中古相場", "⚙️ 設定"])
+    tabs = st.tabs(["🏠 ダッシュボード", "📊 実績分析", "🔗 数珠分析", "👑 親機分析", "🧬 相性・疲弊度分析", "🔄 稼働シミュレーション", "💴 中古相場", "⚙️ 設定"])
 
     # 1. ダッシュボード
     with tabs[0]:
@@ -1203,8 +1405,297 @@ def main():
                     m_df['成功率'] = m_df['成功率'].map('{:.2f}%'.format)
                     st.dataframe(m_df, width="stretch", hide_index=True)
 
-    # 3. 親機分析 (アドバイス復元)
+    # 3. 数珠分析 (寝かせずに連続招待する「数珠つなぎ」運用の専用分析。lite固定・全期間)
     with tabs[2]:
+        st.markdown("## 🔗 数珠分析")
+        st.caption("「検証2」列が数珠のもの（寝かせずに連続招待した試行）を分析します。lite（TikTok Lite）データのみが対象です。")
+
+        jc1, jc2 = st.columns([1, 4])
+        with jc1:
+            juzu_sync = st.button("🔄 数珠データ同期", key="juzu_sync_btn")
+        if juzu_sync or 'juzu_raw_df' not in st.session_state:
+            with st.spinner("liteの全期間データを取得中..."):
+                _jdf, _jerr = fetch_juzu_raw_df(force=juzu_sync)
+                st.session_state.juzu_raw_df = _jdf
+                st.session_state.juzu_err = _jerr
+
+        jdf_all = st.session_state.get('juzu_raw_df')
+        jerr = st.session_state.get('juzu_err')
+
+        if jdf_all is None or jdf_all.empty:
+            st.warning(f"数珠分析用のliteデータを取得できませんでした: {jerr or 'データなし'}。「🔄 数珠データ同期」を押して再試行してください。")
+        elif 'verify2' not in jdf_all.columns:
+            st.warning("liteデータに「検証2」列が見つかりません。シート側の列構成をご確認ください。")
+        else:
+            juzu_df_base = jdf_all[jdf_all['verify2'] == '数珠'].copy()
+            if juzu_df_base.empty:
+                st.info("現在のliteデータに「数珠」の試行がありません。")
+            else:
+                # --- 共通フィルタ（このタブの全集計に効かせる） ---
+                st.markdown("#### 🎛️ フィルタ")
+                fc1, fc2, fc3 = st.columns(3)
+                with fc1:
+                    invite_opts = sorted(juzu_df_base['invite_type'].astype(str).unique().tolist())
+                    sel_invite = st.multiselect("招待種類", invite_opts, default=invite_opts, key="juzu_f_invite")
+                with fc2:
+                    auth_opts = [a for a in sorted(juzu_df_base['auth_method'].astype(str).unique().tolist())]
+                    sel_auth = st.multiselect("招待方法", auth_opts, default=auth_opts, key="juzu_f_auth")
+                with fc3:
+                    valid_dates = juzu_df_base['date'].dropna()
+                    if not valid_dates.empty:
+                        min_d, max_d = valid_dates.min().date(), valid_dates.max().date()
+                        date_range = st.date_input("期間 (Tik開始)", value=(min_d, max_d), min_value=min_d, max_value=max_d, key="juzu_f_period")
+                    else:
+                        date_range = None
+
+                jdf = juzu_df_base.copy()
+                if sel_invite:
+                    jdf = jdf[jdf['invite_type'].isin(sel_invite)]
+                if sel_auth:
+                    jdf = jdf[jdf['auth_method'].isin(sel_auth)]
+                if date_range and isinstance(date_range, (tuple, list)) and len(date_range) == 2:
+                    d0, d1 = date_range
+                    jdf = jdf[(jdf['date'].dt.date >= d0) & (jdf['date'].dt.date <= d1)]
+
+                if jdf.empty:
+                    st.info("フィルタ条件に合致する数珠データがありません。フィルタを見直してください。")
+                else:
+                    # ===== 1. サマリーKPI =====
+                    st.markdown("### 📌 サマリーKPI")
+                    n_j, s_j, rate_j, lo_j, hi_j = _overall_rate_with_ci(jdf)
+
+                    # 非数珠（初回/中3日/中4日/中5日/中6以上）との成功率差（フィルタ非依存・全期間ベース）
+                    non_juzu_labels = ["初回", "中3日", "中4日", "中5日", "中6以上"]
+                    non_juzu_df = jdf_all[jdf_all['verify2'].isin(non_juzu_labels)]
+                    n_nj, s_nj, rate_nj, lo_nj, hi_nj = _overall_rate_with_ci(non_juzu_df)
+
+                    # 直近30日成功率（フィルタ後のjdf基準）
+                    jst_now = datetime.utcnow() + timedelta(hours=9)
+                    recent_30 = jdf[jdf['date'] >= (jst_now - timedelta(days=30))]
+                    n_r30, s_r30, rate_r30, lo_r30, hi_r30 = _overall_rate_with_ci(recent_30)
+
+                    k1, k2, k3, k4 = st.columns(4)
+                    with k1: custom_metric("数珠 試行数", f"{n_j:,}", f"成功 {s_j:,}件")
+                    with k2: custom_metric("数珠 成功率", f"{rate_j:.1f}%", f"95%CI [{lo_j:.1f}–{hi_j:.1f}]")
+                    with k3:
+                        diff = rate_j - rate_nj if n_nj > 0 else None
+                        diff_str = f"{diff:+.1f}pt" if diff is not None else "データなし"
+                        custom_metric("非数珠との成功率差", diff_str, f"非数珠 {rate_nj:.1f}%（n={n_nj:,}）" if n_nj > 0 else "非数珠データなし")
+                    with k4:
+                        r30_str = f"{rate_r30:.1f}%" if n_r30 > 0 else "データなし"
+                        custom_metric("直近30日 成功率", r30_str, f"n={n_r30:,}" if n_r30 > 0 else "")
+
+                    st.markdown("---")
+
+                    # ===== 2. 招待方法別分析（LINE vs Google認証） =====
+                    st.markdown("### 📞 招待方法別分析（LINE vs Google認証）")
+                    auth_ci_df = _rate_summary_with_ci(jdf, 'auth_method')
+                    if auth_ci_df.empty:
+                        st.info("招待方法の集計対象データがありません。")
+                    else:
+                        disp_auth = auth_ci_df.rename(columns={'auth_method': '招待方法'}).sort_values('成功率', ascending=False)
+                        st.dataframe(
+                            disp_auth, width="stretch", hide_index=True,
+                            column_config={
+                                "成功率": st.column_config.NumberColumn("成功率(%)", format="%.1f"),
+                                "CI下限": st.column_config.NumberColumn("CI下限(%)", format="%.1f"),
+                                "CI上限": st.column_config.NumberColumn("CI上限(%)", format="%.1f"),
+                            },
+                            key="juzu_auth_table",
+                        )
+                        fig_auth_ci = go.Figure()
+                        fig_auth_ci.add_trace(go.Bar(
+                            x=disp_auth['招待方法'], y=disp_auth['成功率'], name="成功率",
+                            marker_color='rgba(0,136,255,0.7)',
+                            error_y=dict(
+                                type='data', symmetric=False,
+                                array=disp_auth['CI上限'] - disp_auth['成功率'],
+                                arrayminus=disp_auth['成功率'] - disp_auth['CI下限'],
+                            ),
+                            text=disp_auth.apply(lambda r: f"{r['成功率']:.1f}% (n={int(r['試行数'])})", axis=1),
+                            textposition='outside',
+                        ))
+                        fig_auth_ci.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=350, yaxis=dict(range=[0, 100], title="成功率(%)"))
+                        st.plotly_chart(fig_auth_ci, width="stretch", key="juzu_auth_chart")
+
+                        # 機種×招待方法のクロス成功率表
+                        st.markdown("#### 📱 機種 × 招待方法 クロス成功率")
+                        cross_base = jdf[jdf['is_success'] | jdf['is_failure']].copy()
+                        if cross_base.empty:
+                            st.info("クロス集計の対象データがありません。")
+                        else:
+                            cross = cross_base.groupby(['model', 'auth_method']).agg(
+                                試行数=('is_success', 'count'), 成功数=('is_success', 'sum')
+                            ).reset_index()
+                            cross['成功率'] = (cross['成功数'] / cross['試行数'] * 100).round(1)
+                            pivot_rate = cross.pivot(index='model', columns='auth_method', values='成功率')
+                            pivot_n = cross.pivot(index='model', columns='auth_method', values='試行数').fillna(0).astype(int)
+                            model_totals = cross.groupby('model')['試行数'].sum().sort_values(ascending=False)
+                            ordered_models = model_totals.index.tolist()
+                            disp_cross = pd.DataFrame(index=ordered_models, columns=pivot_rate.columns)
+                            for m in ordered_models:
+                                for a in pivot_rate.columns:
+                                    rate = pivot_rate.loc[m, a] if (m in pivot_rate.index and a in pivot_rate.columns) else np.nan
+                                    cnt = pivot_n.loc[m, a] if (m in pivot_n.index and a in pivot_n.columns) else 0
+                                    disp_cross.at[m, a] = f"{rate:.1f}% ({int(cnt)}件)" if pd.notnull(rate) else "-"
+                            st.dataframe(disp_cross, width="stretch")
+
+                        # 時刻×招待方法の成功率比較チャート
+                        # 「Tik開始」は時刻部分が常に00:00固定のため使わず、実測の時刻専用列
+                        # (hour_of_day、シート上の「時刻」列から抽出)を使う
+                        st.markdown("#### 🕐 時刻 × 招待方法 成功率")
+                        hour_base = jdf[(jdf['is_success'] | jdf['is_failure']) & jdf['hour_of_day'].notna()].copy()
+                        if hour_base.empty:
+                            st.info("時刻別集計の対象データがありません。")
+                        else:
+                            hour_base['hour'] = hour_base['hour_of_day'].astype(int)
+                            hour_auth = hour_base.groupby(['hour', 'auth_method']).agg(
+                                試行数=('is_success', 'count'), 成功数=('is_success', 'sum')
+                            ).reset_index()
+                            hour_auth['成功率'] = (hour_auth['成功数'] / hour_auth['試行数'] * 100).round(1)
+                            fig_hour = go.Figure()
+                            for a in sorted(hour_auth['auth_method'].unique()):
+                                sub = hour_auth[hour_auth['auth_method'] == a].sort_values('hour')
+                                fig_hour.add_trace(go.Scatter(
+                                    x=sub['hour'], y=sub['成功率'], mode='lines+markers', name=a,
+                                ))
+                            fig_hour.update_layout(
+                                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0",
+                                height=350, xaxis=dict(title="時刻(時)", dtick=1), yaxis=dict(title="成功率(%)", range=[0, 100]),
+                            )
+                            st.plotly_chart(fig_hour, width="stretch", key="juzu_hour_auth_chart")
+
+                    st.markdown("---")
+
+                    # ===== 3. 機種別成功率（n閾値可変） =====
+                    st.markdown("### 📱 機種別成功率")
+                    min_n = st.slider("最小試行数 (n以上のみ表示)", min_value=5, max_value=30, value=10, step=1, key="juzu_model_min_n")
+                    model_ci_df = _rate_summary_with_ci(jdf, 'model')
+                    model_ci_df = model_ci_df[model_ci_df['試行数'] >= min_n].sort_values('成功率', ascending=False)
+                    if model_ci_df.empty:
+                        st.info(f"試行数{min_n}件以上の機種データがありません。閾値を下げてください。")
+                    else:
+                        disp_model = model_ci_df.rename(columns={'model': '機種'})
+                        fig_model = go.Figure()
+                        fig_model.add_trace(go.Bar(
+                            x=disp_model['成功率'], y=disp_model['機種'], orientation='h',
+                            marker=dict(color=disp_model['成功率'], colorscale='RdYlGn', cmin=0, cmax=100),
+                            error_x=dict(
+                                type='data', symmetric=False,
+                                array=disp_model['CI上限'] - disp_model['成功率'],
+                                arrayminus=disp_model['成功率'] - disp_model['CI下限'],
+                            ),
+                            text=disp_model.apply(lambda r: f"{r['成功率']:.1f}% (n={int(r['試行数'])})", axis=1),
+                            textposition='outside',
+                        ))
+                        fig_model.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0",
+                            height=max(300, len(disp_model) * 35), xaxis=dict(title="成功率(%)", range=[0, 105]),
+                        )
+                        st.plotly_chart(fig_model, width="stretch", key="juzu_model_chart")
+
+                    st.markdown("---")
+
+                    # ===== 4. 曜日×時刻ヒートマップ =====
+                    # 「Tik開始」は時刻部分が常に00:00固定のため使わず、実測の曜日・時刻専用列
+                    # (weekday_jp / hour_of_day、シート上の「曜日」「時刻」列そのもの)を使う
+                    st.markdown("### 🗓️ 曜日 × 時刻 成功率ヒートマップ")
+                    weekday_labels = ['月', '火', '水', '木', '金', '土', '日']
+                    heat_base = jdf[(jdf['is_success'] | jdf['is_failure']) & jdf['hour_of_day'].notna() & jdf['weekday_jp'].isin(weekday_labels)].copy()
+                    if heat_base.empty:
+                        st.info("ヒートマップの対象データがありません。")
+                    else:
+                        heat_base['weekday'] = heat_base['weekday_jp']
+                        heat_base['hour'] = heat_base['hour_of_day'].astype(int)
+                        heat_agg = heat_base.groupby(['weekday', 'hour']).agg(
+                            試行数=('is_success', 'count'), 成功数=('is_success', 'sum')
+                        ).reset_index()
+                        heat_agg['成功率'] = heat_agg['成功数'] / heat_agg['試行数'] * 100
+
+                        hours = list(range(24))
+                        z = np.full((len(weekday_labels), len(hours)), np.nan)
+                        n_mat = np.zeros((len(weekday_labels), len(hours)), dtype=int)
+                        text_mat = [["" for _ in hours] for _ in weekday_labels]
+                        for _, r in heat_agg.iterrows():
+                            yi = weekday_labels.index(r['weekday'])
+                            xi = hours.index(int(r['hour']))
+                            n_mat[yi, xi] = int(r['試行数'])
+                            if r['試行数'] < 5:
+                                z[yi, xi] = np.nan  # n<5は信頼できないためグレー（データ無扱い）表示
+                                text_mat[yi][xi] = f"n={int(r['試行数'])}(参考値)"
+                            else:
+                                z[yi, xi] = r['成功率']
+                                text_mat[yi][xi] = f"{r['成功率']:.1f}%<br>(n={int(r['試行数'])})"
+
+                        fig_heat_wt = go.Figure(data=go.Heatmap(
+                            z=z, x=hours, y=weekday_labels, text=text_mat, hoverinfo="text",
+                            colorscale='RdYlGn', zmin=0, zmax=100, xgap=2, ygap=2,
+                            colorbar=dict(title="成功率(%)"),
+                        ))
+                        fig_heat_wt.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0",
+                            height=380, xaxis=dict(title="時刻(時)", dtick=1), yaxis=dict(title="曜日"),
+                        )
+                        st.plotly_chart(fig_heat_wt, width="stretch", key="juzu_weekday_hour_heatmap")
+                        st.caption("グレー（データ無表示）のセルは試行数5件未満のため参考値です。数字だけ確認してください。")
+
+                    st.markdown("---")
+
+                    # ===== 5. 稼働時間帯別成功率 =====
+                    st.markdown("### ⏱️ 稼働時間帯別成功率")
+                    wh_ci_df = _rate_summary_with_ci(jdf, 'work_hours_band')
+                    if wh_ci_df.empty:
+                        st.info("稼働時間帯の集計対象データがありません。")
+                    else:
+                        def _band_start(v):
+                            m = re.match(r'^(\d+)', str(v))
+                            return int(m.group(1)) if m else float('inf')
+                        wh_ci_df = wh_ci_df.sort_values('work_hours_band', key=lambda s: s.map(_band_start))
+                        disp_wh = wh_ci_df.rename(columns={'work_hours_band': '稼働時間帯'})
+                        fig_wh = px.bar(disp_wh, x='稼働時間帯', y='成功率', text=disp_wh.apply(lambda r: f"{r['成功率']:.1f}% (n={int(r['試行数'])})", axis=1))
+                        fig_wh.update_traces(marker_color='rgba(0,255,136,0.6)', textposition='outside')
+                        fig_wh.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=350, yaxis=dict(range=[0, 105], title="成功率(%)"))
+                        st.plotly_chart(fig_wh, width="stretch", key="juzu_work_hours_chart")
+
+                    st.markdown("---")
+
+                    # ===== 6. 検証2区分の比較（フィルタ前の全lite行が対象） =====
+                    st.markdown("### 🔁 検証2区分の比較（数珠 vs 寝かせ運用）")
+                    st.caption("このセクションのみ、上のフィルタの影響を受けず全期間・全条件のlite全データを対象にします。")
+                    verify2_order = ["数珠", "初回", "中3日", "中4日", "中5日", "中6以上"]
+                    v2_ci_df = _rate_summary_with_ci(jdf_all[jdf_all['verify2'].isin(verify2_order)], 'verify2')
+                    if v2_ci_df.empty:
+                        st.info("検証2区分の比較データがありません。")
+                    else:
+                        v2_ci_df['_order'] = v2_ci_df['verify2'].map(lambda v: verify2_order.index(v) if v in verify2_order else 99)
+                        v2_ci_df = v2_ci_df.sort_values('_order').drop(columns=['_order'])
+                        disp_v2 = v2_ci_df.rename(columns={'verify2': '検証2区分'})
+                        fig_v2 = go.Figure()
+                        fig_v2.add_trace(go.Bar(
+                            x=disp_v2['検証2区分'], y=disp_v2['成功率'],
+                            marker_color=['#00ff88' if v == '数珠' else 'rgba(0,136,255,0.6)' for v in disp_v2['検証2区分']],
+                            error_y=dict(
+                                type='data', symmetric=False,
+                                array=disp_v2['CI上限'] - disp_v2['成功率'],
+                                arrayminus=disp_v2['成功率'] - disp_v2['CI下限'],
+                            ),
+                            text=disp_v2.apply(lambda r: f"{r['成功率']:.1f}% (n={int(r['試行数'])})", axis=1),
+                            textposition='outside',
+                        ))
+                        fig_v2.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color="#e0e0e0", height=380, yaxis=dict(range=[0, 100], title="成功率(%)"))
+                        st.plotly_chart(fig_v2, width="stretch", key="juzu_verify2_compare_chart")
+                        st.dataframe(
+                            disp_v2, width="stretch", hide_index=True,
+                            column_config={
+                                "成功率": st.column_config.NumberColumn("成功率(%)", format="%.1f"),
+                                "CI下限": st.column_config.NumberColumn("CI下限(%)", format="%.1f"),
+                                "CI上限": st.column_config.NumberColumn("CI上限(%)", format="%.1f"),
+                            },
+                            key="juzu_verify2_compare_table",
+                        )
+
+    # 4. 親機分析 (アドバイス復元)
+    with tabs[3]:
         res = st.session_state.get('actual_res')
         if res:
             st.caption(f"📊 分析対象期間: {res['period']}")
@@ -1354,8 +1845,8 @@ def main():
             p_adv = f"- <b>最強の親機</b>: 現在 <b>{best_pm['parent_model']}</b> が成功率 <b>{best_pm['成功率']:.1f}%</b> でトップ。<br>- <b>要警戒</b>: <b>{worst_pm['parent_model']}</b> は成功率 <b>{worst_pm['成功率']:.1f}%</b> に留まる傾向。"
             st.markdown(f"<div class='advice-card' style='border-color: #ffd700;'><div class='advice-title'>💡 親機戦略のアドバイス</div><div class='advice-text'>{p_adv}</div></div>", unsafe_allow_html=True)
 
-    # 5. 相性・疲弊度分析 (新タブ)
-    with tabs[3]:
+    # 6. 相性・疲弊度分析 (新タブ)
+    with tabs[4]:
         import textwrap
         res = st.session_state.get('actual_res')
         if res:
@@ -1624,8 +2115,8 @@ def main():
                 else:
                     st.info("十分なデータがありません。")
 
-    # 6. シミュレーション (内訳復元)
-    with tabs[4]:
+    # 7. シミュレーション (内訳復元)
+    with tabs[5]:
         st.markdown("## 🔄 稼働シミュレーション")
         st.markdown(f"<div style='background:#111; padding:20px; border-radius:10px; border-left:5px solid #0088ff;'>平均回転サイクル: <b>{avg_cycle:.2f} 日</b></div>", unsafe_allow_html=True)
         c1, c2, c3 = st.columns(3)
@@ -1638,12 +2129,12 @@ def main():
         with sc1: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>✅ 成功時</b><br>確率: {success_p*100:.1f}%<br>拘束: {prep_d+check_d:.1f}日</div>", unsafe_allow_html=True)
         with sc2: st.markdown(f"<div style='background:#0a0a0a; padding:20px; border-radius:10px;'><b>❌ 失敗時</b><br>確率: {(1-success_p)*100:.1f}%<br>拘束: {(prep_d+check_d) if keep_f > 0 else (prep_d+1):.1f}日</div>", unsafe_allow_html=True)
 
-    # 7. 中古相場
-    with tabs[5]:
+    # 8. 中古相場
+    with tabs[6]:
         render_used_market_tab()
 
-    # 8. 設定 (SelectboxColumn復元)
-    with tabs[6]:
+    # 9. 設定 (SelectboxColumn復元)
+    with tabs[7]:
         st.markdown("## ⚙️ 設定 (運用比率のみ編集可能)")
         col_cfg = {"運用比率(%)": st.column_config.SelectboxColumn("運用比率(%)", options=[float(i) for i in range(0, 110, 10)], required=True)}
         st.session_state.invite_types_df = st.data_editor(st.session_state.invite_types_df, width="stretch", disabled=["キャンペーン名", "即時報酬", "完走報酬"], column_config=col_cfg, key="ed_inv")
