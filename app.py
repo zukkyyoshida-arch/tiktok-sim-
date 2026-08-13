@@ -768,22 +768,6 @@ def render_used_market_tab():
         )
         st.session_state.iosys_qty_map = dict(zip(edited_df["機種名"], edited_df["保有台数"]))
 
-        # 「今買い揃えるといくら」と「今手放すといくら」を並べて見せる
-        total_value = int((edited_df["中央値"].fillna(0) * edited_df["保有台数"].fillna(0)).sum())
-        total_kaitori_value = int((edited_df["中古買取上限"].fillna(0) * edited_df["保有台数"].fillna(0)).sum())
-        kaitori_known = edited_df["中古買取上限"].notna().sum()
-        v1, v2 = st.columns(2)
-        with v1:
-            custom_metric(
-                "買い揃える場合（販売中央値×台数）", f"¥{total_value:,}",
-                sub="イオシス販売価格の中央値ベース",
-            )
-        with v2:
-            custom_metric(
-                "売却する場合（買取上限×台数）", f"¥{total_kaitori_value:,}",
-                sub=f"イオシス買取上限ベース・買取価格が判明した {kaitori_known}/{len(edited_df)} 機種のみ合計",
-            )
-
         with st.expander("📊 詳細データ（ランク別最安・買取内訳）", expanded=False):
             st.dataframe(
                 summary_df,
