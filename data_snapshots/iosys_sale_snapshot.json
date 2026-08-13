@@ -1,9 +1,12 @@
 {
- "fetched_at": "2026-08-13T17:42:06+09:00",
+ "fetched_at": "2026-08-13T18:02:59+09:00",
  "source": "https://iosys.co.jp/items",
  "note": "中古相場タブの既定表示元。ライブ取得は「🔄 相場を再取得」ボタンを押したときのみ行う。更新は tools/update_iosys_snapshot.py。",
  "model_count": 112,
- "carried_over_models": [],
+ "carried_over_models": [
+  "Google Pixel 6a",
+  "Pixel 6a"
+ ],
  "zero_hit_models": [
   "Xperia 10 IV SO-52C",
   "AQUOS sense7",
@@ -194,12 +197,6 @@
      "price": 12800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/aquos/rakuten/aquos_wish3_sh-m25/291362"
-    },
-    {
-     "name": "【ネットワーク利用制限▲】AQUOS wish4 A403SH ブラック 法人モデル【SoftBank版SIMフリー】",
-     "price": 19800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/softbank/aquos_wish4_a403sh/349910"
     },
     {
      "name": "AQUOS wish3 A302SH ブラック【SoftBank版 SIMフリー】",
@@ -464,6 +461,12 @@
      "price": 11800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_wish_a104sh_アイボリー/237877"
+    },
+    {
+     "name": "AQUOS wish2 SH-51C ホワイト【docomo版SIMフリー】",
+     "price": 13800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish2_sh-51c/244937"
     }
    ],
    "used_query": "AQUOS wish"
@@ -1976,12 +1979,6 @@
      "price": 32800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/pixel6/simfree/pixel6_pro_gf5kq_sorta_sunny/270262"
-    },
-    {
-     "name": "Google Pixel6a GB17L 128GB Sage【SoftBank版SIMフリー】",
-     "price": 22800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/pixel6a/softbank/pixel6a_gb17l_sage/266831"
     }
    ],
    "used_query": "Pixel 6"
@@ -2684,12 +2681,6 @@
   },
   "AQUOS wish4": {
    "items": [
-    {
-     "name": "【ネットワーク利用制限▲】AQUOS wish4 A403SH ブラック 法人モデル【SoftBank版SIMフリー】",
-     "price": 19800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/softbank/aquos_wish4_a403sh/349910"
-    },
     {
      "name": "AQUOS wish4 A403SH ブラック 法人モデル【SoftBank版SIMフリー】",
      "price": 21800,
@@ -3766,12 +3757,6 @@
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/364411"
     },
     {
-     "name": "iPhoneXR A2106 (MT0T2J/A) 128GB コーラル 【国内版SIMフリー】",
-     "price": 20800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexr/simfree/iphonexr_a2106/183394"
-    },
-    {
      "name": "【SIMロック解除済】au iPhoneXR A2106 (MT082J/A) 64GB イエロー",
      "price": 20800,
      "rank": "中古Bランク",
@@ -3788,6 +3773,12 @@
      "price": 17800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/258831"
+    },
+    {
+     "name": "iPhoneXR A2106 (MT0T2J/A) 128GB コーラル 【国内版SIMフリー】",
+     "price": 20800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonexr/simfree/iphonexr_a2106/183394"
     },
     {
      "name": "【SIMロック解除済】docomo iPhoneXR A2106 (MT032J/A) 64GB ホワイト",
