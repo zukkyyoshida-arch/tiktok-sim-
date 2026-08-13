@@ -4,7 +4,12 @@ iosys.py — 株式会社イオシス（https://iosys.co.jp/）の中古スマ�
 
 app.py の肥大化を避けるため、機種名の正規化・検索・フィルタリングのロジックを
 このモジュールに切り出している。
+
+BUILTIN_MODEL_LIST もここに置く（tools/update_iosys_snapshot.py が
+streamlit抜きで参照するため。app.py は iosys.BUILTIN_MODEL_LIST を使う）。
 """
+import json
+import os
 import random
 import re
 import time
@@ -13,6 +18,41 @@ from urllib.parse import quote
 
 import requests
 from bs4 import BeautifulSoup
+
+# 運用端末の機種リスト（オーナー提供・2026-08-12。表示前に normalize_model_name で正規化・重複除去される）
+BUILTIN_MODEL_LIST = [
+    "★arrows We", "Xperia5 Ⅳ", "Xperia 10 IV SO-52C", "AQUOS sense7", "AQUOS wish",
+    "OPPO Reno7 A", "AQUOS R6", "Xperia10 II (A001SO)", "★AQUOS sense5G", "Xperia SOG04",
+    "AQUOS sense6", "Galaxy A32 5G", "Galaxy A41 (SC-41A)", "OPPO Reno9 A", "★Galaxy A22 5G(SC-56B)",
+    "Xperia 10 IV SOG07", "AQUOS R5G", "OPPO A55s 5G", "OPPO reno 5 A", "AQUOS sense4",
+    "Xperia 5 III", "BASIO　SHG09", "AQUOS wish2", "Galaxy A23 5G", "Galaxy A30",
+    "Xperia 10 IV SO-53B", "Xperia SO-41A", "★arrows We2", "OPPO A54 5G", "Xperia SO-41B",
+    "Pixcel 4a", "Xperia 10 IV A202SO", "Xperia SOG08", "AQUOS sense6S", "Galaxy A25 5G",
+    "AQUOS wish3", "Galaxy A51 5G", "Xperia SOG05", "Galaxy A21", "Galaxy SCG07",
+    "Libero 5G IV (A302ZT)", "OPPO reno3 A", "Xperia Ace Ⅱ", "AQUOS SHG04", "AQUOS zero6",
+    "Galaxy SCG18", "HUAWEI P30 lite", "Xperia1", "AQUOS sense3", "AQUOS sense4 basic",
+    "Galaxy SC-56C", "HUAWEI P20 lite", "OPPO Reno A", "Pixel 6", "Redmi 12 5G",
+    "Redmi Note 10 T", "Xiaomi Redmi 14C", "Xperia Ace III", "Xperia SOV43", "Xperia10 Ⅴ",
+    "android one s9", "BASIO 4", "Galaxy A06", "Galaxy S10", "Galaxy SCG08",
+    "Libero 5G Ⅲ", "OPPO A77", "OPPO A79 5G", "Pixel 5", "Pixel 5a",
+    "Redmi Note 10 JE", "Xperia A001SO", "Xperia J9260", "Xperia SO-52B", "Xperia SO-53C",
+    "Xperia SOG02", "Xperia5", "★OPPO A73 5G", "A203ZT", "AQUOS sense3 basic",
+    "AQUOS sense3 plus", "AQUOS sense7 plus", "AQUOS SH-51C", "AQUOS wish4", "AQUOS zero2",
+    "arrows 5G", "arrows Be4 Plus", "arrows FCG01", "arrows We2", "arrowsRX",
+    "Galaxy  A20", "Google Pixel 4a", "Google Pixel 6a", "iPhone 11", "iPhone 11 pro",
+    "iPhone 12", "iPhone 12 mini", "iPhone 8", "iPhone SE2", "iPhone SE3",
+    "iPhone X", "iPhone XR", "iPhone XS", "moto g9 play", "OPPO A73",
+    "Pixel 6a", "Redmi 9T", "Xperia 8", "Xperia SO-01L", "Xperia XZ2",
+    "Xperia XZ3", "Xperia1 IV", "Xperia10 III",
+]
+
+# 同梱スナップショットの場所（kaitori.py と同じ流儀）。
+# 本番（Streamlit Cloud）はAWSのIPから通信するため iosys.co.jp が絞り込み等で
+# 不安定になることがある。住宅IPで取得したこのファイルを既定の表示元にし、
+# 「🔄 相場を再取得」を押したときだけライブ取得する。
+SNAPSHOT_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "data_snapshots", "iosys_sale_snapshot.json"
+)
 
 BASE_URL = "https://iosys.co.jp/items"
 # UA未指定だと iosys.co.jp は 204 No Content を返して本文が空になることを確認済み。
@@ -314,3 +354,27 @@ def filter_strict(items, query: str):
         elif query_nospace in name_nospace:
             filtered.append(item)
     return filtered
+
+
+def load_sale_snapshot(path=None):
+    """同梱の販売相場スナップショットを読み込む（kaitori.load_snapshot と同じ流儀）。
+
+    形式: {"fetched_at": ISO8601, "results": {機種名: {"items": [...], "used_query": str}}}
+
+    戻り値: dict | None
+        読めない場合（未生成・壊れている等）は None。
+        アプリはスナップショット無しでも動くべきなので、例外は投げずに None で返す。
+    """
+    path = path or SNAPSHOT_PATH
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    if not isinstance(data, dict):
+        return None
+    results = data.get("results")
+    if not isinstance(results, dict):
+        return None
+    return data

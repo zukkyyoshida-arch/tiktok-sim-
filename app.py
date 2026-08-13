@@ -11,6 +11,8 @@ import json
 import requests
 import concurrent.futures
 import sys
+import time
+import random
 from streamlit_autorefresh import st_autorefresh
 from plotly.subplots import make_subplots
 import iosys
@@ -69,15 +71,35 @@ def custom_metric(label, value, sub=""):
 # ==========================================
 @st.cache_data(ttl=600)
 def fetch_api_data_raw(target_app, force_key=None):
+    """GAS（script.google.com）からanalyticsデータを取得する。
+
+    GASはコールドスタート時に応答が遅く、timeout=15秒だと
+    'Read timed out' で落ちることがある（実測済み）。30秒に延長したうえで、
+    通信例外時は1回だけ再試行する（iosys.py の _get_with_retry と同じ発想）。
+    """
+    base_url = get_gas_url(target_app)
+    if not base_url:
+        return None
+    url = f"{base_url}?action=get_analytics&app={target_app}"
+    if force_key:
+        url += f"&t={force_key}"
+
     try:
-        base_url = get_gas_url(target_app)
-        if not base_url: return None
-        url = f"{base_url}?action=get_analytics&app={target_app}"
-        if force_key:
-            url += f"&t={force_key}"
-        response = requests.get(url, timeout=15)
-        if response.status_code != 200: return None
+        response = requests.get(url, timeout=30)
+        if response.status_code != 200:
+            return None
         return response.json()
+    except requests.RequestException as e:
+        print(f"[fetch_api_data_raw] {target_app}: {e} (retry)", file=sys.stderr)
+        time.sleep(random.uniform(2.0, 3.0))
+        try:
+            response = requests.get(url, timeout=30)
+            if response.status_code != 200:
+                return None
+            return response.json()
+        except Exception as e2:
+            print(f"[fetch_api_data_raw] {target_app}: {e2}", file=sys.stderr)
+            return None
     except Exception as e:
         print(f"[fetch_api_data_raw] {target_app}: {e}", file=sys.stderr)
         return None
@@ -208,7 +230,9 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
     try:
         f_key = str(datetime.now().timestamp()) if force else None
         payload = fetch_api_data_raw(target_app, force_key=f_key)
-        if not payload or "analytics" not in payload: return "Invalid API Response"
+        if payload is None:
+            return "APIに接続できませんでした（初回はサーバー起動に時間がかかります）。もう一度同期してください"
+        if "analytics" not in payload: return "Invalid API Response"
 
         raw_data = payload['analytics']
         if not raw_data: return "No Data"
@@ -499,33 +523,8 @@ def fetch_data_logic(target_app, f_mode, l_days=None, t_month=None, force=False)
 # ==========================================
 # 3.5 中古相場タブ（イオシス連携）
 # ==========================================
-# 運用端末の機種リスト（オーナー提供・2026-08-12。表示前に normalize_model_name で正規化・重複除去される）
-BUILTIN_MODEL_LIST = [
-    "★arrows We", "Xperia5 Ⅳ", "Xperia 10 IV SO-52C", "AQUOS sense7", "AQUOS wish",
-    "OPPO Reno7 A", "AQUOS R6", "Xperia10 II (A001SO)", "★AQUOS sense5G", "Xperia SOG04",
-    "AQUOS sense6", "Galaxy A32 5G", "Galaxy A41 (SC-41A)", "OPPO Reno9 A", "★Galaxy A22 5G(SC-56B)",
-    "Xperia 10 IV SOG07", "AQUOS R5G", "OPPO A55s 5G", "OPPO reno 5 A", "AQUOS sense4",
-    "Xperia 5 III", "BASIO　SHG09", "AQUOS wish2", "Galaxy A23 5G", "Galaxy A30",
-    "Xperia 10 IV SO-53B", "Xperia SO-41A", "★arrows We2", "OPPO A54 5G", "Xperia SO-41B",
-    "Pixcel 4a", "Xperia 10 IV A202SO", "Xperia SOG08", "AQUOS sense6S", "Galaxy A25 5G",
-    "AQUOS wish3", "Galaxy A51 5G", "Xperia SOG05", "Galaxy A21", "Galaxy SCG07",
-    "Libero 5G IV (A302ZT)", "OPPO reno3 A", "Xperia Ace Ⅱ", "AQUOS SHG04", "AQUOS zero6",
-    "Galaxy SCG18", "HUAWEI P30 lite", "Xperia1", "AQUOS sense3", "AQUOS sense4 basic",
-    "Galaxy SC-56C", "HUAWEI P20 lite", "OPPO Reno A", "Pixel 6", "Redmi 12 5G",
-    "Redmi Note 10 T", "Xiaomi Redmi 14C", "Xperia Ace III", "Xperia SOV43", "Xperia10 Ⅴ",
-    "android one s9", "BASIO 4", "Galaxy A06", "Galaxy S10", "Galaxy SCG08",
-    "Libero 5G Ⅲ", "OPPO A77", "OPPO A79 5G", "Pixel 5", "Pixel 5a",
-    "Redmi Note 10 JE", "Xperia A001SO", "Xperia J9260", "Xperia SO-52B", "Xperia SO-53C",
-    "Xperia SOG02", "Xperia5", "★OPPO A73 5G", "A203ZT", "AQUOS sense3 basic",
-    "AQUOS sense3 plus", "AQUOS sense7 plus", "AQUOS SH-51C", "AQUOS wish4", "AQUOS zero2",
-    "arrows 5G", "arrows Be4 Plus", "arrows FCG01", "arrows We2", "arrowsRX",
-    "Galaxy  A20", "Google Pixel 4a", "Google Pixel 6a", "iPhone 11", "iPhone 11 pro",
-    "iPhone 12", "iPhone 12 mini", "iPhone 8", "iPhone SE2", "iPhone SE3",
-    "iPhone X", "iPhone XR", "iPhone XS", "moto g9 play", "OPPO A73",
-    "Pixel 6a", "Redmi 9T", "Xperia 8", "Xperia SO-01L", "Xperia XZ2",
-    "Xperia XZ3", "Xperia1 IV", "Xperia10 III",
-]
-
+# 運用端末の機種リストは iosys.BUILTIN_MODEL_LIST（tools/update_iosys_snapshot.py が
+# streamlit抜きで参照するため iosys.py 側に定義を置いている）。
 
 # 販売相場の並列取得数。本番（Streamlit Cloud）で112機種×8並列を撃ったところ、
 # 在庫があるはずの機種まで HTTP 200 のまま0件応答になる事象が出たため4へ下げた。
@@ -600,6 +599,38 @@ def _fetch_sale_prices(model_names_tuple):
     return {name: results[name] for name in model_names if name in results}
 
 
+@st.cache_data(ttl=600)
+def _load_sale_snapshot():
+    """同梱の販売相場スナップショットを読み込む薄いラッパー（kaitoriスナップショットと同じ発想）。
+
+    iosys.load_sale_snapshot() 自体はファイルI/Oだけなので st.* は呼ばない。
+    ttl=600はファイル更新（tools/update_iosys_snapshot.py の再実行→再デプロイ）を
+    多少の遅延で拾えるようにするための保険で、通常は再デプロイ時にプロセスごと再起動される。
+    """
+    return iosys.load_sale_snapshot()
+
+
+def _sale_prices_from_snapshot(snapshot, model_names):
+    """スナップショットの内容を、_fetch_sale_prices と同じ戻り値の形へ整形する。
+
+    スナップショットに存在しない機種（内蔵リスト更新後など）は
+    items無し・エラー無しの0件扱いにする（従来のzero_hit扱いと同じ経路に乗る）。
+    """
+    snapshot_results = snapshot.get("results") or {}
+    results = {}
+    for name in model_names:
+        data = snapshot_results.get(name)
+        if data:
+            results[name] = {
+                "items": data.get("items") or [],
+                "used_query": data.get("used_query") or name,
+                "error": None,
+            }
+        else:
+            results[name] = {"items": [], "used_query": name, "error": None}
+    return results
+
+
 @st.cache_data(ttl=3600, show_spinner=False)
 def _fetch_kaitori_prices(model_names_tuple):
     """買取相場（イオシス買取）を取得し、機種ごとに集約する。
@@ -623,13 +654,13 @@ def render_used_market_tab():
     st.markdown("## 💴 中古相場（イオシス）")
     st.caption(
         "運用端末ごとの中古販売価格（今買うといくら）と買取価格（今売るといくら）。"
-        "タブを開くと自動で取得します。"
+        "既定では同梱スナップショットを即時表示し、「🔄 相場を再取得」で最新のライブ相場を取り直せます。"
     )
 
-    # 機種リストは内蔵リスト（BUILTIN_MODEL_LIST）のみ
+    # 機種リストは内蔵リスト（iosys.BUILTIN_MODEL_LIST）のみ
     candidate_models = []
     seen = set()
-    for name in BUILTIN_MODEL_LIST:
+    for name in iosys.BUILTIN_MODEL_LIST:
         norm = iosys.normalize_model_name(name)
         if norm and norm not in seen:
             seen.add(norm)
@@ -646,21 +677,31 @@ def render_used_market_tab():
         )
         if st.button(
             "🔄 相場を再取得", disabled=(len(selected_models) == 0),
-            help="キャッシュ（1時間）を破棄して、販売・買取の相場を取り直します。",
+            help="スナップショットではなく、販売・買取の相場をその場でライブ取得し直します。",
         ):
             _fetch_sale_prices.clear()
             _fetch_kaitori_prices.clear()
+            # 同一セッション中はライブ結果を優先する（スナップショットに戻さない）
+            st.session_state.iosys_use_live = True
 
     if not selected_models:
         st.info("対象機種を1つ以上選択してください。")
         return
 
-    # タブを開いた時点で自動取得する（ボタン押下を必須にしない）。
-    # 結果は @st.cache_data(ttl=3600) に載るため、再描画のたびに再取得はされない。
     models_key = tuple(selected_models)
+    use_live = st.session_state.get("iosys_use_live", False)
 
-    with st.spinner(f"販売相場を取得中…（{len(selected_models)}機種・初回は1分ほどかかります）"):
-        results = _fetch_sale_prices(models_key)
+    sale_snapshot = None if use_live else _load_sale_snapshot()
+
+    if sale_snapshot:
+        # 既定動作: スナップショットがあればライブ取得せずその内容を表示する
+        results = _sale_prices_from_snapshot(sale_snapshot, selected_models)
+        sale_fetched_at_raw = sale_snapshot.get("fetched_at") or ""
+    else:
+        # スナップショットが無い、またはボタンで明示的にライブ取得が選ばれた場合
+        with st.spinner(f"販売相場を取得中…（{len(selected_models)}機種・初回は1分ほどかかります）"):
+            results = _fetch_sale_prices(models_key)
+        sale_fetched_at_raw = None
 
     with st.spinner("買取相場を取得中…（初回は10秒ほどかかります）"):
         kaitori_map, kaitori_errors, kaitori_meta = _fetch_kaitori_prices(models_key)
@@ -813,14 +854,26 @@ def render_used_market_tab():
             st.markdown("\n".join(f"- {m}" for m in zero_hit_models))
 
     if fetched_at:
+        if sale_fetched_at_raw:
+            # スナップショット由来の日時は "YYYY-MM-DDTHH:MM:SS+09:00" 形式。
+            # "YYYY-MM-DD HH:MM" までを取り出して表示する（タイムゾーン以降は捨てる）。
+            date_part = sale_fetched_at_raw[:10]
+            time_part = sale_fetched_at_raw[11:16]
+            sale_note = (
+                f"販売価格=イオシス（{date_part} {time_part}時点のスナップショット）"
+                if time_part else f"販売価格=イオシス（{date_part}時点のスナップショット）"
+            )
+        else:
+            sale_note = f"販売価格=イオシス（{fetched_at.strftime('%Y-%m-%d %H:%M')}取得のライブ相場）"
+
         kaitori_note = (
             f"買取価格=イオシス買取（k-tai-iosys.com）の {snapshot_date} 時点スナップショット"
             if snapshot_date
             else "買取価格=イオシス買取（k-tai-iosys.com）"
         )
         st.caption(
-            f"出典: 販売価格=イオシス（iosys.co.jp）／{kaitori_note}"
-            f"・価格は税込・取得: {fetched_at.strftime('%Y-%m-%d %H:%M:%S')}"
+            f"出典: {sale_note}／{kaitori_note}"
+            f"・価格は税込・表示更新: {fetched_at.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 
 
