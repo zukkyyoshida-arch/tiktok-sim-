@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-17T02:30:17+09:00",
+ "fetched_at": "2026-08-18T02:30:18+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -11104,7 +11104,7 @@
   {
    "name": "docomo版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
@@ -11112,7 +11112,7 @@
   {
    "name": "au版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
@@ -11120,7 +11120,7 @@
   {
    "name": "SoftBank版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
@@ -11128,7 +11128,7 @@
   {
    "name": "国内版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
@@ -11136,7 +11136,7 @@
   {
    "name": "楽天版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
@@ -11144,7 +11144,7 @@
   {
    "name": "UQmobile版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
@@ -11152,72 +11152,72 @@
   {
    "name": "Ymobile版SIMフリー Pixel10a 256GB",
    "unused_price": 73000,
-   "used_max": 67000,
+   "used_max": 66000,
    "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro Fold 256GB",
-   "unused_price": 176000,
-   "used_max": 151000,
-   "used_min": 105000,
+   "unused_price": 156000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro Fold 256GB",
-   "unused_price": 176000,
-   "used_max": 151000,
-   "used_min": 105000,
+   "unused_price": 156000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro Fold 256GB",
-   "unused_price": 176000,
-   "used_max": 151000,
-   "used_min": 105000,
+   "unused_price": 156000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro Fold 256GB",
-   "unused_price": 176000,
-   "used_max": 151000,
-   "used_min": 105000,
+   "unused_price": 156000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro Fold 512GB",
-   "unused_price": 186000,
-   "used_max": 166000,
-   "used_min": 116000,
+   "unused_price": 166000,
+   "used_max": 141000,
+   "used_min": 98000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro Fold 512GB",
-   "unused_price": 186000,
-   "used_max": 166000,
-   "used_min": 116000,
+   "unused_price": 166000,
+   "used_max": 141000,
+   "used_min": 98000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro Fold 512GB",
-   "unused_price": 186000,
-   "used_max": 166000,
-   "used_min": 116000,
+   "unused_price": 166000,
+   "used_max": 141000,
+   "used_min": 98000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro Fold 512GB",
-   "unused_price": 186000,
-   "used_max": 166000,
-   "used_min": 116000,
+   "unused_price": 166000,
+   "used_max": 141000,
+   "used_min": 98000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -11311,129 +11311,129 @@
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro 256GB",
-   "unused_price": 131000,
-   "used_max": 118000,
-   "used_min": 82000,
+   "unused_price": 111000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro 256GB",
-   "unused_price": 131000,
-   "used_max": 118000,
-   "used_min": 82000,
+   "unused_price": 111000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro 256GB",
-   "unused_price": 131000,
-   "used_max": 118000,
-   "used_min": 82000,
+   "unused_price": 111000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "楽天版SIMフリー Google Pixel 10 Pro 256GB",
-   "unused_price": 131000,
-   "used_max": 118000,
-   "used_min": 82000,
+   "unused_price": 111000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 146000,
-   "used_max": 133000,
-   "used_min": 93000,
+   "unused_price": 126000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 146000,
-   "used_max": 133000,
-   "used_min": 93000,
+   "unused_price": 126000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 146000,
-   "used_max": 133000,
-   "used_min": 93000,
+   "unused_price": 126000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 146000,
-   "used_max": 133000,
-   "used_min": 93000,
+   "unused_price": 126000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro XL 256GB",
-   "unused_price": 151000,
-   "used_max": 131000,
-   "used_min": 91000,
+   "unused_price": 126000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro XL 256GB",
-   "unused_price": 151000,
-   "used_max": 131000,
-   "used_min": 91000,
+   "unused_price": 126000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro XL 256GB",
-   "unused_price": 151000,
-   "used_max": 131000,
-   "used_min": 91000,
+   "unused_price": 126000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro XL 256GB",
-   "unused_price": 151000,
-   "used_max": 131000,
-   "used_min": 91000,
+   "unused_price": 126000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro XL 512GB",
-   "unused_price": 161000,
-   "used_max": 143000,
-   "used_min": 100000,
+   "unused_price": 136000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro XL 512GB",
-   "unused_price": 161000,
-   "used_max": 143000,
-   "used_min": 100000,
+   "unused_price": 136000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro XL 512GB",
-   "unused_price": 161000,
-   "used_max": 143000,
-   "used_min": 100000,
+   "unused_price": 136000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro XL 512GB",
-   "unused_price": 161000,
-   "used_max": 143000,
-   "used_min": 100000,
+   "unused_price": 136000,
+   "used_max": 126000,
+   "used_min": 88000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -11503,78 +11503,94 @@
   },
   {
    "name": "docomo版SIMフリー Pixel9 128GB docomo版",
-   "unused_price": 71000,
-   "used_max": 63000,
-   "used_min": 44000,
+   "unused_price": 68000,
+   "used_max": 61000,
+   "used_min": 42000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 128GB au版",
-   "unused_price": 71000,
-   "used_max": 63000,
-   "used_min": 44000,
+   "unused_price": 68000,
+   "used_max": 61000,
+   "used_min": 42000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 128GB SoftBank版",
-   "unused_price": 71000,
-   "used_max": 63000,
-   "used_min": 44000,
+   "unused_price": 68000,
+   "used_max": 61000,
+   "used_min": 42000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel9 128GB 国内版",
-   "unused_price": 71000,
-   "used_max": 63000,
-   "used_min": 50000,
+   "unused_price": 68000,
+   "used_max": 61000,
+   "used_min": 48000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Pixel9 256GB docomo版",
-   "unused_price": 81000,
-   "used_max": 69000,
-   "used_min": 48000,
+   "unused_price": 78000,
+   "used_max": 66000,
+   "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 256GB au版",
-   "unused_price": 81000,
-   "used_max": 69000,
-   "used_min": 48000,
+   "unused_price": 78000,
+   "used_max": 66000,
+   "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 256GB SoftBank版",
-   "unused_price": 81000,
-   "used_max": 69000,
-   "used_min": 48000,
+   "unused_price": 78000,
+   "used_max": 66000,
+   "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel9 256GB 国内版",
-   "unused_price": 81000,
-   "used_max": 69000,
-   "used_min": 55000,
+   "unused_price": 78000,
+   "used_max": 66000,
+   "used_min": 52000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 Pro XL 128GB au版",
-   "unused_price": 96000,
-   "used_max": 86000,
-   "used_min": 60000,
+   "unused_price": 91000,
+   "used_max": 81000,
+   "used_min": 56000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 Pro XL 128GB SoftBank版",
+   "unused_price": 91000,
+   "used_max": 81000,
+   "used_min": 56000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "国内版SIMフリー Pixel9 Pro XL 128GB 国内版",
+   "unused_price": 91000,
+   "used_max": 81000,
+   "used_min": 64000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel9 Pro XL 256GB docomo版",
    "unused_price": 96000,
    "used_max": 86000,
    "used_min": 60000,
@@ -11582,7 +11598,23 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel9 Pro XL 128GB 国内版",
+   "name": "au版SIMフリー Pixel9 Pro XL 256GB au版",
+   "unused_price": 96000,
+   "used_max": 86000,
+   "used_min": 60000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "SoftBank版SIMフリー Pixel9 Pro XL 256GB SoftBank版",
+   "unused_price": 96000,
+   "used_max": 86000,
+   "used_min": 60000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "国内版SIMフリー Pixel9 Pro XL 256GB 国内版",
    "unused_price": 96000,
    "used_max": 86000,
    "used_min": 68000,
@@ -11590,154 +11622,122 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel9 Pro XL 256GB docomo版",
-   "unused_price": 101000,
+   "name": "au版SIMフリー Pixel9 Pro XL 512GB au版",
+   "unused_price": 106000,
    "used_max": 91000,
    "used_min": 63000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel9 Pro XL 256GB au版",
-   "unused_price": 101000,
+   "name": "SoftBank版SIMフリー Pixel9 Pro XL 512GB SoftBank版",
+   "unused_price": 106000,
    "used_max": 91000,
    "used_min": 63000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel9 Pro XL 256GB SoftBank版",
-   "unused_price": 101000,
-   "used_max": 91000,
-   "used_min": 63000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "国内版SIMフリー Pixel9 Pro XL 256GB 国内版",
-   "unused_price": 101000,
+   "name": "国内版SIMフリー Pixel9 Pro XL 512GB 国内版",
+   "unused_price": 106000,
    "used_max": 91000,
    "used_min": 72000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel9 Pro XL 512GB au版",
-   "unused_price": 111000,
-   "used_max": 101000,
-   "used_min": 70000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "SoftBank版SIMフリー Pixel9 Pro XL 512GB SoftBank版",
-   "unused_price": 111000,
-   "used_max": 101000,
-   "used_min": 70000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "国内版SIMフリー Pixel9 Pro XL 512GB 国内版",
-   "unused_price": 111000,
-   "used_max": 101000,
-   "used_min": 80000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
    "name": "docomo版SIMフリー Pixel9 Pro 128GB docomo版",
-   "unused_price": 86000,
-   "used_max": 76000,
-   "used_min": 53000,
+   "unused_price": 76000,
+   "used_max": 71000,
+   "used_min": 49000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 Pro 128GB au版",
-   "unused_price": 86000,
-   "used_max": 76000,
-   "used_min": 53000,
+   "unused_price": 76000,
+   "used_max": 71000,
+   "used_min": 49000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 Pro 128GB SoftBank版",
-   "unused_price": 86000,
+   "unused_price": 76000,
+   "used_max": 71000,
+   "used_min": 49000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "国内版SIMフリー Pixel9 Pro 128GB 国内版",
+   "unused_price": 76000,
+   "used_max": 71000,
+   "used_min": 56000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel9 Pro 256GB docomo版",
+   "unused_price": 81000,
    "used_max": 76000,
    "used_min": 53000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel9 Pro 128GB 国内版",
-   "unused_price": 86000,
+   "name": "au版SIMフリー Pixel9 Pro 256GB au版",
+   "unused_price": 81000,
+   "used_max": 76000,
+   "used_min": 53000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "SoftBank版SIMフリー Pixel9 Pro 256GB SoftBank版",
+   "unused_price": 81000,
+   "used_max": 76000,
+   "used_min": 53000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "国内版SIMフリー Pixel9 Pro 256GB 国内版",
+   "unused_price": 81000,
    "used_max": 76000,
    "used_min": 60000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel9 Pro 256GB docomo版",
-   "unused_price": 96000,
-   "used_max": 81000,
-   "used_min": 56000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "au版SIMフリー Pixel9 Pro 256GB au版",
-   "unused_price": 96000,
-   "used_max": 81000,
-   "used_min": 56000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "SoftBank版SIMフリー Pixel9 Pro 256GB SoftBank版",
-   "unused_price": 96000,
-   "used_max": 81000,
-   "used_min": 56000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "国内版SIMフリー Pixel9 Pro 256GB 国内版",
-   "unused_price": 96000,
-   "used_max": 81000,
-   "used_min": 64000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
    "name": "docomo版SIMフリー Pixel9 Pro 512GB docomo版",
-   "unused_price": 101000,
-   "used_max": 91000,
-   "used_min": 63000,
+   "unused_price": 91000,
+   "used_max": 86000,
+   "used_min": 60000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 Pro 512GB au版",
-   "unused_price": 101000,
-   "used_max": 91000,
-   "used_min": 63000,
+   "unused_price": 91000,
+   "used_max": 86000,
+   "used_min": 60000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 Pro 512GB SoftBank版",
-   "unused_price": 101000,
-   "used_max": 91000,
-   "used_min": 63000,
+   "unused_price": 91000,
+   "used_max": 86000,
+   "used_min": 60000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel9 Pro 512GB 国内版",
-   "unused_price": 101000,
-   "used_max": 91000,
-   "used_min": 72000,
+   "unused_price": 91000,
+   "used_max": 86000,
+   "used_min": 68000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
