@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-19T02:30:18+09:00",
+ "fetched_at": "2026-08-20T02:30:18+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -8615,81 +8615,81 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 12GB/256GB",
-   "unused_price": 150000,
-   "used_max": 136000,
-   "used_min": 95000,
+   "unused_price": 155000,
+   "used_max": 146000,
+   "used_min": 102000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold7 SCG34 au版 12GB/256GB",
-   "unused_price": 150000,
-   "used_max": 136000,
-   "used_min": 95000,
+   "unused_price": 155000,
+   "used_max": 146000,
+   "used_min": 102000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Fold7 SoftBank版 12GB/256GB",
-   "unused_price": 150000,
-   "used_max": 136000,
-   "used_min": 95000,
+   "unused_price": 155000,
+   "used_max": 146000,
+   "used_min": 102000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold7 国内版 12GB/256GB",
-   "unused_price": 150000,
-   "used_max": 136000,
-   "used_min": 95000,
+   "unused_price": 155000,
+   "used_max": 146000,
+   "used_min": 102000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 12GB/512GB",
-   "unused_price": 160000,
-   "used_max": 145000,
-   "used_min": 101000,
+   "unused_price": 169000,
+   "used_max": 164000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold7 SCG34 au版 12GB/512GB",
-   "unused_price": 160000,
-   "used_max": 145000,
-   "used_min": 101000,
+   "unused_price": 169000,
+   "used_max": 164000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold7 国内版 12GB/512GB",
-   "unused_price": 160000,
-   "used_max": 145000,
-   "used_min": 101000,
+   "unused_price": 169000,
+   "used_max": 164000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 16GB/1TB",
-   "unused_price": 175000,
-   "used_max": 160000,
-   "used_min": 112000,
+   "unused_price": 176000,
+   "used_max": 169000,
+   "used_min": 118000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold7 SCG34 au版 16GB/1TB",
-   "unused_price": 175000,
-   "used_max": 160000,
-   "used_min": 112000,
+   "unused_price": 176000,
+   "used_max": 169000,
+   "used_min": 118000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold7 国内版 16GB/1TB",
-   "unused_price": 175000,
-   "used_max": 160000,
-   "used_min": 112000,
+   "unused_price": 176000,
+   "used_max": 169000,
+   "used_min": 118000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -8728,24 +8728,24 @@
   {
    "name": "docomo版SIMフリー Galaxy Z Flip7 SC-55F docomo版 12GB/512GB",
    "unused_price": 116000,
-   "used_max": 101000,
-   "used_min": 70000,
+   "used_max": 103000,
+   "used_min": 72000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Flip7 SCG35 au版 12GB/512GB",
    "unused_price": 116000,
-   "used_max": 101000,
-   "used_min": 70000,
+   "used_max": 103000,
+   "used_min": 72000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Flip7 国内版 12GB/512GB",
    "unused_price": 116000,
-   "used_max": 101000,
-   "used_min": 70000,
+   "used_max": 103000,
+   "used_min": 72000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
