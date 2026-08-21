@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-21T02:30:17+09:00",
+ "fetched_at": "2026-08-22T02:30:18+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -19,7 +19,7 @@
  ],
  "errors": [],
  "carried_over_brands": [],
- "row_count": 2539,
+ "row_count": 2543,
  "rows": [
   {
    "name": "docomo版SIMフリー iPhone17e 256GB",
@@ -11046,7 +11046,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 docomo版SIMフリー 256GB",
+   "name": "docomo版SIMフリー Pixel11 256GB",
    "unused_price": 90000,
    "used_max": 85000,
    "used_min": 59000,
@@ -11054,7 +11054,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 au版SIMフリー 256GB",
+   "name": "au版SIMフリー Pixel11 256GB",
    "unused_price": 90000,
    "used_max": 85000,
    "used_min": 59000,
@@ -11062,7 +11062,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 SoftBank版SIMフリー 256GB",
+   "name": "SoftBank版SIMフリー Pixel11 256GB",
    "unused_price": 90000,
    "used_max": 85000,
    "used_min": 59000,
@@ -11070,7 +11070,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 国内版SIMフリー 256GB",
+   "name": "国内版SIMフリー Pixel11 256GB",
    "unused_price": 90000,
    "used_max": 85000,
    "used_min": 59000,
@@ -11078,7 +11078,15 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 docomo版SIMフリー 512GB",
+   "name": "楽天版SIMフリー Pixel11 256GB",
+   "unused_price": 90000,
+   "used_max": 85000,
+   "used_min": 59000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel11 512GB",
    "unused_price": 110000,
    "used_max": 100000,
    "used_min": 70000,
@@ -11086,7 +11094,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 au版SIMフリー 512GB",
+   "name": "au版SIMフリー Pixel11 512GB",
    "unused_price": 110000,
    "used_max": 100000,
    "used_min": 70000,
@@ -11094,7 +11102,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 SoftBank版SIMフリー 512GB",
+   "name": "SoftBank版SIMフリー Pixel11 512GB",
    "unused_price": 110000,
    "used_max": 100000,
    "used_min": 70000,
@@ -11102,7 +11110,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 国内版SIMフリー 512GB",
+   "name": "国内版SIMフリー Pixel11 512GB",
    "unused_price": 110000,
    "used_max": 100000,
    "used_min": 70000,
@@ -11110,7 +11118,15 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 Pro docomo版SIMフリー 256GB",
+   "name": "楽天版SIMフリー Pixel11 512GB",
+   "unused_price": 110000,
+   "used_max": 100000,
+   "used_min": 70000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel11 Pro 256GB",
    "unused_price": 115000,
    "used_max": 105000,
    "used_min": 73000,
@@ -11118,7 +11134,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 Pro au版SIMフリー 256GB",
+   "name": "au版SIMフリー Pixel11 Pro 256GB",
    "unused_price": 115000,
    "used_max": 105000,
    "used_min": 73000,
@@ -11126,7 +11142,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 Pro SoftBank版SIMフリー 256GB",
+   "name": "SoftBank版SIMフリー Pixel11 Pro 256GB",
    "unused_price": 115000,
    "used_max": 105000,
    "used_min": 73000,
@@ -11134,7 +11150,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 Pro 国内版SIMフリー 256GB",
+   "name": "国内版SIMフリー Pixel11 Pro 256GB",
    "unused_price": 115000,
    "used_max": 105000,
    "used_min": 73000,
@@ -11142,7 +11158,15 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 Pro docomo版SIMフリー 512GB",
+   "name": "楽天版SIMフリー Pixel11 Pro 256GB",
+   "unused_price": 115000,
+   "used_max": 105000,
+   "used_min": 73000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel11 Pro 512GB",
    "unused_price": 135000,
    "used_max": 125000,
    "used_min": 87000,
@@ -11150,7 +11174,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 Pro au版SIMフリー 512GB",
+   "name": "au版SIMフリー Pixel11 Pro 512GB",
    "unused_price": 135000,
    "used_max": 125000,
    "used_min": 87000,
@@ -11158,7 +11182,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 Pro SoftBank版SIMフリー 512GB",
+   "name": "SoftBank版SIMフリー Pixel11 Pro 512GB",
    "unused_price": 135000,
    "used_max": 125000,
    "used_min": 87000,
@@ -11166,7 +11190,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 Pro 国内版SIMフリー 512GB",
+   "name": "国内版SIMフリー Pixel11 Pro 512GB",
    "unused_price": 135000,
    "used_max": 125000,
    "used_min": 87000,
@@ -11174,7 +11198,15 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 Pro XL docomo版SIMフリー 256GB",
+   "name": "楽天版SIMフリー Pixel11 Pro 512GB",
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 87000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel11 Pro XL 256GB",
    "unused_price": 140000,
    "used_max": 130000,
    "used_min": 91000,
@@ -11182,7 +11214,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 Pro XL au版SIMフリー 256GB",
+   "name": "au版SIMフリー Pixel11 Pro XL 256GB",
    "unused_price": 140000,
    "used_max": 130000,
    "used_min": 91000,
@@ -11190,7 +11222,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 Pro XL SoftBank版SIMフリー 256GB",
+   "name": "SoftBank版SIMフリー Pixel11 Pro XL 256GB",
    "unused_price": 140000,
    "used_max": 130000,
    "used_min": 91000,
@@ -11198,7 +11230,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 Pro XL 国内版SIMフリー 256GB",
+   "name": "国内版SIMフリー Pixel11 Pro XL 256GB",
    "unused_price": 140000,
    "used_max": 130000,
    "used_min": 91000,
@@ -11206,7 +11238,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 Pro XL docomo版SIMフリー 512GB",
+   "name": "docomo版SIMフリー Pixel11 Pro XL 512GB",
    "unused_price": 160000,
    "used_max": 150000,
    "used_min": 105000,
@@ -11214,7 +11246,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 Pro XL au版SIMフリー 512GB",
+   "name": "au版SIMフリー Pixel11 Pro XL 512GB",
    "unused_price": 160000,
    "used_max": 150000,
    "used_min": 105000,
@@ -11222,7 +11254,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 Pro XL SoftBank版SIMフリー 512GB",
+   "name": "SoftBank版SIMフリー Pixel11 Pro XL 512GB",
    "unused_price": 160000,
    "used_max": 150000,
    "used_min": 105000,
@@ -11230,7 +11262,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 Pro XL 国内版SIMフリー 512GB",
+   "name": "国内版SIMフリー Pixel11 Pro XL 512GB",
    "unused_price": 160000,
    "used_max": 150000,
    "used_min": 105000,
@@ -11238,7 +11270,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 Pro Fold docomo版SIMフリー 256GB",
+   "name": "docomo版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
    "used_max": 190000,
    "used_min": 133000,
@@ -11246,7 +11278,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 Pro Fold au版SIMフリー 256GB",
+   "name": "au版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
    "used_max": 190000,
    "used_min": 133000,
@@ -11254,7 +11286,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 Pro Fold SoftBank版SIMフリー 256GB",
+   "name": "SoftBank版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
    "used_max": 190000,
    "used_min": 133000,
@@ -11262,7 +11294,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 Pro Fold 国内版SIMフリー 256GB",
+   "name": "国内版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
    "used_max": 190000,
    "used_min": 133000,
@@ -11270,7 +11302,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel11 Pro Fold docomo版SIMフリー 512GB",
+   "name": "docomo版SIMフリー Pixel11 Pro Fold 512GB",
    "unused_price": 225000,
    "used_max": 215000,
    "used_min": 150000,
@@ -11278,7 +11310,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "au版SIMフリー Pixel11 Pro Fold au版SIMフリー 512GB",
+   "name": "au版SIMフリー Pixel11 Pro Fold 512GB",
    "unused_price": 225000,
    "used_max": 215000,
    "used_min": 150000,
@@ -11286,7 +11318,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "SoftBank版SIMフリー Pixel11 Pro Fold SoftBank版SIMフリー 512GB",
+   "name": "SoftBank版SIMフリー Pixel11 Pro Fold 512GB",
    "unused_price": 225000,
    "used_max": 215000,
    "used_min": 150000,
@@ -11294,7 +11326,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel11 Pro Fold 国内版SIMフリー 512GB",
+   "name": "国内版SIMフリー Pixel11 Pro Fold 512GB",
    "unused_price": 225000,
    "used_max": 215000,
    "used_min": 150000,
