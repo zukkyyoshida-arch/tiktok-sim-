@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-24T02:30:18+09:00",
+ "fetched_at": "2026-08-25T02:30:18+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -13631,17 +13631,17 @@
   },
   {
    "name": "SIMフリー ZenFone Max （M2） ZB633KL 国内版 32GB",
-   "unused_price": 7000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "zenfone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/zenfone/"
   },
   {
    "name": "SIMフリー ZenFone Max （M2） ZB633KL 国内版 64GB",
-   "unused_price": 8000,
-   "used_max": 5500,
-   "used_min": 3000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "zenfone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/zenfone/"
   },
@@ -13663,9 +13663,9 @@
   },
   {
    "name": "mineo ZenFone Max (M2)",
-   "unused_price": 8000,
-   "used_max": 6000,
-   "used_min": 4000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "zenfone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/zenfone/"
   },
@@ -13703,9 +13703,9 @@
   },
   {
    "name": "SIMフリー ZenFone Max Pro (M1) ZB602KL 国内版",
-   "unused_price": 4500,
-   "used_max": 3500,
-   "used_min": 2000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "zenfone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/zenfone/"
   },
@@ -16495,17 +16495,17 @@
   },
   {
    "name": "SIMフリー Huawei nova lite3 楽天モバイル",
-   "unused_price": 4000,
-   "used_max": 3000,
-   "used_min": 1500,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "huawei",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/huawei/"
   },
   {
    "name": "SIMフリー Huawei nova lite3",
-   "unused_price": 4000,
-   "used_max": 3000,
-   "used_min": 1500,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "huawei",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/huawei/"
   },
