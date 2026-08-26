@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-26T02:30:18+09:00",
+ "fetched_at": "2026-08-27T02:30:18+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -583,7 +583,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone Air 256GB",
-   "unused_price": 122000,
+   "unused_price": 120000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -591,7 +591,7 @@
   },
   {
    "name": "au版SIMフリー iPhone Air 256GB",
-   "unused_price": 122000,
+   "unused_price": 120000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -599,7 +599,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone Air 256GB",
-   "unused_price": 122000,
+   "unused_price": 120000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -607,7 +607,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 256GB",
-   "unused_price": 122000,
+   "unused_price": 120000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -615,7 +615,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone Air 256GB",
-   "unused_price": 122000,
+   "unused_price": 120000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -623,7 +623,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone Air 256GB",
-   "unused_price": 85000,
+   "unused_price": 84000,
    "used_max": 81000,
    "used_min": 65000,
    "brand": "iphone",
@@ -631,7 +631,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone Air 512GB",
-   "unused_price": 132000,
+   "unused_price": 130000,
    "used_max": 128000,
    "used_min": 102000,
    "brand": "iphone",
@@ -639,7 +639,7 @@
   },
   {
    "name": "au版SIMフリー iPhone Air 512GB",
-   "unused_price": 132000,
+   "unused_price": 130000,
    "used_max": 128000,
    "used_min": 102000,
    "brand": "iphone",
@@ -647,7 +647,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone Air 512GB",
-   "unused_price": 132000,
+   "unused_price": 130000,
    "used_max": 128000,
    "used_min": 102000,
    "brand": "iphone",
@@ -655,7 +655,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 512GB",
-   "unused_price": 132000,
+   "unused_price": 130000,
    "used_max": 128000,
    "used_min": 102000,
    "brand": "iphone",
@@ -663,7 +663,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone Air 512GB",
-   "unused_price": 132000,
+   "unused_price": 130000,
    "used_max": 128000,
    "used_min": 102000,
    "brand": "iphone",
@@ -671,7 +671,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone Air 512GB",
-   "unused_price": 92000,
+   "unused_price": 91000,
    "used_max": 89000,
    "used_min": 71000,
    "brand": "iphone",
@@ -679,7 +679,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone Air 1TB",
-   "unused_price": 142000,
+   "unused_price": 140000,
    "used_max": 137000,
    "used_min": 110000,
    "brand": "iphone",
@@ -687,7 +687,7 @@
   },
   {
    "name": "au版SIMフリー iPhone Air 1TB",
-   "unused_price": 142000,
+   "unused_price": 140000,
    "used_max": 137000,
    "used_min": 110000,
    "brand": "iphone",
@@ -695,7 +695,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone Air 1TB",
-   "unused_price": 142000,
+   "unused_price": 140000,
    "used_max": 137000,
    "used_min": 110000,
    "brand": "iphone",
@@ -703,7 +703,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 1TB",
-   "unused_price": 142000,
+   "unused_price": 140000,
    "used_max": 137000,
    "used_min": 110000,
    "brand": "iphone",
@@ -711,7 +711,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone Air 1TB",
-   "unused_price": 142000,
+   "unused_price": 140000,
    "used_max": 137000,
    "used_min": 110000,
    "brand": "iphone",
@@ -719,7 +719,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone Air 1TB",
-   "unused_price": 99000,
+   "unused_price": 98000,
    "used_max": 95000,
    "used_min": 77000,
    "brand": "iphone",
@@ -19207,7 +19207,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 256GB",
-   "unused_price": 122000,
+   "unused_price": 120000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "rakuten",
@@ -19215,7 +19215,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 512GB",
-   "unused_price": 132000,
+   "unused_price": 130000,
    "used_max": 128000,
    "used_min": 102000,
    "brand": "rakuten",
@@ -19223,7 +19223,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 1TB",
-   "unused_price": 142000,
+   "unused_price": 140000,
    "used_max": 137000,
    "used_min": 110000,
    "brand": "rakuten",
