@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-28T02:30:19+09:00",
+ "fetched_at": "2026-08-29T02:30:20+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -12887,17 +12887,17 @@
   },
   {
    "name": "docomo版SIMフリー arrows Alpha F-51F docomo版",
-   "unused_price": 50000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 49000,
+   "used_max": 43000,
+   "used_min": 30000,
    "brand": "arrows",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/arrows/"
   },
   {
    "name": "国内版SIMフリー arrows Alpha M08 国内版",
-   "unused_price": 50000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 49000,
+   "used_max": 43000,
+   "used_min": 30000,
    "brand": "arrows",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/arrows/"
   },
