@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-18T02:30:41+09:00",
+ "fetched_at": "2026-09-19T02:30:46+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -23,455 +23,455 @@
  "rows": [
   {
    "name": "docomo版SIMフリー iPhone18 Pro Max 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 210000,
+   "used_max": 200000,
+   "used_min": 160000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro Max 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 210000,
+   "used_max": 200000,
+   "used_min": 160000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro Max 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 210000,
+   "used_max": 200000,
+   "used_min": 160000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro Max 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 210000,
+   "used_max": 200000,
+   "used_min": 160000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro Max 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 210000,
+   "used_max": 200000,
+   "used_min": 160000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro Max 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 240000,
+   "used_max": 230000,
+   "used_min": 184000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro Max 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 240000,
+   "used_max": 230000,
+   "used_min": 184000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro Max 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 240000,
+   "used_max": 230000,
+   "used_min": 184000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro Max 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 240000,
+   "used_max": 230000,
+   "used_min": 184000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro Max 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 240000,
+   "used_max": 230000,
+   "used_min": 184000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro Max 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 300000,
+   "used_max": 290000,
+   "used_min": 232000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro Max 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 300000,
+   "used_max": 290000,
+   "used_min": 232000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro Max 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 300000,
+   "used_max": 290000,
+   "used_min": 232000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro Max 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 300000,
+   "used_max": 290000,
+   "used_min": 232000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro Max 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 300000,
+   "used_max": 290000,
+   "used_min": 232000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro Max 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 380000,
+   "used_max": 370000,
+   "used_min": 296000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro Max 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 380000,
+   "used_max": 370000,
+   "used_min": 296000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro Max 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 380000,
+   "used_max": 370000,
+   "used_min": 296000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro Max 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 380000,
+   "used_max": 370000,
+   "used_min": 296000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro Max 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 380000,
+   "used_max": 370000,
+   "used_min": 296000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 192000,
+   "used_max": 182000,
+   "used_min": 146000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 192000,
+   "used_max": 182000,
+   "used_min": 146000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 192000,
+   "used_max": 182000,
+   "used_min": 146000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 192000,
+   "used_max": 182000,
+   "used_min": 146000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro 256GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 192000,
+   "used_max": 182000,
+   "used_min": 146000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 223000,
+   "used_max": 213000,
+   "used_min": 170000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 223000,
+   "used_max": 213000,
+   "used_min": 170000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 223000,
+   "used_max": 213000,
+   "used_min": 170000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 223000,
+   "used_max": 213000,
+   "used_min": 170000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro 512GB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 223000,
+   "used_max": 213000,
+   "used_min": 170000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 285000,
+   "used_max": 275000,
+   "used_min": 220000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 285000,
+   "used_max": 275000,
+   "used_min": 220000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 285000,
+   "used_max": 275000,
+   "used_min": 220000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 285000,
+   "used_max": 275000,
+   "used_min": 220000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro 1TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 285000,
+   "used_max": 275000,
+   "used_min": 220000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone18 Pro 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 360000,
+   "used_max": 350000,
+   "used_min": 280000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone18 Pro 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 360000,
+   "used_max": 350000,
+   "used_min": 280000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone18 Pro 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 360000,
+   "used_max": 350000,
+   "used_min": 280000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone18 Pro 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 360000,
+   "used_max": 350000,
+   "used_min": 280000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone18 Pro 2TB",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
+   "unused_price": 360000,
+   "used_max": 350000,
+   "used_min": 280000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone17e 256GB",
    "unused_price": 71000,
-   "used_max": 62000,
-   "used_min": 49000,
+   "used_max": 60000,
+   "used_min": 48000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Ymobile版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "UQmobile版SIMフリー iPhone17e 256GB",
    "unused_price": 101000,
-   "used_max": 89000,
-   "used_min": 71000,
+   "used_max": 86000,
+   "used_min": 69000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone17e 512GB",
-   "unused_price": 83000,
-   "used_max": 71000,
-   "used_min": 57000,
+   "unused_price": 85000,
+   "used_max": 70000,
+   "used_min": 56000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Ymobile版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "UQmobile版SIMフリー iPhone17e 512GB",
-   "unused_price": 118000,
-   "used_max": 102000,
-   "used_min": 82000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 81000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone17 256GB",
-   "unused_price": 124000,
+   "unused_price": 135000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -479,7 +479,7 @@
   },
   {
    "name": "au版SIMフリー iPhone17 256GB",
-   "unused_price": 124000,
+   "unused_price": 135000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -487,7 +487,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone17 256GB",
-   "unused_price": 124000,
+   "unused_price": 135000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -495,7 +495,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 256GB",
-   "unused_price": 124000,
+   "unused_price": 135000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -503,7 +503,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone17 256GB",
-   "unused_price": 124000,
+   "unused_price": 135000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "iphone",
@@ -511,7 +511,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone17 256GB",
-   "unused_price": 87000,
+   "unused_price": 95000,
    "used_max": 81000,
    "used_min": 65000,
    "brand": "iphone",
@@ -519,7 +519,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone17 512GB",
-   "unused_price": 151000,
+   "unused_price": 160000,
    "used_max": 141000,
    "used_min": 113000,
    "brand": "iphone",
@@ -527,7 +527,7 @@
   },
   {
    "name": "au版SIMフリー iPhone17 512GB",
-   "unused_price": 151000,
+   "unused_price": 160000,
    "used_max": 141000,
    "used_min": 113000,
    "brand": "iphone",
@@ -535,7 +535,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone17 512GB",
-   "unused_price": 151000,
+   "unused_price": 160000,
    "used_max": 141000,
    "used_min": 113000,
    "brand": "iphone",
@@ -543,7 +543,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 512GB",
-   "unused_price": 151000,
+   "unused_price": 160000,
    "used_max": 141000,
    "used_min": 113000,
    "brand": "iphone",
@@ -551,7 +551,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone17 512GB",
-   "unused_price": 151000,
+   "unused_price": 160000,
    "used_max": 141000,
    "used_min": 113000,
    "brand": "iphone",
@@ -559,7 +559,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone17 512GB",
-   "unused_price": 106000,
+   "unused_price": 112000,
    "used_max": 98000,
    "used_min": 79000,
    "brand": "iphone",
@@ -568,480 +568,480 @@
   {
    "name": "docomo版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 166000,
-   "used_max": 154000,
-   "used_min": 123000,
+   "used_max": 150000,
+   "used_min": 120000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 166000,
-   "used_max": 154000,
-   "used_min": 123000,
+   "used_max": 150000,
+   "used_min": 120000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 166000,
-   "used_max": 154000,
-   "used_min": 123000,
+   "used_max": 150000,
+   "used_min": 120000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 166000,
-   "used_max": 154000,
-   "used_min": 123000,
+   "used_max": 150000,
+   "used_min": 120000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 166000,
-   "used_max": 154000,
-   "used_min": 123000,
+   "used_max": 150000,
+   "used_min": 120000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 116000,
-   "used_max": 107000,
-   "used_min": 86000,
+   "used_max": 105000,
+   "used_min": 84000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 190000,
-   "used_max": 185000,
-   "used_min": 148000,
+   "used_max": 180000,
+   "used_min": 144000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 190000,
-   "used_max": 185000,
-   "used_min": 148000,
+   "used_max": 180000,
+   "used_min": 144000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 190000,
-   "used_max": 185000,
-   "used_min": 148000,
+   "used_max": 180000,
+   "used_min": 144000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 190000,
-   "used_max": 185000,
-   "used_min": 148000,
+   "used_max": 180000,
+   "used_min": 144000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 190000,
-   "used_max": 185000,
-   "used_min": 148000,
+   "used_max": 180000,
+   "used_min": 144000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 133000,
-   "used_max": 129000,
-   "used_min": 103000,
+   "used_max": 126000,
+   "used_min": 100000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 216000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "unused_price": 220000,
+   "used_max": 195000,
+   "used_min": 156000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 216000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "unused_price": 220000,
+   "used_max": 195000,
+   "used_min": 156000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 216000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "unused_price": 220000,
+   "used_max": 195000,
+   "used_min": 156000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 216000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "unused_price": 220000,
+   "used_max": 195000,
+   "used_min": 156000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 216000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "unused_price": 220000,
+   "used_max": 195000,
+   "used_min": 156000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 151000,
-   "used_max": 140000,
-   "used_min": 112000,
+   "unused_price": 154000,
+   "used_max": 136000,
+   "used_min": 109000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 176000,
-   "used_max": 170000,
-   "used_min": 136000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "au版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 176000,
-   "used_max": 170000,
-   "used_min": 136000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 176000,
-   "used_max": 170000,
-   "used_min": 136000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 176000,
-   "used_max": 170000,
-   "used_min": 136000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "国内版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 176000,
-   "used_max": 170000,
-   "used_min": 136000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "海外版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 123000,
-   "used_max": 119000,
-   "used_min": 95000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "docomo版SIMフリー iPhone17 Pro MAX 512GB",
-   "unused_price": 205000,
-   "used_max": 200000,
-   "used_min": 160000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "au版SIMフリー iPhone17 Pro MAX 512GB",
-   "unused_price": 205000,
-   "used_max": 200000,
-   "used_min": 160000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 512GB",
-   "unused_price": 205000,
-   "used_max": 200000,
-   "used_min": 160000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 512GB",
-   "unused_price": 205000,
-   "used_max": 200000,
-   "used_min": 160000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "国内版SIMフリー iPhone17 Pro MAX 512GB",
-   "unused_price": 205000,
-   "used_max": 200000,
-   "used_min": 160000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "海外版SIMフリー iPhone17 Pro MAX 512GB",
-   "unused_price": 144000,
-   "used_max": 140000,
-   "used_min": 112000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "docomo版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 230000,
-   "used_max": 225000,
-   "used_min": 180000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "au版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 230000,
-   "used_max": 225000,
-   "used_min": 180000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 230000,
-   "used_max": 225000,
-   "used_min": 180000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 230000,
-   "used_max": 225000,
-   "used_min": 180000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "国内版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 230000,
-   "used_max": 225000,
-   "used_min": 180000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "海外版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 161000,
-   "used_max": 157000,
-   "used_min": 126000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "docomo版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 251000,
-   "used_max": 240000,
-   "used_min": 192000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "au版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 251000,
-   "used_max": 240000,
-   "used_min": 192000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 251000,
-   "used_max": 240000,
-   "used_min": 192000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 251000,
-   "used_max": 240000,
-   "used_min": 192000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "国内版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 251000,
-   "used_max": 240000,
-   "used_min": 192000,
-   "brand": "iphone",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
-  },
-  {
-   "name": "海外版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 176000,
+   "unused_price": 180000,
    "used_max": 168000,
    "used_min": 134000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
+   "name": "au版SIMフリー iPhone17 Pro MAX 256GB",
+   "unused_price": 180000,
+   "used_max": 168000,
+   "used_min": 134000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 256GB",
+   "unused_price": 180000,
+   "used_max": 168000,
+   "used_min": 134000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 256GB",
+   "unused_price": 180000,
+   "used_max": 168000,
+   "used_min": 134000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "国内版SIMフリー iPhone17 Pro MAX 256GB",
+   "unused_price": 180000,
+   "used_max": 168000,
+   "used_min": 134000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "海外版SIMフリー iPhone17 Pro MAX 256GB",
+   "unused_price": 126000,
+   "used_max": 117000,
+   "used_min": 93000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "docomo版SIMフリー iPhone17 Pro MAX 512GB",
+   "unused_price": 205000,
+   "used_max": 198000,
+   "used_min": 158000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "au版SIMフリー iPhone17 Pro MAX 512GB",
+   "unused_price": 205000,
+   "used_max": 198000,
+   "used_min": 158000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 512GB",
+   "unused_price": 205000,
+   "used_max": 198000,
+   "used_min": 158000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 512GB",
+   "unused_price": 205000,
+   "used_max": 198000,
+   "used_min": 158000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "国内版SIMフリー iPhone17 Pro MAX 512GB",
+   "unused_price": 205000,
+   "used_max": 198000,
+   "used_min": 158000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "海外版SIMフリー iPhone17 Pro MAX 512GB",
+   "unused_price": 144000,
+   "used_max": 138000,
+   "used_min": 110000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "docomo版SIMフリー iPhone17 Pro MAX 1TB",
+   "unused_price": 225000,
+   "used_max": 220000,
+   "used_min": 176000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "au版SIMフリー iPhone17 Pro MAX 1TB",
+   "unused_price": 225000,
+   "used_max": 220000,
+   "used_min": 176000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 1TB",
+   "unused_price": 225000,
+   "used_max": 220000,
+   "used_min": 176000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 1TB",
+   "unused_price": 225000,
+   "used_max": 220000,
+   "used_min": 176000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "国内版SIMフリー iPhone17 Pro MAX 1TB",
+   "unused_price": 225000,
+   "used_max": 220000,
+   "used_min": 176000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "海外版SIMフリー iPhone17 Pro MAX 1TB",
+   "unused_price": 158000,
+   "used_max": 154000,
+   "used_min": 123000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "docomo版SIMフリー iPhone17 Pro MAX 2TB",
+   "unused_price": 255000,
+   "used_max": 235000,
+   "used_min": 188000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "au版SIMフリー iPhone17 Pro MAX 2TB",
+   "unused_price": 255000,
+   "used_max": 235000,
+   "used_min": 188000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "SoftBank版SIMフリー iPhone17 Pro MAX 2TB",
+   "unused_price": 255000,
+   "used_max": 235000,
+   "used_min": 188000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "Rakuten版SIMフリー iPhone17 Pro MAX 2TB",
+   "unused_price": 255000,
+   "used_max": 235000,
+   "used_min": 188000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "国内版SIMフリー iPhone17 Pro MAX 2TB",
+   "unused_price": 255000,
+   "used_max": 235000,
+   "used_min": 188000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
+   "name": "海外版SIMフリー iPhone17 Pro MAX 2TB",
+   "unused_price": 179000,
+   "used_max": 164000,
+   "used_min": 131000,
+   "brand": "iphone",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
+  },
+  {
    "name": "docomo版SIMフリー iPhone Air 256GB",
-   "unused_price": 120000,
-   "used_max": 111000,
-   "used_min": 89000,
+   "unused_price": 125000,
+   "used_max": 115000,
+   "used_min": 92000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Air 256GB",
-   "unused_price": 120000,
-   "used_max": 111000,
-   "used_min": 89000,
+   "unused_price": 125000,
+   "used_max": 115000,
+   "used_min": 92000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Air 256GB",
-   "unused_price": 120000,
-   "used_max": 111000,
-   "used_min": 89000,
+   "unused_price": 125000,
+   "used_max": 115000,
+   "used_min": 92000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 256GB",
-   "unused_price": 120000,
-   "used_max": 111000,
-   "used_min": 89000,
+   "unused_price": 125000,
+   "used_max": 115000,
+   "used_min": 92000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Air 256GB",
-   "unused_price": 120000,
-   "used_max": 111000,
-   "used_min": 89000,
+   "unused_price": 125000,
+   "used_max": 115000,
+   "used_min": 92000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone Air 256GB",
-   "unused_price": 84000,
-   "used_max": 77000,
-   "used_min": 62000,
+   "unused_price": 88000,
+   "used_max": 80000,
+   "used_min": 64000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone Air 512GB",
-   "unused_price": 130000,
-   "used_max": 122000,
-   "used_min": 98000,
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 100000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Air 512GB",
-   "unused_price": 130000,
-   "used_max": 122000,
-   "used_min": 98000,
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 100000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Air 512GB",
-   "unused_price": 130000,
-   "used_max": 122000,
-   "used_min": 98000,
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 100000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 512GB",
-   "unused_price": 130000,
-   "used_max": 122000,
-   "used_min": 98000,
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 100000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Air 512GB",
-   "unused_price": 130000,
-   "used_max": 122000,
-   "used_min": 98000,
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 100000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone Air 512GB",
-   "unused_price": 91000,
-   "used_max": 85000,
-   "used_min": 68000,
+   "unused_price": 95000,
+   "used_max": 87000,
+   "used_min": 70000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone Air 1TB",
-   "unused_price": 140000,
-   "used_max": 136000,
-   "used_min": 109000,
+   "unused_price": 145000,
+   "used_max": 135000,
+   "used_min": 108000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Air 1TB",
-   "unused_price": 140000,
-   "used_max": 136000,
-   "used_min": 109000,
+   "unused_price": 145000,
+   "used_max": 135000,
+   "used_min": 108000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Air 1TB",
-   "unused_price": 140000,
-   "used_max": 136000,
-   "used_min": 109000,
+   "unused_price": 145000,
+   "used_max": 135000,
+   "used_min": 108000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 1TB",
-   "unused_price": 140000,
-   "used_max": 136000,
-   "used_min": 109000,
+   "unused_price": 145000,
+   "used_max": 135000,
+   "used_min": 108000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Air 1TB",
-   "unused_price": 140000,
-   "used_max": 136000,
-   "used_min": 109000,
+   "unused_price": 145000,
+   "used_max": 135000,
+   "used_min": 108000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone Air 1TB",
-   "unused_price": 98000,
-   "used_max": 95000,
-   "used_min": 76000,
+   "unused_price": 102000,
+   "used_max": 94000,
+   "used_min": 75000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
@@ -1799,7 +1799,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone16 128GB",
-   "unused_price": 105000,
+   "unused_price": 110000,
    "used_max": 95000,
    "used_min": 71000,
    "brand": "iphone",
@@ -1807,7 +1807,7 @@
   },
   {
    "name": "au版SIMフリー iPhone16 128GB",
-   "unused_price": 105000,
+   "unused_price": 110000,
    "used_max": 95000,
    "used_min": 71000,
    "brand": "iphone",
@@ -1815,7 +1815,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone16 128GB",
-   "unused_price": 105000,
+   "unused_price": 110000,
    "used_max": 95000,
    "used_min": 71000,
    "brand": "iphone",
@@ -1823,7 +1823,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone16 128GB",
-   "unused_price": 105000,
+   "unused_price": 110000,
    "used_max": 95000,
    "used_min": 71000,
    "brand": "iphone",
@@ -1831,7 +1831,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone16 128GB",
-   "unused_price": 105000,
+   "unused_price": 110000,
    "used_max": 95000,
    "used_min": 71000,
    "brand": "iphone",
@@ -1839,7 +1839,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone16 128GB",
-   "unused_price": 74000,
+   "unused_price": 77000,
    "used_max": 66000,
    "used_min": 49000,
    "brand": "iphone",
@@ -1847,7 +1847,7 @@
   },
   {
    "name": "香港版SIMフリー iPhone16 128GB",
-   "unused_price": 74000,
+   "unused_price": 77000,
    "used_max": 66000,
    "used_min": 49000,
    "brand": "iphone",
@@ -1855,7 +1855,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone16 256GB",
-   "unused_price": 116000,
+   "unused_price": 120000,
    "used_max": 105000,
    "used_min": 79000,
    "brand": "iphone",
@@ -1863,7 +1863,7 @@
   },
   {
    "name": "au版SIMフリー iPhone16 256GB",
-   "unused_price": 116000,
+   "unused_price": 120000,
    "used_max": 105000,
    "used_min": 79000,
    "brand": "iphone",
@@ -1871,7 +1871,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone16 256GB",
-   "unused_price": 116000,
+   "unused_price": 120000,
    "used_max": 105000,
    "used_min": 79000,
    "brand": "iphone",
@@ -1879,7 +1879,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone16 256GB",
-   "unused_price": 116000,
+   "unused_price": 120000,
    "used_max": 105000,
    "used_min": 79000,
    "brand": "iphone",
@@ -1887,7 +1887,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone16 256GB",
-   "unused_price": 116000,
+   "unused_price": 120000,
    "used_max": 105000,
    "used_min": 79000,
    "brand": "iphone",
@@ -1895,7 +1895,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone16 256GB",
-   "unused_price": 81000,
+   "unused_price": 84000,
    "used_max": 73000,
    "used_min": 55000,
    "brand": "iphone",
@@ -1903,7 +1903,7 @@
   },
   {
    "name": "香港版SIMフリー iPhone16 256GB",
-   "unused_price": 81000,
+   "unused_price": 84000,
    "used_max": 73000,
    "used_min": 55000,
    "brand": "iphone",
@@ -1911,7 +1911,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone16 512GB",
-   "unused_price": 126000,
+   "unused_price": 130000,
    "used_max": 115000,
    "used_min": 86000,
    "brand": "iphone",
@@ -1919,7 +1919,7 @@
   },
   {
    "name": "au版SIMフリー iPhone16 512GB",
-   "unused_price": 126000,
+   "unused_price": 130000,
    "used_max": 115000,
    "used_min": 86000,
    "brand": "iphone",
@@ -1927,7 +1927,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone16 512GB",
-   "unused_price": 126000,
+   "unused_price": 130000,
    "used_max": 115000,
    "used_min": 86000,
    "brand": "iphone",
@@ -1935,7 +1935,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone16 512GB",
-   "unused_price": 126000,
+   "unused_price": 130000,
    "used_max": 115000,
    "used_min": 86000,
    "brand": "iphone",
@@ -1943,7 +1943,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone16 512GB",
-   "unused_price": 126000,
+   "unused_price": 130000,
    "used_max": 115000,
    "used_min": 86000,
    "brand": "iphone",
@@ -1951,7 +1951,7 @@
   },
   {
    "name": "海外版SIMフリー iPhone16 512GB",
-   "unused_price": 88000,
+   "unused_price": 91000,
    "used_max": 80000,
    "used_min": 60000,
    "brand": "iphone",
@@ -1959,7 +1959,7 @@
   },
   {
    "name": "香港版SIMフリー iPhone16 512GB",
-   "unused_price": 88000,
+   "unused_price": 91000,
    "used_max": 80000,
    "used_min": 60000,
    "brand": "iphone",
@@ -1968,384 +1968,384 @@
   {
    "name": "docomo版SIMフリー iPhone15 Pro Max 256GB",
    "unused_price": 122000,
-   "used_max": 111000,
-   "used_min": 83000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro Max 256GB",
    "unused_price": 122000,
-   "used_max": 111000,
-   "used_min": 83000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro Max 256GB",
    "unused_price": 122000,
-   "used_max": 111000,
-   "used_min": 83000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro Max 256GB",
    "unused_price": 122000,
-   "used_max": 111000,
-   "used_min": 83000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro Max 256GB",
    "unused_price": 122000,
-   "used_max": 111000,
-   "used_min": 83000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro Max 256GB",
    "unused_price": 85000,
-   "used_max": 77000,
-   "used_min": 58000,
+   "used_max": 81000,
+   "used_min": 60000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "香港版SIMフリー iPhone15 Pro Max 256GB",
    "unused_price": 85000,
-   "used_max": 77000,
-   "used_min": 58000,
+   "used_max": 81000,
+   "used_min": 60000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone15 Pro Max 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 87000,
+   "used_max": 126000,
+   "used_min": 95000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro Max 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 87000,
+   "used_max": 126000,
+   "used_min": 95000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro Max 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 87000,
+   "used_max": 126000,
+   "used_min": 95000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro Max 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 87000,
+   "used_max": 126000,
+   "used_min": 95000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro Max 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 87000,
+   "used_max": 126000,
+   "used_min": 95000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro Max 512GB",
    "unused_price": 92000,
-   "used_max": 81000,
-   "used_min": 60000,
+   "used_max": 88000,
+   "used_min": 66000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "香港版SIMフリー iPhone15 Pro Max 512GB",
    "unused_price": 92000,
-   "used_max": 81000,
-   "used_min": 60000,
+   "used_max": 88000,
+   "used_min": 66000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone15 Pro Max 1TB",
    "unused_price": 141000,
-   "used_max": 126000,
-   "used_min": 95000,
+   "used_max": 136000,
+   "used_min": 102000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro Max 1TB",
    "unused_price": 141000,
-   "used_max": 126000,
-   "used_min": 95000,
+   "used_max": 136000,
+   "used_min": 102000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro Max 1TB",
    "unused_price": 141000,
-   "used_max": 126000,
-   "used_min": 95000,
+   "used_max": 136000,
+   "used_min": 102000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro Max 1TB",
    "unused_price": 141000,
-   "used_max": 126000,
-   "used_min": 95000,
+   "used_max": 136000,
+   "used_min": 102000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro Max 1TB",
    "unused_price": 141000,
-   "used_max": 126000,
-   "used_min": 95000,
+   "used_max": 136000,
+   "used_min": 102000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro Max 1TB",
    "unused_price": 99000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "used_max": 95000,
+   "used_min": 71000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "香港版SIMフリー iPhone15 Pro Max 1TB",
    "unused_price": 99000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "used_max": 95000,
+   "used_min": 71000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone15 Pro 128GB",
-   "unused_price": 92000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "unused_price": 95000,
+   "used_max": 91000,
+   "used_min": 68000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro 128GB",
-   "unused_price": 92000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "unused_price": 95000,
+   "used_max": 91000,
+   "used_min": 68000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro 128GB",
-   "unused_price": 92000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "unused_price": 95000,
+   "used_max": 91000,
+   "used_min": 68000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro 128GB",
-   "unused_price": 92000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "unused_price": 95000,
+   "used_max": 91000,
+   "used_min": 68000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro 128GB",
-   "unused_price": 92000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "unused_price": 95000,
+   "used_max": 91000,
+   "used_min": 68000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro 128GB",
-   "unused_price": 64000,
-   "used_max": 61000,
-   "used_min": 46000,
+   "unused_price": 67000,
+   "used_max": 63000,
+   "used_min": 47000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "香港版SIMフリー iPhone15 Pro 128GB",
-   "unused_price": 64000,
-   "used_max": 61000,
-   "used_min": 46000,
+   "unused_price": 67000,
+   "used_max": 63000,
+   "used_min": 47000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone15 Pro 256GB",
-   "unused_price": 102000,
-   "used_max": 98000,
-   "used_min": 74000,
+   "unused_price": 105000,
+   "used_max": 101000,
+   "used_min": 76000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro 256GB",
-   "unused_price": 102000,
-   "used_max": 98000,
-   "used_min": 74000,
+   "unused_price": 105000,
+   "used_max": 101000,
+   "used_min": 76000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro 256GB",
-   "unused_price": 102000,
-   "used_max": 98000,
-   "used_min": 74000,
+   "unused_price": 105000,
+   "used_max": 101000,
+   "used_min": 76000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro 256GB",
-   "unused_price": 102000,
-   "used_max": 98000,
-   "used_min": 74000,
+   "unused_price": 105000,
+   "used_max": 101000,
+   "used_min": 76000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro 256GB",
-   "unused_price": 102000,
-   "used_max": 98000,
-   "used_min": 74000,
+   "unused_price": 105000,
+   "used_max": 101000,
+   "used_min": 76000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro 256GB",
-   "unused_price": 71000,
-   "used_max": 68000,
-   "used_min": 51000,
+   "unused_price": 74000,
+   "used_max": 70000,
+   "used_min": 53000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "香港版SIMフリー iPhone15 Pro 256GB",
-   "unused_price": 71000,
-   "used_max": 68000,
-   "used_min": 51000,
+   "unused_price": 74000,
+   "used_max": 70000,
+   "used_min": 53000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone15 Pro 512GB",
-   "unused_price": 111000,
-   "used_max": 102000,
-   "used_min": 77000,
+   "unused_price": 115000,
+   "used_max": 111000,
+   "used_min": 83000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro 512GB",
-   "unused_price": 111000,
-   "used_max": 102000,
-   "used_min": 77000,
+   "unused_price": 115000,
+   "used_max": 111000,
+   "used_min": 83000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro 512GB",
-   "unused_price": 111000,
-   "used_max": 102000,
-   "used_min": 77000,
+   "unused_price": 115000,
+   "used_max": 111000,
+   "used_min": 83000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro 512GB",
-   "unused_price": 111000,
-   "used_max": 102000,
-   "used_min": 77000,
+   "unused_price": 115000,
+   "used_max": 111000,
+   "used_min": 83000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro 512GB",
-   "unused_price": 111000,
-   "used_max": 102000,
-   "used_min": 77000,
+   "unused_price": 115000,
+   "used_max": 111000,
+   "used_min": 83000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro 512GB",
-   "unused_price": 78000,
-   "used_max": 71000,
-   "used_min": 53000,
+   "unused_price": 81000,
+   "used_max": 77000,
+   "used_min": 58000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone15 Pro 1TB",
    "unused_price": 121000,
-   "used_max": 112000,
-   "used_min": 84000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone15 Pro 1TB",
    "unused_price": 121000,
-   "used_max": 112000,
-   "used_min": 84000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone15 Pro 1TB",
    "unused_price": 121000,
-   "used_max": 112000,
-   "used_min": 84000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone15 Pro 1TB",
    "unused_price": 121000,
-   "used_max": 112000,
-   "used_min": 84000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone15 Pro 1TB",
    "unused_price": 121000,
-   "used_max": 112000,
-   "used_min": 84000,
+   "used_max": 116000,
+   "used_min": 87000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone15 Pro 1TB",
    "unused_price": 85000,
-   "used_max": 78000,
-   "used_min": 58000,
+   "used_max": 81000,
+   "used_min": 60000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "香港版SIMフリー iPhone15 Pro 1TB",
    "unused_price": 85000,
-   "used_max": 78000,
-   "used_min": 58000,
+   "used_max": 81000,
+   "used_min": 60000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
@@ -19831,7 +19831,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 256GB",
-   "unused_price": 124000,
+   "unused_price": 135000,
    "used_max": 116000,
    "used_min": 93000,
    "brand": "rakuten",
@@ -19839,7 +19839,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 512GB",
-   "unused_price": 151000,
+   "unused_price": 160000,
    "used_max": 141000,
    "used_min": 113000,
    "brand": "rakuten",
@@ -19848,80 +19848,80 @@
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro 256GB",
    "unused_price": 166000,
-   "used_max": 154000,
-   "used_min": 123000,
+   "used_max": 150000,
+   "used_min": 120000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro 512GB",
    "unused_price": 190000,
-   "used_max": 185000,
-   "used_min": 148000,
+   "used_max": 180000,
+   "used_min": 144000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro 1TB",
-   "unused_price": 216000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "unused_price": 220000,
+   "used_max": 195000,
+   "used_min": 156000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro MAX 256GB",
-   "unused_price": 176000,
-   "used_max": 170000,
-   "used_min": 136000,
+   "unused_price": 180000,
+   "used_max": 168000,
+   "used_min": 134000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro MAX 512GB",
    "unused_price": 205000,
-   "used_max": 200000,
-   "used_min": 160000,
+   "used_max": 198000,
+   "used_min": 158000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro MAX 1TB",
-   "unused_price": 230000,
-   "used_max": 225000,
-   "used_min": 180000,
+   "unused_price": 225000,
+   "used_max": 220000,
+   "used_min": 176000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone17 Pro MAX 2TB",
-   "unused_price": 251000,
-   "used_max": 240000,
-   "used_min": 192000,
+   "unused_price": 255000,
+   "used_max": 235000,
+   "used_min": 188000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 256GB",
-   "unused_price": 120000,
-   "used_max": 111000,
-   "used_min": 89000,
+   "unused_price": 125000,
+   "used_max": 115000,
+   "used_min": 92000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 512GB",
-   "unused_price": 130000,
-   "used_max": 122000,
-   "used_min": 98000,
+   "unused_price": 135000,
+   "used_max": 125000,
+   "used_min": 100000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Air 1TB",
-   "unused_price": 140000,
-   "used_max": 136000,
-   "used_min": 109000,
+   "unused_price": 145000,
+   "used_max": 135000,
+   "used_min": 108000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
@@ -19951,7 +19951,7 @@
   },
   {
    "name": "Rakuten iPhone16 128GB",
-   "unused_price": 105000,
+   "unused_price": 110000,
    "used_max": 95000,
    "used_min": 71000,
    "brand": "rakuten",
@@ -19959,7 +19959,7 @@
   },
   {
    "name": "Rakuten iPhone16 256GB",
-   "unused_price": 116000,
+   "unused_price": 120000,
    "used_max": 105000,
    "used_min": 79000,
    "brand": "rakuten",
@@ -19967,7 +19967,7 @@
   },
   {
    "name": "Rakuten iPhone16 512GB",
-   "unused_price": 126000,
+   "unused_price": 130000,
    "used_max": 115000,
    "used_min": 86000,
    "brand": "rakuten",
@@ -20103,57 +20103,57 @@
   },
   {
    "name": "Rakuten iPhone15 Pro 128GB",
-   "unused_price": 92000,
-   "used_max": 88000,
-   "used_min": 66000,
+   "unused_price": 95000,
+   "used_max": 91000,
+   "used_min": 68000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten iPhone15 Pro 256GB",
-   "unused_price": 102000,
-   "used_max": 98000,
-   "used_min": 74000,
+   "unused_price": 105000,
+   "used_max": 101000,
+   "used_min": 76000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "Rakuten iPhone15 Pro 512GB",
-   "unused_price": 111000,
-   "used_max": 102000,
-   "used_min": 77000,
-   "brand": "rakuten",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
-  },
-  {
-   "name": "Rakuten iPhone15 Pro 1TB",
-   "unused_price": 121000,
-   "used_max": 112000,
-   "used_min": 84000,
-   "brand": "rakuten",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
-  },
-  {
-   "name": "Rakuten iPhone15 Pro Max 256GB",
-   "unused_price": 122000,
+   "unused_price": 115000,
    "used_max": 111000,
    "used_min": 83000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
-   "name": "Rakuten iPhone15 Pro Max 512GB",
-   "unused_price": 131000,
+   "name": "Rakuten iPhone15 Pro 1TB",
+   "unused_price": 121000,
    "used_max": 116000,
    "used_min": 87000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
-   "name": "Rakuten iPhone15 Pro Max 1TB",
-   "unused_price": 141000,
+   "name": "Rakuten iPhone15 Pro Max 256GB",
+   "unused_price": 122000,
+   "used_max": 116000,
+   "used_min": 87000,
+   "brand": "rakuten",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
+  },
+  {
+   "name": "Rakuten iPhone15 Pro Max 512GB",
+   "unused_price": 131000,
    "used_max": 126000,
    "used_min": 95000,
+   "brand": "rakuten",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
+  },
+  {
+   "name": "Rakuten iPhone15 Pro Max 1TB",
+   "unused_price": 141000,
+   "used_max": 136000,
+   "used_min": 102000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
