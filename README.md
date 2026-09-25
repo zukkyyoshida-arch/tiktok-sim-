@@ -74,8 +74,21 @@ git add data_snapshots/iosys_sale_snapshot.json
 git commit -m "chore: 販売相場スナップショットを更新"
 ```
 
+## モバイル版（`mobile/`）
+
+スマホで「今日の成功数」「機種別の相場」をサッと見るための軽量版。本家と同じ GAS データを
+縦画面向けに絞って表示する（4タブ: 🏠 今日 / 📈 実績 / 👑 親機 / 💴 相場）。
+Streamlit Cloud では **Main file path に `mobile/app.py` を指定して別アプリとして**デプロイする
+（本家 URL には影響しない）。詳細・ホーム画面への追加方法は [`mobile/README.md`](mobile/README.md)。
+
+```bash
+streamlit run mobile/app.py            # ローカル起動
+python3 -m pytest mobile/test_analytics.py && python3 mobile/smoke_test.py   # テスト
+```
+
 ## 注記
 
 - `Antigravty/` は本アプリと無関係な別アプリ群。同名の `app.py` を含むため
   編集時は対象フォルダを取り違えないこと
+- `mobile/app.py` はモバイル版の本体。ルートの `app.py`（PC版）とは別物なので同様に注意
 - `scratch/` は使い捨てスクリプト置き場。git管理外（.gitignoreで除外）

@@ -1,0 +1,20 @@
+# モバイル版の Streamlit 設定（ダークテーマ固定・本家PC版と同じ黒基調）。
+# Streamlit はカレントディレクトリの .streamlit/config.toml に加えて、
+# メインスクリプト（mobile/app.py）と同じディレクトリの .streamlit/config.toml も読むため、
+# リポジトリのルートから `streamlit run mobile/app.py` で起動しても、Streamlit Cloud で
+# Main file path に mobile/app.py を指定しても、この設定が効く。
+# （本家 app.py はルートに .streamlit/ が無いので影響しない）
+# この [theme] を消すと、アプリは端末のライト/ダーク設定に追従する（両テーマ対応済み）。
+
+[theme]
+base = "dark"
+primaryColor = "#3b82f6"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#0f0f10"
+textColor = "#e0e0e0"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false
