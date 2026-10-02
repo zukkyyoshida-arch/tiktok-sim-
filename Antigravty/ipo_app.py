@@ -1080,28 +1080,55 @@ def filter_solid_double(df_scored):
 # ==========================================
 # 6. Gemini AI & ローカルOllama AI 定性要約診断
 # ==========================================
-def call_ollama(prompt, model="elyza:8b"):
+# ---- ローカルOllama設定（M1 MacBook 16GB向け） ----
+# 本命: Qwen3.5 9B（約6.6GB）。日本語の要約・定性診断で ELYZA 8B より高精度。
+# 代替: Qwen3.5 4B（約3.4GB）。本命が未インストール等で使えないときに同系統で品質を揃える。
+#   導入: ollama pull qwen3.5:9b  （代替も入れる場合は ollama pull qwen3.5:4b）
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "qwen3.5:9b"
+OLLAMA_FALLBACK_MODEL = "qwen3.5:4b"
+OLLAMA_KEEP_ALIVE = "30m"   # 既定5分だと呼ぶたびに再ロードが走るため常駐時間を延ばす
+OLLAMA_TIMEOUT_SEC = 60     # 初回はモデルロード（数秒〜10秒）が乗るので余裕を持たせる
+OLLAMA_OPTIONS = {
+    "temperature": 0.3,
+    "num_ctx": 4096,        # 3行要約には十分。既定の長大ctxはKVキャッシュでメモリを食うため抑える
+    "num_predict": 400,     # 暴走防止。3行要約なら十分な上限
+}
+_THINK_TAG_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
+
+
+def call_ollama(prompt, model=OLLAMA_MODEL):
     """
-    ローカルのOllamaサーバーから推論結果を取得する（日本語特化ELYZAを最優先、Llama3をフォールバック）
+    ローカルのOllamaサーバーから推論結果を取得する。
+    Qwen3.5 9B を最優先し、失敗時（未インストール・タイムアウト・空応答）は Qwen3.5 4B で再試行する。
+    - think=False: Qwen3.5の思考モードを切り、短文要約を即答型にする（旧Ollamaが無視した場合に備え
+      <think>タグも除去する）
+    - keep_alive: Streamlitから連続して呼ぶ際の再ロードを避ける
     """
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "think": False,
+        "keep_alive": OLLAMA_KEEP_ALIVE,
+        "options": OLLAMA_OPTIONS,
+    }
+    text = None
     try:
-        import requests
-        url = "http://localhost:11434/api/generate"
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.3
-            }
-        }
-        response = requests.post(url, json=payload, timeout=25)
+        response = requests.post(OLLAMA_URL, json=payload, timeout=OLLAMA_TIMEOUT_SEC)
         if response.status_code == 200:
-            return response.json().get("response", "").strip()
+            text = response.json().get("response", "")
     except Exception:
-        # elyza:8bがエラー（未インストール等）の場合は llama3 で試行
-        if model == "elyza:8b":
-            return call_ollama(prompt, model="llama3")
+        text = None
+
+    if text:
+        text = _THINK_TAG_RE.sub("", text).strip()
+    if text:
+        return text
+
+    # 本命モデルで失敗（HTTPエラー・例外・空応答）した場合のみ、同系統の小型モデルで1回だけ再試行
+    if model == OLLAMA_MODEL and OLLAMA_FALLBACK_MODEL != OLLAMA_MODEL:
+        return call_ollama(prompt, model=OLLAMA_FALLBACK_MODEL)
     return None
 
 @st.cache_data(ttl=86400)
