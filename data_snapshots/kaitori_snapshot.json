@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-06T02:30:45+09:00",
+ "fetched_at": "2026-10-07T02:30:43+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -14623,9 +14623,9 @@
   },
   {
    "name": "国内版SIMフリー moto g06 国内版",
-   "unused_price": 15000,
-   "used_max": 13000,
-   "used_min": 9000,
+   "unused_price": 12000,
+   "used_max": 10000,
+   "used_min": 7000,
    "brand": "motorola",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/motorola/"
   },
