@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-08T02:30:40+09:00",
+ "fetched_at": "2026-10-09T02:30:42+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -19,7 +19,7 @@
  ],
  "errors": [],
  "carried_over_brands": [],
- "row_count": 2630,
+ "row_count": 2650,
  "rows": [
   {
    "name": "docomo版SIMフリー iPhone18 Pro Max 256GB",
@@ -7126,6 +7126,14 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
+   "name": "mineo版SIMフリー Xperia10 VII mineo版",
+   "unused_price": 51000,
+   "used_max": 47000,
+   "used_min": 32000,
+   "brand": "xperia",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
+  },
+  {
    "name": "docomo版SIMフリー Xperia1 VII SO-51F docomo版 12GB/256GB",
    "unused_price": 105000,
    "used_max": 96000,
@@ -7242,6 +7250,14 @@
    "unused_price": 37000,
    "used_max": 31000,
    "used_min": 23000,
+   "brand": "xperia",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
+  },
+  {
+   "name": "mineo版SIMフリー Xperia10 VI mineo版",
+   "unused_price": 37000,
+   "used_max": 31000,
+   "used_min": 21000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
@@ -13174,6 +13190,22 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
+   "name": "docomo版SIMフリー arrows Alpha2 F-51G docomo版 256GB",
+   "unused_price": 63000,
+   "used_max": 58000,
+   "used_min": 40000,
+   "brand": "arrows",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/arrows/"
+  },
+  {
+   "name": "docomo版SIMフリー arrows Alpha2 F-51G docomo版 512GB",
+   "unused_price": 70000,
+   "used_max": 63000,
+   "used_min": 44000,
+   "brand": "arrows",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/arrows/"
+  },
+  {
    "name": "docomo版SIMフリー arrows We3 F-52G docomo版SIMフリー",
    "unused_price": 17000,
    "used_max": 15000,
@@ -13306,6 +13338,14 @@
    "unused_price": 15000,
    "used_max": 13000,
    "used_min": 9000,
+   "brand": "arrows",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/arrows/"
+  },
+  {
+   "name": "docomo版SIMフリー arrows N F-51C docomo版",
+   "unused_price": 13000,
+   "used_max": 12000,
+   "used_min": 8000,
    "brand": "arrows",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/arrows/"
   },
@@ -15022,7 +15062,39 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/motorola/"
   },
   {
-   "name": "docomo版SIMフリー AQUOS R11 SH-51G docomo版SIMフリー",
+   "name": "mineo AQUOS wish6 SH-M36 mineo版",
+   "unused_price": 31000,
+   "used_max": 26000,
+   "used_min": 18000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "楽天版SIMフリー AQUOS wish6 SH-M36 楽天版",
+   "unused_price": 31000,
+   "used_max": 26000,
+   "used_min": 18000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "国内版SIMフリー AQUOS wish6 SH-M36 国内版",
+   "unused_price": 31000,
+   "used_max": 26000,
+   "used_min": 18000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "Ymobile版SIMフリー AQUOS wish6 A603SH Ymobile版SIMフリー",
+   "unused_price": 31000,
+   "used_max": 26000,
+   "used_min": 18000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "docomo版SIMフリー AQUOS R11 SH-51G docomo版",
    "unused_price": 105000,
    "used_max": 95000,
    "used_min": 66000,
@@ -15030,7 +15102,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
-   "name": "SoftBank版SIMフリー AQUOS R11 A601SH SoftBank版SIMフリー",
+   "name": "SoftBank版SIMフリー AQUOS R11 A601SH SoftBank版",
    "unused_price": 105000,
    "used_max": 95000,
    "used_min": 66000,
@@ -15042,6 +15114,78 @@
    "unused_price": 115000,
    "used_max": 105000,
    "used_min": 73000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "docomo版SIMフリー AQUOS sense10 SH-53F docomo版",
+   "unused_price": 48000,
+   "used_max": 45000,
+   "used_min": 31000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "au版SIM版フリー AQUOS sense10 SHG15 au版",
+   "unused_price": 48000,
+   "used_max": 45000,
+   "used_min": 31000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "SoftBank版SIMフリー AQUOS sense10 A505SH SoftBank版",
+   "unused_price": 48000,
+   "used_max": 45000,
+   "used_min": 31000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "mineo AQUOS sense10 SH-M33 mineo版 128GB",
+   "unused_price": 48000,
+   "used_max": 45000,
+   "used_min": 31000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "楽天版SIMフリー AQUOS sense10 SH-M33 楽天版 128GB",
+   "unused_price": 48000,
+   "used_max": 45000,
+   "used_min": 31000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "国内版SIMフリー AQUOS sense10 SH-M33 国内版 128GB",
+   "unused_price": 48000,
+   "used_max": 45000,
+   "used_min": 31000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "mineo AQUOS sense10 SH-M33 mineo版 256GB",
+   "unused_price": 51000,
+   "used_max": 48000,
+   "used_min": 33000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "楽天版SIMフリー AQUOS sense10 SH-M33 楽天版 256GB",
+   "unused_price": 51000,
+   "used_max": 48000,
+   "used_min": 33000,
+   "brand": "aquos",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
+  },
+  {
+   "name": "国内版SIMフリー AQUOS sense10 SH-M33 国内版 256GB",
+   "unused_price": 51000,
+   "used_max": 48000,
+   "used_min": 33000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -17052,6 +17196,22 @@
    "used_min": 0,
    "brand": "huawei",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/huawei/"
+  },
+  {
+   "name": "国内版SIMフリー POCO F9 Ultra 国内版 512GB",
+   "unused_price": 115000,
+   "used_max": 105000,
+   "used_min": 73000,
+   "brand": "xiaomi",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xiaomi/"
+  },
+  {
+   "name": "国内版SIMフリー POCO F9 Ultra 国内版 256GB",
+   "unused_price": 100000,
+   "used_max": 90000,
+   "used_min": 63000,
+   "brand": "xiaomi",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xiaomi/"
   },
   {
    "name": "国内版SIMフリー REDMI17 5G 国内版 256GB",
