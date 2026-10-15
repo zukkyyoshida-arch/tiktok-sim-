@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-15T02:30:42+09:00",
+ "fetched_at": "2026-10-16T02:30:41+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -19,7 +19,7 @@
  ],
  "errors": [],
  "carried_over_brands": [],
- "row_count": 2650,
+ "row_count": 2654,
  "rows": [
   {
    "name": "docomo版SIMフリー iPhone18 Pro Max 256GB",
@@ -7038,7 +7038,39 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
-   "name": "docomo版SIMフリー Xperia1 VIII SO-51G docomo版SIMフリー 12GB/256GB",
+   "name": "docomo版SIMフリー Xperia10 VIII SO-52G",
+   "unused_price": 65000,
+   "used_max": 61000,
+   "used_min": 42000,
+   "brand": "xperia",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
+  },
+  {
+   "name": "au版SIMフリー Xperia10 VIII SOG18",
+   "unused_price": 65000,
+   "used_max": 61000,
+   "used_min": 42000,
+   "brand": "xperia",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
+  },
+  {
+   "name": "SoftBank版SIMフリー Xperia10 VIII A602SO",
+   "unused_price": 65000,
+   "used_max": 61000,
+   "used_min": 42000,
+   "brand": "xperia",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
+  },
+  {
+   "name": "国内版SIMフリー Xperia10 VIII 国内版",
+   "unused_price": 71000,
+   "used_max": 61000,
+   "used_min": 45000,
+   "brand": "xperia",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
+  },
+  {
+   "name": "docomo版SIMフリー Xperia1 VIII SO-51G docomo版 12GB/256GB",
    "unused_price": 171000,
    "used_max": 151000,
    "used_min": 113000,
@@ -7046,7 +7078,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
-   "name": "au版SIMフリー Xperia1 VIII SOG17 au版SIMフリー 12GB/256GB",
+   "name": "au版SIMフリー Xperia1 VIII SOG17 au版 12GB/256GB",
    "unused_price": 171000,
    "used_max": 151000,
    "used_min": 113000,
@@ -7054,7 +7086,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
-   "name": "SoftBank版SIMフリー Xperia1 VIII A601SO SoftBank版SIMフリー 12GB/256GB",
+   "name": "SoftBank版SIMフリー Xperia1 VIII A601SO SoftBank版 12GB/256GB",
    "unused_price": 171000,
    "used_max": 151000,
    "used_min": 113000,
@@ -7062,7 +7094,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
-   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版SIMフリー 16GB/1TB",
+   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版 16GB/1TB",
    "unused_price": 201000,
    "used_max": 171000,
    "used_min": 128000,
@@ -7070,7 +7102,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
-   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版SIMフリー 12GB/256GB",
+   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版 12GB/256GB",
    "unused_price": 171000,
    "used_max": 151000,
    "used_min": 113000,
@@ -7078,7 +7110,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
-   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版SIMフリー 12GB/512GB",
+   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版 12GB/512GB",
    "unused_price": 176000,
    "used_max": 156000,
    "used_min": 117000,
@@ -7086,7 +7118,7 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
-   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版SIMフリー 16GB/512GB",
+   "name": "国内版SIMフリー Xperia1 VIII XQ-GE44 国内版 16GB/512GB",
    "unused_price": 191000,
    "used_max": 161000,
    "used_min": 120000,
@@ -18775,9 +18807,9 @@
   },
   {
    "name": "国内版 SIMフリー Find X9 Ultra 国内版",
-   "unused_price": 180000,
-   "used_max": 160000,
-   "used_min": 112000,
+   "unused_price": 170000,
+   "used_max": 156000,
+   "used_min": 109000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
@@ -18823,9 +18855,9 @@
   },
   {
    "name": "国内版 OPPO Find N6 国内版 16GB/512GB",
-   "unused_price": 196000,
-   "used_max": 186000,
-   "used_min": 130000,
+   "unused_price": 191000,
+   "used_max": 181000,
+   "used_min": 126000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
@@ -20687,41 +20719,41 @@
   },
   {
    "name": "SIMフリー Rakuten Hand 5G P780",
-   "unused_price": 10000,
-   "used_max": 7000,
-   "used_min": 4000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー Rakuten BIG s 3917JR",
-   "unused_price": 11000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー Rakuten Hand P710",
-   "unused_price": 8000,
-   "used_max": 3500,
-   "used_min": 2000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー Rakuten Mini",
-   "unused_price": 5500,
-   "used_max": 3500,
-   "used_min": 2000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー Rakuten BIG ZR01",
-   "unused_price": 10000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 0,
+   "used_max": 0,
+   "used_min": 0,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
