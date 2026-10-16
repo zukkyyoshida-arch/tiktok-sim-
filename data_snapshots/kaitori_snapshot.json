@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-16T02:30:41+09:00",
+ "fetched_at": "2026-10-17T02:30:43+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -12695,9 +12695,9 @@
   },
   {
    "name": "SIMフリー Pixel Tablet",
-   "unused_price": 38000,
-   "used_max": 32000,
-   "used_min": 22000,
+   "unused_price": 36000,
+   "used_max": 30000,
+   "used_min": 20000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -14679,17 +14679,17 @@
   },
   {
    "name": "国内版SIMフリー motorola edge60 国内版 8GB/128GB",
-   "unused_price": 34000,
-   "used_max": 31000,
-   "used_min": 21000,
+   "unused_price": 28000,
+   "used_max": 25000,
+   "used_min": 17000,
    "brand": "motorola",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/motorola/"
   },
   {
    "name": "UQmobile版 motorola edge60 UQmobile版",
-   "unused_price": 31000,
-   "used_max": 29000,
-   "used_min": 20000,
+   "unused_price": 28000,
+   "used_max": 25000,
+   "used_min": 17000,
    "brand": "motorola",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/motorola/"
   },
