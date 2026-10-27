@@ -74,6 +74,12 @@ git add data_snapshots/iosys_sale_snapshot.json
 git commit -m "chore: 販売相場スナップショットを更新"
 ```
 
+## セキュリティ運用メモ
+
+- **Tailscale「Tailworm」(2026-10-25 公開、CVE 未割当・修正版未公開)**: アプリ本体は無関係だが、
+  Tailscale を入れている運用機（M1 サーバー等）は対象。手順は
+  `docs/tailscale_tailworm_2026-10.md`、点検は `bash tools/tailscale_security_check.sh`
+
 ## 注記
 
 - `Antigravty/` は本アプリと無関係な別アプリ群。同名の `app.py` を含むため
