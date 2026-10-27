@@ -1,9 +1,10 @@
 {
- "fetched_at": "2026-10-27T02:33:19+09:00",
+ "fetched_at": "2026-10-28T02:34:21+09:00",
  "source": "https://iosys.co.jp/items",
  "note": "中古相場タブの既定表示元。ライブ取得は「🔄 相場を再取得」ボタンを押したときのみ行う。更新は tools/update_iosys_snapshot.py。",
  "model_count": 112,
  "carried_over_models": [
+  "Xperia5 IV",
   "Xperia 10 IV SO-52C",
   "AQUOS sense7",
   "Galaxy A32 5G",
@@ -14,15 +15,18 @@
   "Xperia 5 III",
   "AQUOS wish2",
   "Galaxy A23 5G",
+  "Galaxy A30",
   "OPPO A54 5G",
+  "Xperia 10 IV A202SO",
+  "AQUOS wish3",
   "Galaxy A51 5G",
   "Galaxy A21",
   "OPPO reno3 A",
   "AQUOS zero6",
-  "HUAWEI P30 lite",
-  "HUAWEI P20 lite",
+  "OPPO Reno A",
   "Pixel 6",
   "Redmi 12 5G",
+  "Redmi Note 10 T",
   "android one s9",
   "Galaxy S10",
   "Libero 5G III",
@@ -30,12 +34,19 @@
   "OPPO A79 5G",
   "Pixel 5",
   "Pixel 5a",
+  "Redmi Note 10 JE",
   "AQUOS sense3 plus",
   "AQUOS sense7 plus",
-  "arrows 5G",
   "arrows Be4 Plus",
   "Galaxy A20",
+  "Google Pixel 4a",
   "Google Pixel 6a",
+  "iPhone 12",
+  "iPhone 12 mini",
+  "iPhone 8",
+  "iPhone SE2",
+  "iPhone SE3",
+  "iPhone X",
   "iPhone XR",
   "iPhone XS",
   "Pixel 6a",
@@ -86,10 +97,16 @@
   "arrows We": {
    "items": [
     {
-     "name": "arrows We F-51B ホワイト 【docomo版SIMフリー】",
-     "price": 12800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we_f-51b/234485"
+     "name": "arrows We2 F-52E ライトブルー 【docomo版SIMフリー】",
+     "price": 19800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we2_f-52e/338432"
+    },
+    {
+     "name": "arrows We2 F-52E ライトオレンジ 【docomo版SIMフリー】",
+     "price": 19800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we2_f-52e/338433"
     },
     {
      "name": "arrows We F-51B ホワイト 【docomo版SIMフリー】",
@@ -98,46 +115,16 @@
      "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we_f-51b/234484"
     },
     {
-     "name": "arrows We A101FC ホワイト 【SoftBank版SIMフリー】",
-     "price": 13800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/softbank/arrows_we_a101fc/241385"
-    },
-    {
-     "name": "【ネットワーク利用制限－】arrows We F-51B ネイビー 【docomo版SIMフリー】",
-     "price": 11800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we_f-51b/296368"
-    },
-    {
-     "name": "arrows We FCG01 ローズゴールド 【UQmobile版SIMフリー】",
-     "price": 12800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/uqmobile/arrows_we_fcg01/378182"
-    },
-    {
-     "name": "arrows We2 A402FC ライトオレンジ 【SoftBank版SIMフリー】",
+     "name": "arrows We2 F-52E ネイビーグリーン 【docomo版SIMフリー】",
      "price": 19800,
      "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/softbank/arrows_we2_a402fc/350793"
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we2_f-52e/338406"
     },
     {
-     "name": "arrows We2 Plus M06 12GB/256GB スレートグレイ 【国内版SIMフリー】",
-     "price": 29800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/simfree/arrows_we2_plus_m06_12gb_256gb/344347"
-    },
-    {
-     "name": "arrows We FCG01 ブラック 【au版SIMフリー】",
-     "price": 10800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/au/arrows_we_fcg01/236253"
-    },
-    {
-     "name": "arrows We FCG01 ホワイト 【au版SIMフリー】",
-     "price": 12800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/au/arrows_we_fcg01/243361"
+     "name": "arrows We3 F-52G ホワイト 【docomo版SIMフリー】",
+     "price": 24800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we3_f-52g/413266"
     },
     {
      "name": "arrows We3 F-52G ブラック 【docomo版SIMフリー】",
@@ -202,16 +189,40 @@
   "AQUOS wish": {
    "items": [
     {
-     "name": "AQUOS wish3 SH-53D ブラック 【docomo版SIMフリー】",
-     "price": 16800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish3_sh-53d/301638"
+     "name": "AQUOS wish5 SH-52F 64GB ミソラ 【docomo版SIMフリー】",
+     "price": 32800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish5_sh-52f_ミソラ/371073"
     },
     {
-     "name": "AQUOS wish4 SH-M27 ホワイト 【国内版SIMフリー】",
+     "name": "AQUOS wish5 SH-52F 64GB ナデシコ 【docomo版SIMフリー】",
+     "price": 32800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish5_sh-52f_ナデシコ/371074"
+    },
+    {
+     "name": "AQUOS wish5 SH-52F 64GB ワカバ 【docomo版SIMフリー】",
+     "price": 32800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish5_sh-52f_ワカバ/371075"
+    },
+    {
+     "name": "AQUOS wish4 SH-52E ブラック 【docomo版SIMフリー】",
      "price": 21800,
      "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/simfree/aquos_wish4_sh-m27/339394"
+     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish4_sh-52e/332626"
+    },
+    {
+     "name": "AQUOS wish6 SH-M36 ソラ 【Rakuten版SIMフリー】",
+     "price": 47800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/simfree/aquos_wish6_sh-m36_ソラ/440209"
+    },
+    {
+     "name": "AQUOS wish6 SH-M36 ソラ 【国内版SIMフリー】",
+     "price": 43800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/simfree/aquos_wish6_sh-m36_ソラ/439933"
     }
    ],
    "used_query": "AQUOS wish"
@@ -220,15 +231,9 @@
    "items": [
     {
      "name": "OPPO Reno7A A201OP ドリームブルー 【Y!mobile版SIMフリー】",
-     "price": 15800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/reno7a/ymobile/reno7a_a201op/249217"
-    },
-    {
-     "name": "OPPO Reno7A OPG04 スターリーブラック 【au版SIMフリー】",
-     "price": 15800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/reno7a/au/reno7a_opg04/283313"
+     "price": 17800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/reno7a/ymobile/reno7a_a201op/256166"
     }
    ],
    "used_query": "OPPO Reno7 A"
@@ -250,42 +255,6 @@
   },
   "AQUOS sense5G": {
    "items": [
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense5G SH-53A ライトカッパー",
-     "price": 11800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense5g_sh-53a/227255"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense5G SH-53A オリーブシルバー",
-     "price": 11800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense5g/234596"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense5G SH-53A ライトカッパー",
-     "price": 13800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense5g_sh-53a/223219"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense5G SH-53A スカイブルー",
-     "price": 11800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense5g_sh-53a/223348"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense5G SH-53A ニュアンスブラック",
-     "price": 11800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense5g_sh-53a/223449"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense5G SH-53A ライラック",
-     "price": 11800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense5g_sh-53a_ライラック/227256"
-    },
     {
      "name": "【SIMロック解除済】AQUOS sense5G A105SH ライトカッパー 【ジャパネットたかた版SIMフリー】",
      "price": 19800,
@@ -333,7 +302,7 @@
     },
     {
      "name": "AQUOS sense6s SH-M19s-y ブラック 【ジャパネットたかた版SIMフリー】",
-     "price": 19800,
+     "price": 21800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense6s_sh-m19s-y/433961"
     }
@@ -429,34 +398,16 @@
   "AQUOS sense4": {
    "items": [
     {
-     "name": "【SIMロック解除済】Y!mobile AQUOS sense4 basic A003SH シルバー",
-     "price": 17800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/211291"
-    },
-    {
      "name": "AQUOS sense4 SH-M15 ライトカッパー 【OCN版SIMフリー】",
      "price": 10800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/aquos/other/aquos_sense4_sh-m15/254580"
     },
     {
-     "name": "【SIMロック解除済】Y!mobile AQUOS sense4 basic A003SH ブラック",
-     "price": 11800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/219132"
-    },
-    {
-     "name": "AQUOS sense4 lite SH-RM15 ブラック 【Rakuten版SIMフリー】",
-     "price": 9980,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/rakuten/aquos_sense4_lite_sh-rm15/215613"
-    },
-    {
-     "name": "【SIMロック解除済】Y!mobile AQUOS sense4 basic A003SH ライトカッパー",
-     "price": 9980,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/223201"
+     "name": "【SIMロック解除済】Y!mobile AQUOS sense4 basic A003SH シルバー",
+     "price": 17800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/211291"
     }
    ],
    "used_query": "AQUOS sense4"
@@ -526,16 +477,22 @@
   "arrows We2": {
    "items": [
     {
-     "name": "arrows We2 A402FC ライトオレンジ 【SoftBank版SIMフリー】",
+     "name": "arrows We2 F-52E ライトブルー 【docomo版SIMフリー】",
      "price": 19800,
      "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/softbank/arrows_we2_a402fc/350793"
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we2_f-52e/338432"
     },
     {
-     "name": "arrows We2 Plus M06 12GB/256GB スレートグレイ 【国内版SIMフリー】",
-     "price": 29800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/arrows/simfree/arrows_we2_plus_m06_12gb_256gb/344347"
+     "name": "arrows We2 F-52E ライトオレンジ 【docomo版SIMフリー】",
+     "price": 19800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we2_f-52e/338433"
+    },
+    {
+     "name": "arrows We2 F-52E ネイビーグリーン 【docomo版SIMフリー】",
+     "price": 19800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we2_f-52e/338406"
     }
    ],
    "used_query": "arrows We2"
@@ -559,7 +516,7 @@
   },
   "Xperia SO-41B": {
    "items": [],
-   "used_query": "Xperia SO-41 B"
+   "used_query": "Xperia SO-41B"
   },
   "Pixcel 4a": {
    "items": [],
@@ -596,7 +553,7 @@
     },
     {
      "name": "AQUOS sense6s SH-M19s-y ブラック 【ジャパネットたかた版SIMフリー】",
-     "price": 19800,
+     "price": 21800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense6s_sh-m19s-y/433961"
     }
@@ -606,16 +563,16 @@
   "Galaxy A25 5G": {
    "items": [
     {
-     "name": "【ネットワーク利用制限－】Galaxy A25 5G SCG33 ブラック 【au版SIMフリー】",
-     "price": 17800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/439914"
-    },
-    {
      "name": "【ネットワーク利用制限▲】Galaxy A25 5G SM-A253Z ブルー 【Y!mobile版SIMフリー】",
      "price": 19800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/ymobile/galaxy_a25_5g_sm-a253z/360201"
+    },
+    {
+     "name": "Galaxy A25 5G SCG33 ライトブルー 【au版SIMフリー】",
+     "price": 19800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/363638"
     },
     {
      "name": "Galaxy A25 5G SCG33 ブルー 【au版SIMフリー】",
@@ -648,22 +605,10 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/ymobile/galaxy_a25_5g_sm-a253z/363918"
     },
     {
-     "name": "Galaxy A25 5G SCG33 ブルー 【au版SIMフリー】",
-     "price": 17800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/361337"
-    },
-    {
      "name": "Galaxy A25 5G SM-A253C ブラック 【Rakuten版SIMフリー】",
      "price": 17800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/397008"
-    },
-    {
-     "name": "Galaxy A25 5G SCG33 ブルー 【au版SIMフリー】",
-     "price": 24800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/357142"
     },
     {
      "name": "Galaxy A25 5G SM-A253C ブラック 【Rakuten版SIMフリー】",
@@ -678,10 +623,10 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/371524"
     },
     {
-     "name": "Galaxy A25 5G SM-A253C ブラック 【Rakuten版SIMフリー】",
-     "price": 24800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/388850"
+     "name": "Galaxy A25 5G SM-A253C ライトブルー 【Rakuten版SIMフリー】",
+     "price": 21800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/389928"
     },
     {
      "name": "Galaxy A25 5G SM-A253C ブラック 【Rakuten版SIMフリー】",
@@ -696,16 +641,16 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/380698"
     },
     {
-     "name": "Galaxy A25 5G SCG33 ライトブルー 【au版SIMフリー】",
-     "price": 24800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/357134"
-    },
-    {
      "name": "Galaxy A25 5G SC-53F ブルー 【docomo版SIMフリー】",
      "price": 21800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/363092"
+    },
+    {
+     "name": "Galaxy A25 5G SCG33 ライトブルー 【au版SIMフリー】",
+     "price": 24800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/357134"
     },
     {
      "name": "Galaxy A25 5G SCG33 ブラック 【UQmobile版SIMフリー】",
@@ -744,16 +689,16 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/364660"
     },
     {
-     "name": "Galaxy A25 5G SM-A253Z ブラック 【SoftBank版SIMフリー】",
-     "price": 17800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/softbank/galaxy_a25_5g_sm-a253z/393395"
-    },
-    {
      "name": "Galaxy A25 5G SCG33 ブラック 【au版SIMフリー】",
      "price": 21800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/363822"
+    },
+    {
+     "name": "Galaxy A25 5G SM-A253Z ブラック 【SoftBank版SIMフリー】",
+     "price": 17800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/galaxy/softbank/galaxy_a25_5g_sm-a253z/393395"
     },
     {
      "name": "Galaxy A25 5G SC-53F ブルー 【docomo版SIMフリー】",
@@ -787,6 +732,12 @@
     },
     {
      "name": "Galaxy A25 5G SM-A253C ライトブルー 【Rakuten版SIMフリー】",
+     "price": 17800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/407736"
+    },
+    {
+     "name": "Galaxy A25 5G SM-A253C ライトブルー 【Rakuten版SIMフリー】",
      "price": 24800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/388849"
@@ -796,12 +747,6 @@
      "price": 21800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/364180"
-    },
-    {
-     "name": "Galaxy A25 5G SM-A253C ライトブルー 【Rakuten版SIMフリー】",
-     "price": 17800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/395790"
     },
     {
      "name": "【ネットワーク利用制限▲】Galaxy A25 5G SCG33 ブラック 【au版SIMフリー】",
@@ -991,10 +936,10 @@
   "HUAWEI P30 lite": {
    "items": [
     {
-     "name": "Huawei P30 lite MAR-LX2J パールホワイト 【Y!mobile版SIMフリー】",
+     "name": "Huawei P30 lite MAR-LX2J パールホワイト 【国内版SIMフリー】",
      "price": 6980,
      "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/p30/ymobile/p30_lite_mar-lx2j/198775"
+     "url": "https://iosys.co.jp/items/smartphone/p30/simfree/p30_lite_mar-lx2j/182887"
     }
    ],
    "used_query": "HUAWEI P30 lite"
@@ -1008,40 +953,10 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/au/xperia1_vi_sog13/354147"
     },
     {
-     "name": "Xperia1 II XQ-AT42 フロストブラック 【国内版SIMフリー】",
-     "price": 16800,
+     "name": "Xperia10 V SOG11 ホワイト 【au版SIMフリー】",
+     "price": 20800,
      "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_ii_xq-at42/231449"
-    },
-    {
-     "name": "【SIMロック解除済】au Xperia10 III SOG04 ブラック",
-     "price": 17800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_iii_sog04/232903"
-    },
-    {
-     "name": "Xperia10 IV A202SO ブラック 【SoftBank版SIMフリー】",
-     "price": 18800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/softbank/xperia10_iv_a202so/269789"
-    },
-    {
-     "name": "【SIMロック解除済】docomo Xperia10 II SO-41A ミント",
-     "price": 8980,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/docomo/xperia10_ii_so-41a/218846"
-    },
-    {
-     "name": "Xperia10 VI XQ-ES44 ブラック 【Rakuten版SIMフリー】",
-     "price": 42800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/rakuten/xperia10_vi_xq-es44/440348"
-    },
-    {
-     "name": "Xperia10 VII SOG16 チャコールブラック 【au版SIMフリー】",
-     "price": 52800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vii_sog16/440420"
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_v_sog11/283433"
     },
     {
      "name": "【SIMロック解除済】docomo Xperia1 II SO-51A ブラック",
@@ -1062,16 +977,22 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_so-03l/193187"
     },
     {
-     "name": "Xperia10 VI A402SO ブラック 【SoftBank版SIMフリー】",
-     "price": 29800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/softbank/xperia10_vi_a402so/390321"
+     "name": "Xperia1 V SOG10 ブラック 【au版SIMフリー】",
+     "price": 62800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/au/xperia1_v_sog10/378090"
     },
     {
-     "name": "Xperia1 V XQ-DQ44 カーキグリーン 【国内版SIMフリー】",
-     "price": 79800,
+     "name": "Xperia10 VI XQ-ES44 ブラック 【Rakuten版SIMフリー】",
+     "price": 42800,
      "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_v_xq-dq44/285312"
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/rakuten/xperia10_vi_xq-es44/440348"
+    },
+    {
+     "name": "Xperia10 VI SOG14 ブルー 【au版SIMフリー】",
+     "price": 46800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/376197"
     },
     {
      "name": "Xperia10 III Lite XQ-BT44 ブラック 【Rakuten版SIMフリー】",
@@ -1093,21 +1014,9 @@
     },
     {
      "name": "Xperia10 VI SOG14 ブルー 【au版SIMフリー】",
-     "price": 46800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/376197"
-    },
-    {
-     "name": "Xperia10 VI SOG14 ブルー 【au版SIMフリー】",
      "price": 37800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/353201"
-    },
-    {
-     "name": "Xperia1 II XQ-AT42 ホワイト 【国内版SIMフリー】",
-     "price": 19800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_ii_xq-at42/229287"
     },
     {
      "name": "Xperia1 VII XQ-FS44 256GB スレートブラック 【国内版SIMフリー】",
@@ -1128,34 +1037,16 @@
      "url": "https://iosys.co.jp/items/smartphone/ahamo/docomo/ahamo_xperia1_ii_so-51aa/247179"
     },
     {
-     "name": "Xperia1 II XQ-AT42 ホワイト 【国内版SIMフリー】",
-     "price": 19800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_ii_xq-at42/264970"
-    },
-    {
-     "name": "【SIMロック解除済】docomo Xperia1 II SO-51A ホワイト",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_ii_so-51a/203101"
-    },
-    {
-     "name": "【SIMロック解除済】docomo Xperia1 II SO-51A ブラック",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_ii_so-51a/220994"
-    },
-    {
      "name": "Xperia10 VI SO-52E ホワイト 【docomo版SIMフリー】",
      "price": 37800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/docomo/xperia10_vi_so-52e/395792"
     },
     {
-     "name": "【SIMロック解除済】docomo Xperia1 II SO-51A ブラック",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_ii_so-51a/196750"
+     "name": "Xperia10 VII SOG16 ホワイト 【au版SIMフリー】",
+     "price": 52800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vii_sog16/437105"
     },
     {
      "name": "Xperia10 VI SO-52E ブラック 【docomo版SIMフリー】",
@@ -1168,12 +1059,6 @@
      "price": 144800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_vii_xq-fs44_12gb_512gb/371959"
-    },
-    {
-     "name": "【SIMロック解除済】docomo Xperia1 II SO-51A ブラック",
-     "price": 16800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_ii_so-51a/223765"
     },
     {
      "name": "Xperia1 VII SOG15 スレートブラック 【au版SIMフリー】",
@@ -1230,6 +1115,12 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/354706"
     },
     {
+     "name": "Xperia1 VI SO-51E プラチナシルバー 【docomo版SIMフリー】",
+     "price": 84800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/395007"
+    },
+    {
      "name": "Xperia1 VII SO-51F オーキッドパープル 【docomo版SIMフリー】",
      "price": 127800,
      "rank": "中古Bランク",
@@ -1240,12 +1131,6 @@
      "price": 84800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/394063"
-    },
-    {
-     "name": "Xperia1 VI SO-51E プラチナシルバー 【docomo版SIMフリー】",
-     "price": 84800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/395007"
     },
     {
      "name": "Xperia1 VII SO-51F スレートブラック 【docomo版SIMフリー】",
@@ -1272,22 +1157,28 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vii_so-51f/416481"
     },
     {
-     "name": "【ネットワーク利用制限▲】Xperia10 VI XQ-ES44 ホワイト 【mineo版SIMフリー】",
-     "price": 43800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/other/xperia10_vi_xq-es44/432626"
-    },
-    {
      "name": "Xperia1 VII XQ-FS44 256GB スレートブラック 【国内版SIMフリー】",
      "price": 122800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_vii_xq-fs44/371406"
     },
     {
+     "name": "【ネットワーク利用制限▲】Xperia1 VII A501SO スレートブラック 【SoftBank版SIMフリー】",
+     "price": 127800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/softbank/xperia1_vii_a501so/389320"
+    },
+    {
      "name": "Xperia10 V SO-52D ホワイト 【docomo版SIMフリー】",
      "price": 20800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/docomo/xperia10_v_so-52d/345111"
+    },
+    {
+     "name": "Xperia10 V SO-52D ブラック 【docomo版SIMフリー】",
+     "price": 20800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/docomo/xperia10_v_so-52d/332531"
     }
    ],
    "used_query": "Xperia1"
@@ -1307,46 +1198,10 @@
      "url": "https://iosys.co.jp/items/smartphone/aquos/au/aquos_sense3_shv45/213947"
     },
     {
-     "name": "AQUOS sense3 SH-M12 シルバーホワイト 【国内版SIMフリー】",
-     "price": 9980,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/simfree/aquos_sense3_sh-m12/199576"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense3 SH-02M ライトカッパー",
-     "price": 9980,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense3_sh-02m/200097"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense3 SH-02M ブラック",
-     "price": 9980,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense3_sh-02m/201558"
-    },
-    {
-     "name": "AQUOS sense3 SH-M12 シルバーホワイト 【mineo版SIMフリー】",
-     "price": 9980,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/other/aquos_sense3_sh-m12/234872"
-    },
-    {
-     "name": "【SIMロック解除済】docomo AQUOS sense3 SH-02M ブラック",
-     "price": 8980,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_sense3_sh-02m/197360"
-    },
-    {
      "name": "【SIMロック解除済】au AQUOS sense3 SHV45 ブラック",
      "price": 10800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/aquos/au/aquos_sense3_shv45/195961"
-    },
-    {
-     "name": "【SIMロック解除済】【ネットワーク利用制限－】au AQUOS sense3 basic SHV48 ブラック",
-     "price": 11800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/au/aquos_sense3_basic_shv48/437669"
     },
     {
      "name": "Y!mobile AQUOS sense3 SH-M12-y ライトカッパー",
@@ -1370,18 +1225,6 @@
      "price": 17800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/211291"
-    },
-    {
-     "name": "【SIMロック解除済】Y!mobile AQUOS sense4 basic A003SH ブラック",
-     "price": 11800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/219132"
-    },
-    {
-     "name": "【SIMロック解除済】Y!mobile AQUOS sense4 basic A003SH ライトカッパー",
-     "price": 9980,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/ymobile/aquos_sense4_basic_a003sh/223201"
     }
    ],
    "used_query": "AQUOS sense4 basic"
@@ -1393,10 +1236,10 @@
   "HUAWEI P20 lite": {
    "items": [
     {
-     "name": "【SIMロック解除済】au Huawei P20 lite HWV32 クラインブルー",
+     "name": "Huawei P20 lite ANE-LX2J クラインブルー 【国内版SIMフリー】",
      "price": 5980,
      "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/p20/au/p20_lite_hwv32/179832"
+     "url": "https://iosys.co.jp/items/smartphone/p20/simfree/p20_lite_ane-lx2j/151884"
     }
    ],
    "used_query": "HUAWEI P20 lite"
@@ -1447,7 +1290,7 @@
   },
   "Xiaomi Redmi 14C": {
    "items": [],
-   "used_query": "Xiaomi Redmi 14 C"
+   "used_query": "Xiaomi Redmi 14C"
   },
   "Xperia Ace III": {
    "items": [
@@ -1485,22 +1328,16 @@
   "Xperia10 V": {
    "items": [
     {
+     "name": "Xperia10 V SOG11 ホワイト 【au版SIMフリー】",
+     "price": 20800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_v_sog11/283433"
+    },
+    {
      "name": "Xperia10 VI XQ-ES44 ブラック 【Rakuten版SIMフリー】",
      "price": 42800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/rakuten/xperia10_vi_xq-es44/440348"
-    },
-    {
-     "name": "Xperia10 VII SOG16 チャコールブラック 【au版SIMフリー】",
-     "price": 52800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vii_sog16/440420"
-    },
-    {
-     "name": "Xperia10 VI A402SO ブラック 【SoftBank版SIMフリー】",
-     "price": 29800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/softbank/xperia10_vi_a402so/390321"
     },
     {
      "name": "Xperia10 VI SOG14 ブルー 【au版SIMフリー】",
@@ -1519,6 +1356,12 @@
      "price": 37800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/docomo/xperia10_vi_so-52e/395792"
+    },
+    {
+     "name": "Xperia10 VII SOG16 ホワイト 【au版SIMフリー】",
+     "price": 52800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vii_sog16/437105"
     },
     {
      "name": "Xperia10 VI SO-52E ブラック 【docomo版SIMフリー】",
@@ -1549,12 +1392,6 @@
      "price": 37800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/docomo/xperia10_vi_so-52e/395793"
-    },
-    {
-     "name": "【ネットワーク利用制限▲】Xperia10 VI XQ-ES44 ホワイト 【mineo版SIMフリー】",
-     "price": 43800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/other/xperia10_vi_xq-es44/432626"
     },
     {
      "name": "Xperia10 V SO-52D ホワイト 【docomo版SIMフリー】",
@@ -1712,18 +1549,6 @@
   "Xperia5": {
    "items": [
     {
-     "name": "Xperia5 IV SOG09 エクリュホワイト 【au版SIMフリー】",
-     "price": 25800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia5/au/xperia5_iv_sog09/291670"
-    },
-    {
-     "name": "Xperia5 IV A204SO ブラック 【SoftBank版SIMフリー】",
-     "price": 25800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia5/softbank/xperia5_iv_a204so/300107"
-    },
-    {
      "name": "Xperia5 V SO-53D プラチナシルバー 【docomo版SIMフリー】",
      "price": 39800,
      "rank": "中古Cランク",
@@ -1777,12 +1602,6 @@
      "price": 9980,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/aquos/uqmobile/aquos_sense3_basic_shv48/206771"
-    },
-    {
-     "name": "【SIMロック解除済】【ネットワーク利用制限－】au AQUOS sense3 basic SHV48 ブラック",
-     "price": 11800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/au/aquos_sense3_basic_shv48/437669"
     }
    ],
    "used_query": "AQUOS sense3 basic"
@@ -1822,10 +1641,10 @@
   "AQUOS wish4": {
    "items": [
     {
-     "name": "AQUOS wish4 SH-M27 ホワイト 【国内版SIMフリー】",
+     "name": "AQUOS wish4 SH-52E ブラック 【docomo版SIMフリー】",
      "price": 21800,
      "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/aquos/simfree/aquos_wish4_sh-m27/339394"
+     "url": "https://iosys.co.jp/items/smartphone/aquos/docomo/aquos_wish4_sh-52e/332626"
     }
    ],
    "used_query": "AQUOS wish4"
@@ -1907,28 +1726,28 @@
   "iPhone 11": {
    "items": [
     {
-     "name": "【SIMロック解除済】【ネットワーク利用制限▲】SoftBank iPhone11 A2221 (MWM22J/A) 128GB ホワイト",
-     "price": 26800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphone11_a2221/210879"
-    },
-    {
-     "name": "【SIMロック解除済】au iPhone11 A2221 (MWM02J/A) 128GB ブラック",
-     "price": 28800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone11/au/iphone11_a2221/194182"
-    },
-    {
-     "name": "【SIMロック解除済】docomo iPhone11 A2221 (MWM22J/A) 128GB ホワイト",
-     "price": 28800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone11/docomo/iphone11_a2221/207943"
-    },
-    {
      "name": "【バッテリー80%未満】【SIMロック解除済】SoftBank iPhone11 Pro A2215 (MWC92J/A) 256GB ゴールド",
      "price": 30800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone11/softbank/iphone11_pro_a2215/321535"
+    },
+    {
+     "name": "【SIMロック解除済】SoftBank iPhone11 A2221 (MWM92J/A) 256GB (PRODUCT)RED",
+     "price": 32800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphone11_a2221/216742"
+    },
+    {
+     "name": "iPhone11 A2221 (MHDM3J/A) 128GB パープル 【国内版SIMフリー】",
+     "price": 32800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone11/simfree/iphone11_a2221/222381"
+    },
+    {
+     "name": "iPhone11 A2221 (MWLV2J/A) 64GB (PRODUCT)RED 【国内版SIMフリー】",
+     "price": 25800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone11/simfree/iphone11_a2221/199573"
     }
    ],
    "used_query": "iPhone 11"
