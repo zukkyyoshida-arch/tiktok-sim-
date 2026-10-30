@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-30T02:30:40+09:00",
+ "fetched_at": "2026-10-31T02:30:43+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -8655,159 +8655,159 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold8 Ultra SC-56G 256GB",
-   "unused_price": 215000,
-   "used_max": 195000,
-   "used_min": 136000,
+   "unused_price": 220000,
+   "used_max": 202000,
+   "used_min": 141000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold8 Ultra SCG39 256GB",
-   "unused_price": 215000,
-   "used_max": 195000,
-   "used_min": 136000,
+   "unused_price": 220000,
+   "used_max": 202000,
+   "used_min": 141000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Fold8 Ultra SM-F976Z 256GB",
-   "unused_price": 215000,
-   "used_max": 195000,
-   "used_min": 136000,
+   "unused_price": 220000,
+   "used_max": 202000,
+   "used_min": 141000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold8 Ultra 256GB",
-   "unused_price": 215000,
-   "used_max": 195000,
-   "used_min": 136000,
+   "unused_price": 220000,
+   "used_max": 202000,
+   "used_min": 141000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold8 Ultra SC-56G 512GB",
-   "unused_price": 237000,
-   "used_max": 217000,
-   "used_min": 151000,
+   "unused_price": 245000,
+   "used_max": 225000,
+   "used_min": 157000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold8 Ultra SCG39 512GB",
-   "unused_price": 237000,
-   "used_max": 217000,
-   "used_min": 151000,
+   "unused_price": 245000,
+   "used_max": 225000,
+   "used_min": 157000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Fold8 Ultra SM-F976Z 512GB",
-   "unused_price": 237000,
-   "used_max": 217000,
-   "used_min": 151000,
+   "unused_price": 245000,
+   "used_max": 225000,
+   "used_min": 157000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold8 Ultra 512GB",
-   "unused_price": 237000,
-   "used_max": 217000,
-   "used_min": 151000,
+   "unused_price": 245000,
+   "used_max": 225000,
+   "used_min": 157000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold8 Ultra SC-56G 1TB",
-   "unused_price": 270000,
-   "used_max": 245000,
-   "used_min": 171000,
+   "unused_price": 260000,
+   "used_max": 240000,
+   "used_min": 168000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold8 Ultra SCG39 1TB",
-   "unused_price": 270000,
-   "used_max": 245000,
-   "used_min": 171000,
+   "unused_price": 260000,
+   "used_max": 240000,
+   "used_min": 168000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Fold8 Ultra SM-F976Z 1TB",
-   "unused_price": 270000,
-   "used_max": 245000,
-   "used_min": 171000,
+   "unused_price": 260000,
+   "used_max": 240000,
+   "used_min": 168000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold8 Ultra 1TB",
-   "unused_price": 270000,
-   "used_max": 245000,
-   "used_min": 171000,
+   "unused_price": 260000,
+   "used_max": 240000,
+   "used_min": 168000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold8 SC-57G 256GB",
-   "unused_price": 195000,
-   "used_max": 185000,
-   "used_min": 129000,
+   "unused_price": 201000,
+   "used_max": 191000,
+   "used_min": 133000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold8 SCG41 256GB",
-   "unused_price": 195000,
-   "used_max": 185000,
-   "used_min": 129000,
+   "unused_price": 201000,
+   "used_max": 191000,
+   "used_min": 133000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Fold8 SM-F971Z 256GB",
-   "unused_price": 195000,
-   "used_max": 185000,
-   "used_min": 129000,
+   "unused_price": 201000,
+   "used_max": 191000,
+   "used_min": 133000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold8 256GB",
-   "unused_price": 195000,
-   "used_max": 185000,
-   "used_min": 129000,
+   "unused_price": 201000,
+   "used_max": 191000,
+   "used_min": 133000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold8 SC-57G 512GB",
-   "unused_price": 208000,
-   "used_max": 197000,
-   "used_min": 137000,
+   "unused_price": 215000,
+   "used_max": 205000,
+   "used_min": 143000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold8 SCG41 512GB",
-   "unused_price": 208000,
-   "used_max": 197000,
-   "used_min": 137000,
+   "unused_price": 215000,
+   "used_max": 205000,
+   "used_min": 143000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold8 512GB",
-   "unused_price": 208000,
-   "used_max": 197000,
-   "used_min": 137000,
+   "unused_price": 215000,
+   "used_max": 205000,
+   "used_min": 143000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold8 SCG41 1TB",
-   "unused_price": 242000,
+   "unused_price": 245000,
    "used_max": 225000,
    "used_min": 157000,
    "brand": "galaxy",
@@ -8815,7 +8815,7 @@
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold8 1TB",
-   "unused_price": 242000,
+   "unused_price": 245000,
    "used_max": 225000,
    "used_min": 157000,
    "brand": "galaxy",
@@ -9151,81 +9151,81 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 12GB/256GB",
-   "unused_price": 163000,
-   "used_max": 148000,
-   "used_min": 103000,
+   "unused_price": 159000,
+   "used_max": 145000,
+   "used_min": 101000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold7 SCG34 au版 12GB/256GB",
-   "unused_price": 163000,
-   "used_max": 148000,
-   "used_min": 103000,
+   "unused_price": 159000,
+   "used_max": 145000,
+   "used_min": 101000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Fold7 SoftBank版 12GB/256GB",
-   "unused_price": 163000,
-   "used_max": 148000,
-   "used_min": 103000,
+   "unused_price": 159000,
+   "used_max": 145000,
+   "used_min": 101000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold7 国内版 12GB/256GB",
-   "unused_price": 163000,
-   "used_max": 148000,
-   "used_min": 103000,
+   "unused_price": 159000,
+   "used_max": 145000,
+   "used_min": 101000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 12GB/512GB",
-   "unused_price": 183000,
-   "used_max": 166000,
-   "used_min": 116000,
+   "unused_price": 168000,
+   "used_max": 155000,
+   "used_min": 108000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold7 SCG34 au版 12GB/512GB",
-   "unused_price": 183000,
-   "used_max": 166000,
-   "used_min": 116000,
+   "unused_price": 168000,
+   "used_max": 155000,
+   "used_min": 108000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold7 国内版 12GB/512GB",
-   "unused_price": 183000,
+   "unused_price": 168000,
+   "used_max": 155000,
+   "used_min": 108000,
+   "brand": "galaxy",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
+  },
+  {
+   "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 16GB/1TB",
+   "unused_price": 182000,
    "used_max": 166000,
    "used_min": 116000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
-   "name": "docomo版SIMフリー Galaxy Z Fold7 SC-56F docomo版 16GB/1TB",
-   "unused_price": 188000,
-   "used_max": 171000,
-   "used_min": 119000,
-   "brand": "galaxy",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
-  },
-  {
    "name": "au版SIMフリー Galaxy Z Fold7 SCG34 au版 16GB/1TB",
-   "unused_price": 188000,
-   "used_max": 171000,
-   "used_min": 119000,
+   "unused_price": 182000,
+   "used_max": 166000,
+   "used_min": 116000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold7 国内版 16GB/1TB",
-   "unused_price": 188000,
-   "used_max": 171000,
-   "used_min": 119000,
+   "unused_price": 182000,
+   "used_max": 166000,
+   "used_min": 116000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -9712,24 +9712,24 @@
   {
    "name": "docomo版SIMフリー Galaxy Z Fold6 SC-55E docomo版 12GB/256GB",
    "unused_price": 116000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 104000,
+   "used_min": 72000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Fold6 SCG28 au版 12GB/256GB",
    "unused_price": 116000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 104000,
+   "used_min": 72000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold6 国内版 12GB/256GB",
    "unused_price": 116000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 104000,
+   "used_min": 72000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -9760,16 +9760,16 @@
   {
    "name": "au版SIMフリー Galaxy Z Fold6 SCG28 au版 12GB/1TB",
    "unused_price": 136000,
-   "used_max": 131000,
-   "used_min": 91000,
+   "used_max": 128000,
+   "used_min": 89000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Fold6 国内版 12GB/1TB",
    "unused_price": 136000,
-   "used_max": 131000,
-   "used_min": 91000,
+   "used_max": 128000,
+   "used_min": 89000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
