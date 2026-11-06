@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-06T02:30:41+09:00",
+ "fetched_at": "2026-11-07T02:30:42+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -19,7 +19,7 @@
  ],
  "errors": [],
  "carried_over_brands": [],
- "row_count": 2674,
+ "row_count": 2671,
  "rows": [
   {
    "name": "docomo版SIMフリー iPhone Duo 256GB",
@@ -503,7 +503,7 @@
   },
   {
    "name": "docomo版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -511,7 +511,7 @@
   },
   {
    "name": "au版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -519,7 +519,7 @@
   },
   {
    "name": "SoftBank版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -527,7 +527,7 @@
   },
   {
    "name": "Rakuten版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -535,7 +535,7 @@
   },
   {
    "name": "国内版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -551,7 +551,7 @@
   },
   {
    "name": "Ymobile版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -559,7 +559,7 @@
   },
   {
    "name": "UQmobile版SIMフリー iPhone17e 256GB",
-   "unused_price": 101000,
+   "unused_price": 102000,
    "used_max": 91000,
    "used_min": 73000,
    "brand": "iphone",
@@ -12946,30 +12946,6 @@
    "unused_price": 37000,
    "used_max": 33000,
    "used_min": 23000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "au版SIMフリー Pixel6a au版",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "SoftBank版SIMフリー Pixel6a SoftBank版",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "SIMフリー Pixel6a 国内版",
-   "unused_price": 0,
-   "used_max": 0,
-   "used_min": 0,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
