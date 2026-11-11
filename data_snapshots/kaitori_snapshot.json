@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-11T02:30:44+09:00",
+ "fetched_at": "2026-11-12T02:30:41+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -15423,17 +15423,17 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS R9 pro SH-54E docomo版",
-   "unused_price": 96000,
-   "used_max": 91000,
-   "used_min": 63000,
+   "unused_price": 91000,
+   "used_max": 86000,
+   "used_min": 60000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS R9 pro SH-M30 国内版",
-   "unused_price": 96000,
-   "used_max": 91000,
-   "used_min": 63000,
+   "unused_price": 91000,
+   "used_max": 86000,
+   "used_min": 60000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -15519,33 +15519,33 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS R9 SH-51E docomo版",
-   "unused_price": 49000,
-   "used_max": 43000,
-   "used_min": 30000,
+   "unused_price": 46000,
+   "used_max": 39000,
+   "used_min": 27000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SoftBank版SIMフリー AQUOS AQUOS R9 A401SH SoftBank版",
-   "unused_price": 49000,
-   "used_max": 43000,
-   "used_min": 30000,
+   "unused_price": 46000,
+   "used_max": 39000,
+   "used_min": 27000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "mineo版SIMフリー AQUOS R9 mineo版",
-   "unused_price": 49000,
-   "used_max": 43000,
-   "used_min": 30000,
+   "unused_price": 46000,
+   "used_max": 39000,
+   "used_min": 27000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS R9 SH-M28 国内版",
-   "unused_price": 49000,
-   "used_max": 43000,
-   "used_min": 30000,
+   "unused_price": 46000,
+   "used_max": 39000,
+   "used_min": 27000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
