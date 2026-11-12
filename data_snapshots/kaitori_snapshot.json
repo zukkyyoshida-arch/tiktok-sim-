@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-12T02:30:41+09:00",
+ "fetched_at": "2026-11-13T02:30:43+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -13895,7 +13895,7 @@
   },
   {
    "name": "docomo版 arrows Tab F-04H docomo版",
-   "unused_price": 2000,
+   "unused_price": 0,
    "used_max": 0,
    "used_min": 0,
    "brand": "arrows",
