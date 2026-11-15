@@ -1,11 +1,10 @@
 {
- "fetched_at": "2026-11-15T02:33:35+09:00",
+ "fetched_at": "2026-11-16T02:33:32+09:00",
  "source": "https://iosys.co.jp/items",
  "note": "中古相場タブの既定表示元。ライブ取得は「🔄 相場を再取得」ボタンを押したときのみ行う。更新は tools/update_iosys_snapshot.py。",
  "model_count": 112,
  "carried_over_models": [
   "Xperia 10 IV SO-52C",
-  "AQUOS sense7",
   "AQUOS wish",
   "OPPO Reno7 A",
   "Galaxy A32 5G",
@@ -45,6 +44,7 @@
   "AQUOS sense3 plus",
   "AQUOS sense7 plus",
   "AQUOS wish4",
+  "AQUOS zero2",
   "arrows 5G",
   "arrows Be4 Plus",
   "Galaxy A20",
@@ -97,6 +97,12 @@
   "arrows We": {
    "items": [
     {
+     "name": "arrows We3 F-52G ライトブルー 【docomo版SIMフリー】",
+     "price": 24800,
+     "rank": "未使用品",
+     "url": "https://iosys.co.jp/items/smartphone/arrows/docomo/arrows_we3_f-52g/413417"
+    },
+    {
      "name": "arrows We3 F-52G ブラック 【docomo版SIMフリー】",
      "price": 24800,
      "rank": "未使用品",
@@ -108,10 +114,10 @@
   "Xperia5 IV": {
    "items": [
     {
-     "name": "【ネットワーク利用制限－】Xperia5 IV SO-54C エクリュホワイト 【docomo版SIMフリー】",
-     "price": 23800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia5/docomo/xperia5_iv_so-54c/346880"
+     "name": "Xperia5 IV SOG09 エクリュホワイト 【au版SIMフリー】",
+     "price": 22800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia5/au/xperia5_iv_sog09/267260"
     },
     {
      "name": "Xperia5 IV SO-54C ブラック 【docomo版SIMフリー】",
@@ -253,12 +259,6 @@
      "price": 22800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/reno9a/simfree/reno9a_cph2523/415747"
-    },
-    {
-     "name": "OPPO Reno9A CPH2523 ムーンホワイト 【Rakuten版SIMフリー】",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/reno9a/rakuten/reno9a_cph2523/274511"
     }
    ],
    "used_query": "OPPO Reno9 A"
@@ -467,16 +467,16 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/390352"
     },
     {
-     "name": "Galaxy A25 5G SC-53F ブラック 【docomo版SIMフリー】",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/367969"
-    },
-    {
      "name": "【箱傷み】Galaxy A25 5G SM-A253Z ブルー 【Y!mobile版SIMフリー】",
      "price": 24800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/ymobile/galaxy_a25_5g_sm-a253z/364064"
+    },
+    {
+     "name": "Galaxy A25 5G SC-53F ブラック 【docomo版SIMフリー】",
+     "price": 21800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/367969"
     },
     {
      "name": "Galaxy A25 5G SM-A253C ブラック 【Rakuten版SIMフリー】",
@@ -491,22 +491,10 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/368354"
     },
     {
-     "name": "Galaxy A25 5G SC-53F ライトブルー 【docomo版SIMフリー】",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/365327"
-    },
-    {
      "name": "Galaxy A25 5G SCG33 ブラック 【au版SIMフリー】",
      "price": 24800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/357150"
-    },
-    {
-     "name": "Galaxy A25 5G SM-A253C ブラック 【Rakuten版SIMフリー】",
-     "price": 19800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/rakuten/galaxy_a25_5g_sm-a253c/390235"
     },
     {
      "name": "Galaxy A25 5G SM-A253Z ライトブルー 【Y!mobile版SIMフリー】",
@@ -527,22 +515,10 @@
      "url": "https://iosys.co.jp/items/smartphone/galaxy/ymobile/galaxy_a25_5g_sm-a253z/357144"
     },
     {
-     "name": "【ネットワーク利用制限－】Galaxy A25 5G SC-53F ライトブルー 【docomo版SIMフリー】",
-     "price": 24800,
-     "rank": "未使用品",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/401595"
-    },
-    {
      "name": "Galaxy A25 5G SCG33 ブラック 【au版SIMフリー】",
      "price": 21800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/363822"
-    },
-    {
-     "name": "Galaxy A25 5G SC-53F ブルー 【docomo版SIMフリー】",
-     "price": 17800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/docomo/galaxy_a25_5g_sc-53f/365677"
     },
     {
      "name": "Galaxy A25 5G SM-A253Z ブラック 【SoftBank版SIMフリー】",
@@ -597,12 +573,6 @@
      "price": 21800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/galaxy/softbank/galaxy_a25_5g_sm-a253z/370486"
-    },
-    {
-     "name": "Galaxy A25 5G SCG33 ライトブルー 【au版SIMフリー】",
-     "price": 21800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/galaxy/au/galaxy_a25_5g_scg33/361186"
     },
     {
      "name": "Galaxy A25 5G SC-53F ブルー 【docomo版SIMフリー】",
@@ -761,16 +731,16 @@
   "Xperia1": {
    "items": [
     {
+     "name": "Xperia1 IV SO-51C パープル 【docomo版SIMフリー】",
+     "price": 42800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/246765"
+    },
+    {
      "name": "【SIMロック解除済】au Xperia1 II SOG01 ホワイト",
      "price": 16800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia1/au/xperia1_ii_sog01/221813"
-    },
-    {
-     "name": "Xperia1 VI XQ-EC44 256GB スカーレット 【国内版SIMフリー】",
-     "price": 84800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_vi_xq-ec44/358067"
     },
     {
      "name": "Xperia1 VII XQ-FS44 256GB スレートブラック 【国内版SIMフリー】",
@@ -779,16 +749,22 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_vii_xq-fs44/442559"
     },
     {
+     "name": "Xperia1 IV SO-51C パープル 【docomo版SIMフリー】",
+     "price": 38800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/254293"
+    },
+    {
+     "name": "Xperia10 VI XQ-ES44 ブルー 【国内版SIMフリー】",
+     "price": 38800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/simfree/xperia10_vi_xq-es44/399414"
+    },
+    {
      "name": "Xperia1 VII XQ-FS44 12GB/512GB スレートブラック 【国内版SIMフリー】",
      "price": 144800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_vii_xq-fs44_12gb_512gb/371959"
-    },
-    {
-     "name": "Xperia1 VII SOG15 スレートブラック 【au版SIMフリー】",
-     "price": 137800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/au/xperia1_vii_sog15/379951"
     },
     {
      "name": "Xperia1 VII XQ-FS44 256GB スレートブラック 【国内版SIMフリー】",
@@ -797,10 +773,10 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/simfree/xperia1_vii_xq-fs44/371406"
     },
     {
-     "name": "Xperia10 VI XQ-ES44 ブルー 【国内版SIMフリー】",
-     "price": 38800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/simfree/xperia10_vi_xq-es44/399414"
+     "name": "Xperia1 VII SOG15 スレートブラック 【au版SIMフリー】",
+     "price": 137800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/au/xperia1_vii_sog15/379951"
     },
     {
      "name": "Xperia1 IV SO-51C アイスホワイト 【docomo版SIMフリー】",
@@ -821,12 +797,6 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/275326"
     },
     {
-     "name": "【SIMロック解除済】docomo Xperia1 III SO-51B フロストパープル",
-     "price": 29800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iii_so-51b/245219"
-    },
-    {
      "name": "Xperia10 VI SOG14 ブラック 【au版SIMフリー】",
      "price": 34800,
      "rank": "中古Cランク",
@@ -845,10 +815,10 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/357757"
     },
     {
-     "name": "Xperia10 VI SOG14 ホワイト 【au版SIMフリー】",
-     "price": 38800,
+     "name": "【ネットワーク利用制限－】Xperia1 IV SO-51C パープル 【docomo版SIMフリー】",
+     "price": 35800,
      "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/442072"
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/389424"
     },
     {
      "name": "Xperia10 VI A402SO ブラック 【SoftBank版SIMフリー】",
@@ -857,16 +827,10 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia10/softbank/xperia10_vi_a402so/385575"
     },
     {
-     "name": "【ネットワーク利用制限－】Xperia1 IV SO-51C パープル 【docomo版SIMフリー】",
-     "price": 35800,
+     "name": "Xperia10 VI SOG14 ホワイト 【au版SIMフリー】",
+     "price": 38800,
      "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/389424"
-    },
-    {
-     "name": "Xperia1 VII SO-51F スレートブラック 【docomo版SIMフリー】",
-     "price": 127800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vii_so-51f/404614"
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/442072"
     },
     {
      "name": "Xperia10 VI SOG14 ブルー 【au版SIMフリー】",
@@ -935,12 +899,6 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vii_so-51f/399773"
     },
     {
-     "name": "Xperia1 VI SO-51E プラチナシルバー 【docomo版SIMフリー】",
-     "price": 77800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/395007"
-    },
-    {
      "name": "Xperia1 VII SO-51F スレートブラック 【docomo版SIMフリー】",
      "price": 117800,
      "rank": "中古Cランク",
@@ -951,6 +909,12 @@
      "price": 77800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/394063"
+    },
+    {
+     "name": "Xperia1 VI SO-51E プラチナシルバー 【docomo版SIMフリー】",
+     "price": 77800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_vi_so-51e/395007"
     },
     {
      "name": "Xperia1 VII SO-51F モスグリーン 【docomo版SIMフリー】",
@@ -1136,16 +1100,16 @@
      "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/357757"
     },
     {
-     "name": "Xperia10 VI SOG14 ホワイト 【au版SIMフリー】",
-     "price": 38800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/442072"
-    },
-    {
      "name": "Xperia10 VI A402SO ブラック 【SoftBank版SIMフリー】",
      "price": 42800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/xperia10/softbank/xperia10_vi_a402so/385575"
+    },
+    {
+     "name": "Xperia10 VI SOG14 ホワイト 【au版SIMフリー】",
+     "price": 38800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia10/au/xperia10_vi_sog14/442072"
     },
     {
      "name": "Xperia10 VI SOG14 ブルー 【au版SIMフリー】",
@@ -1357,10 +1321,16 @@
   "Xperia5": {
    "items": [
     {
-     "name": "【ネットワーク利用制限－】Xperia5 IV SO-54C エクリュホワイト 【docomo版SIMフリー】",
-     "price": 23800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/xperia5/docomo/xperia5_iv_so-54c/346880"
+     "name": "Xperia5 IV SOG09 エクリュホワイト 【au版SIMフリー】",
+     "price": 22800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia5/au/xperia5_iv_sog09/267260"
+    },
+    {
+     "name": "Xperia5 J9260 レッド 【国内版SIMフリー】",
+     "price": 13800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia5/simfree/xperia5_j9260/238612"
     },
     {
      "name": "Xperia5 IV SO-54C ブラック 【docomo版SIMフリー】",
@@ -1663,22 +1633,16 @@
      "url": "https://iosys.co.jp/items/smartphone/iphone12/docomo/iphone12_mini_a2398/310747"
     },
     {
-     "name": "【バッテリー80%未満】iPhone12 mini A2398 (MGDJ3J/A) 128GB ブラック 【国内版SIMフリー】",
-     "price": 22800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone12/simfree/iphone12_mini_a2398/328523"
-    },
-    {
      "name": "【バッテリー80%未満】【SIMロック解除済】au iPhone12 mini A2398 (MGAE3J/A) 64GB (PRODUCT)RED",
      "price": 24800,
      "rank": "中古Aランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone12/au/iphone12_mini_a2398/317280"
     },
     {
-     "name": "【バッテリー80%未満】【SIMロック解除済】au iPhone12 mini A2398 (MGAV3J/A) 64GB グリーン",
-     "price": 24800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone12/au/iphone12_mini_a2398/317282"
+     "name": "【バッテリー80%未満】iPhone12 mini A2398 (MGDJ3J/A) 128GB ブラック 【国内版SIMフリー】",
+     "price": 22800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone12/simfree/iphone12_mini_a2398/328523"
     },
     {
      "name": "【バッテリー80%未満】iPhone12 mini A2398 (MGDW3J/A) 256GB グリーン 【国内版SIMフリー】",
@@ -1687,16 +1651,16 @@
      "url": "https://iosys.co.jp/items/smartphone/iphone12/simfree/iphone12_mini_a2398/328532"
     },
     {
+     "name": "【バッテリー80%未満】【SIMロック解除済】au iPhone12 mini A2398 (MGAV3J/A) 64GB グリーン",
+     "price": 24800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone12/au/iphone12_mini_a2398/317282"
+    },
+    {
      "name": "【SIMロック解除済】docomo iPhone12 mini A2398 (MGA03J/A) 64GB ブラック",
      "price": 24800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone12/docomo/iphone12_mini_a2398/228317"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】docomo iPhone12 mini A2398 (MGAV3J/A) 64GB グリーン",
-     "price": 19800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone12/docomo/iphone12_mini_a2398/310745"
     },
     {
      "name": "【SIMロック解除済】docomo iPhone12 mini A2398 (MGDN3J/A) 128GB (PRODUCT)RED",
@@ -1705,10 +1669,10 @@
      "url": "https://iosys.co.jp/items/smartphone/iphone12/docomo/iphone12_mini_a2398/238334"
     },
     {
-     "name": "【バッテリー80%未満】【SIMロック解除済】docomo iPhone12 mini A2398 (MJQD3J/A) 128GB パープル",
-     "price": 27800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone12/docomo/iphone12_mini_a2398/310734"
+     "name": "【バッテリー80%未満】【SIMロック解除済】docomo iPhone12 mini A2398 (MGAV3J/A) 64GB グリーン",
+     "price": 19800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone12/docomo/iphone12_mini_a2398/310745"
     },
     {
      "name": "【バッテリー80%未満】iPhone12 mini A2398 (MGA63J/A) 64GB ホワイト 【国内版SIMフリー】",
@@ -1735,16 +1699,22 @@
      "url": "https://iosys.co.jp/items/smartphone/iphone12/simfree/iphone12_mini_a2398/328527"
     },
     {
-     "name": "【バッテリー80%未満】【SIMロック解除済】SoftBank iPhone12 mini A2398 (MGAE3J/A) 64GB (PRODUCT)RED",
-     "price": 17800,
+     "name": "【バッテリー80%未満】【SIMロック解除済】au iPhone12 mini A2398 (MGDN3J/A) 128GB (PRODUCT)RED",
+     "price": 19800,
      "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone12/softbank/iphone12_mini_a2398/323871"
+     "url": "https://iosys.co.jp/items/smartphone/iphone12/au/iphone12_mini_a2398/317322"
     }
    ],
    "used_query": "iPhone 12 mini"
   },
   "iPhone 8": {
    "items": [
+    {
+     "name": "【SIMロック解除済】au iPhone8 A1906 (MQ7A2J/A) 64GB ゴールド",
+     "price": 9980,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone8/au/iphone8_a1906/153186"
+    },
     {
      "name": "【SIMロック解除済】docomo iPhone8 A1906 (MQ7A2J/A) 64GB ゴールド",
      "price": 10800,
@@ -1756,12 +1726,6 @@
      "price": 7980,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone8/docomo/iphone8_a1906/169759"
-    },
-    {
-     "name": "【SIMロック解除済】docomo iPhone8 A1906 (MQ7A2J/A) 64GB ゴールド",
-     "price": 9980,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone8/docomo/iphone8_a1906/142273"
     }
    ],
    "used_query": "iPhone 8"
@@ -1769,28 +1733,22 @@
   "iPhone SE2": {
    "items": [
     {
-     "name": "【第2世代】 iPhoneSE A2296 (MHGP3J/A) 64GB ブラック 【Rakuten版SIMフリー】",
-     "price": 12800,
+     "name": "【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MHGQ3J/A) 64GB ホワイト",
+     "price": 16800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/209384"
+    },
+    {
+     "name": "【SIMロック解除済】【第2世代】 docomo iPhoneSE A2296 (MHGT3J/A) 128GB ブラック",
+     "price": 14800,
      "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/rakuten/iphonese2/230595"
+     "url": "https://iosys.co.jp/items/smartphone/iphonese2/docomo/iphonese2/228715"
     },
     {
      "name": "【第2世代】 iPhoneSE A2296 (MHGQ3J/A) 64GB ホワイト 【Rakuten版SIMフリー】",
      "price": 15800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone/rakuten/iphonese2/245564"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MHGT3J/A) 128GB ブラック",
-     "price": 12800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/313978"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MXD02J/A) 128GB ブラック",
-     "price": 12800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/313979"
     },
     {
      "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 docomo iPhoneSE A2296 (MHGT3J/A) 128GB ブラック",
@@ -1803,18 +1761,6 @@
      "price": 15800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/313964"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MHGU3J/A) 128GB ホワイト",
-     "price": 12800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/313980"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 SoftBank iPhoneSE A2296 (MXD22J/A) 128GB (PRODUCT)RED",
-     "price": 12800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphonese2/320538"
     },
     {
      "name": "【バッテリー80%未満】【第2世代】 iPhoneSE A2296 (MHGQ3J/A) 64GB ホワイト 【Rakuten版SIMフリー】",
@@ -1859,12 +1805,6 @@
      "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/313955"
     },
     {
-     "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 docomo iPhoneSE A2296 (MHGQ3J/A) 64GB ホワイト",
-     "price": 12800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonese2/docomo/iphonese2/307401"
-    },
-    {
      "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 docomo iPhoneSE A2296 (MXD12J/A) 128GB ホワイト",
      "price": 15800,
      "rank": "中古Bランク",
@@ -1881,12 +1821,6 @@
      "price": 15800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/313963"
-    },
-    {
-     "name": "【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MHGR3J/A) 64GB (PRODUCT)RED",
-     "price": 15800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/222400"
     },
     {
      "name": "【バッテリー80%未満】【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MHGU3J/A) 128GB ホワイト",
@@ -2055,6 +1989,36 @@
      "price": 15800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/219384"
+    },
+    {
+     "name": "【SIMロック解除済】【第2世代】 SoftBank iPhoneSE A2296 (MX9U2J/A) 64GB (PRODUCT)RED",
+     "price": 15800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphonese2/204808"
+    },
+    {
+     "name": "【SIMロック解除済】【第2世代】 au iPhoneSE A2296 (MX9U2J/A) 64GB (PRODUCT)RED",
+     "price": 15800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonese2/au/iphonese2/218743"
+    },
+    {
+     "name": "【SIMロック解除済】【第2世代】 SoftBank iPhoneSE A2296 (MHGP3J/A) 64GB ブラック",
+     "price": 15800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphonese2/222946"
+    },
+    {
+     "name": "【SIMロック解除済】【第2世代】 docomo iPhoneSE A2296 (MHGU3J/A) 128GB ホワイト",
+     "price": 14800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonese2/docomo/iphonese2/223316"
+    },
+    {
+     "name": "【SIMロック解除済】【第2世代】 docomo iPhoneSE A2296 (MX9T2J/A) 64GB ホワイト",
+     "price": 15800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonese2/docomo/iphonese2/222993"
     }
    ],
    "used_query": "iPhone SE 第2世代"
@@ -2062,16 +2026,34 @@
   "iPhone SE3": {
    "items": [
     {
+     "name": "【第3世代】 iPhoneSE A2782 (MMYC3J/A) 64GB ミッドナイト 【docomo版SIMフリー】",
+     "price": 21800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/docomo/iphonese3/242067"
+    },
+    {
+     "name": "【第3世代】 iPhoneSE A2782 (MMYC3J/A) 64GB ミッドナイト 【au版SIMフリー】",
+     "price": 21800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/au/iphonese3/254565"
+    },
+    {
+     "name": "【バッテリー80%未満】【第3世代】 iPhoneSE A2782 (MMYJ3J/A) 256GB ミッドナイト 【docomo版SIMフリー】",
+     "price": 40800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/docomo/iphonese3/311063"
+    },
+    {
      "name": "【第3世代】 iPhoneSE A2782 (MMYE3J/A) 64GB (PRODUCT)RED 【au版SIMフリー】",
      "price": 26800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone/au/iphonese3/244738"
     },
     {
-     "name": "【第3世代】 iPhoneSE A2782 (MMYC3J/A) 64GB ミッドナイト 【au版SIMフリー】",
-     "price": 32800,
+     "name": "【第3世代】 iPhoneSE A2782 (MMYG3J/A) 128GB スターライト 【Rakuten版SIMフリー】",
+     "price": 44800,
      "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/au/iphonese3/242054"
+     "url": "https://iosys.co.jp/items/smartphone/iphone/rakuten/iphonese3/333115"
     },
     {
      "name": "【第3世代】 iPhoneSE A2782 (MMYC3J/A) 64GB ミッドナイト 【au版SIMフリー】",
@@ -2092,34 +2074,10 @@
      "url": "https://iosys.co.jp/items/smartphone/iphone/docomo/iphonese3/268082"
     },
     {
-     "name": "【第3世代】 iPhoneSE A2782 (MMYH3J/A) 128GB (PRODUCT)RED 【docomo版SIMフリー】",
-     "price": 32800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/docomo/iphonese3/254997"
-    },
-    {
-     "name": "【第3世代】 iPhoneSE A2782 (MMYK3J/A) 256GB スターライト 【au版SIMフリー】",
-     "price": 44800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/au/iphonese3/274606"
-    },
-    {
-     "name": "【バッテリー80%未満】【第3世代】 iPhoneSE A2782 (MMYH3J/A) 128GB (PRODUCT)RED 【docomo版SIMフリー】",
-     "price": 30800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/docomo/iphonese3/311061"
-    },
-    {
      "name": "【第3世代】 iPhoneSE A2782 (MMYC3J/A) 64GB ミッドナイト 【au版SIMフリー】",
      "price": 57800,
      "rank": "未使用品",
      "url": "https://iosys.co.jp/items/smartphone/iphone/au/iphonese3/237733"
-    },
-    {
-     "name": "【バッテリー80%未満】【第3世代】 iPhoneSE A2782 (MMYF3J/A) 128GB ミッドナイト 【SoftBank版SIMフリー】",
-     "price": 35800,
-     "rank": "中古Aランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphonese3/324161"
     },
     {
      "name": "【バッテリー80%未満】【第3世代】 iPhoneSE A2782 (MMYF3J/A) 128GB ミッドナイト 【SoftBank版SIMフリー】",
@@ -2222,6 +2180,12 @@
      "price": 17800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphone/softbank/iphonese3/324176"
+    },
+    {
+     "name": "【第3世代】 iPhoneSE A2782 (MMYD3J/A) 64GB スターライト 【docomo版SIMフリー】",
+     "price": 32800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphone/docomo/iphonese3/242499"
     },
     {
      "name": "【バッテリー80%未満】【第3世代】 iPhoneSE A2782 (MMYC3J/A) 64GB ミッドナイト 【au版SIMフリー】",
@@ -2342,12 +2306,6 @@
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/168089"
     },
     {
-     "name": "【バッテリー80%未満】【SIMロック解除済】au iPhoneXR A2106 (MT0W2J/A) 256GB ホワイト",
-     "price": 18800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexr/au/iphonexr_a2106/313769"
-    },
-    {
      "name": "【バッテリー80%未満】【SIMロック解除済】docomo iPhoneXR A2106 (MT0E2J/A) 64GB ブルー",
      "price": 14800,
      "rank": "中古Cランク",
@@ -2358,6 +2316,12 @@
      "price": 17800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/softbank/iphonexr_a2106/208027"
+    },
+    {
+     "name": "【バッテリー80%未満】【SIMロック解除済】au iPhoneXR A2106 (MT0W2J/A) 256GB ホワイト",
+     "price": 18800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonexr/au/iphonexr_a2106/313769"
     },
     {
      "name": "【SIMロック解除済】au iPhoneXR A2106 (MT082J/A) 64GB イエロー",
@@ -2384,18 +2348,6 @@
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/198443"
     },
     {
-     "name": "【SIMロック解除済】docomo iPhoneXR A2106 (MT0J2J/A) 128GB ホワイト",
-     "price": 20800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/191702"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】au iPhoneXR A2106 (MT082J/A) 64GB イエロー",
-     "price": 14800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexr/au/iphonexr_a2106/313759"
-    },
-    {
      "name": "iPhoneXR A2106 (MT002J/A) 64GB ブラック 【国内版SIMフリー】",
      "price": 17800,
      "rank": "中古Cランク",
@@ -2406,6 +2358,12 @@
      "price": 17800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/softbank/iphonexr_a2106/208936"
+    },
+    {
+     "name": "【SIMロック解除済】docomo iPhoneXR A2106 (MT0J2J/A) 128GB ホワイト",
+     "price": 20800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/191702"
     },
     {
      "name": "iPhoneXR A2106 (MT0T2J/A) 128GB コーラル 【国内版SIMフリー】",
@@ -2592,6 +2550,12 @@
      "price": 20800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexr/docomo/iphonexr_a2106/179290"
+    },
+    {
+     "name": "【SIMロック解除済】SoftBank iPhoneXR A2106 (MT0A2J/A) 64GB コーラル",
+     "price": 20800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonexr/softbank/iphonexr_a2106/207796"
     }
    ],
    "used_query": "iPhone XR"
@@ -2603,12 +2567,6 @@
      "price": 20800,
      "rank": "中古Bランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexs/au/iphonexs_a2098/184798"
-    },
-    {
-     "name": "【SIMロック解除済】docomo iPhoneXS A2098 (MTE22J/A) 256GB ゴールド",
-     "price": 21800,
-     "rank": "中古Bランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexs/docomo/iphonexs_a2098/168926"
     },
     {
      "name": "【バッテリー80%未満】iPhoneXS A2098 (MTAW2J/A) 64GB スペースグレイ 【国内版SIMフリー】",
@@ -2659,16 +2617,16 @@
      "url": "https://iosys.co.jp/items/smartphone/iphonexs/simfree/iphonexs_max_a2102/180378"
     },
     {
-     "name": "iPhoneXS Max A2102 (MT6T2J/A) 64GB ゴールド 【国内版SIMフリー】",
-     "price": 27800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexs/simfree/iphonexs_max_a2102/165634"
-    },
-    {
      "name": "【SIMロック解除済】au iPhoneXS Max A2102 (MT6V2J/A) 256GB シルバー",
      "price": 30800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexs/au/iphonexs_max_a2102/206113"
+    },
+    {
+     "name": "iPhoneXS Max A2102 (MT6T2J/A) 64GB ゴールド 【国内版SIMフリー】",
+     "price": 27800,
+     "rank": "中古Cランク",
+     "url": "https://iosys.co.jp/items/smartphone/iphonexs/simfree/iphonexs_max_a2102/165634"
     },
     {
      "name": "iPhoneXS Max A2102 (MT6X2J/A) 512GB スペースグレイ 【国内版SIMフリー】",
@@ -2681,12 +2639,6 @@
      "price": 22800,
      "rank": "中古Cランク",
      "url": "https://iosys.co.jp/items/smartphone/iphonexs/au/iphonexs_max_a2102/313495"
-    },
-    {
-     "name": "【バッテリー80%未満】【SIMロック解除済】docomo iPhoneXS Max A2102 (MT6X2J/A) 512GB スペースグレイ",
-     "price": 28800,
-     "rank": "中古Cランク",
-     "url": "https://iosys.co.jp/items/smartphone/iphonexs/docomo/iphonexs_max_a2102/306946"
     },
     {
      "name": "【SIMロック解除済】au iPhoneXS Max A2102 (MT6U2J/A) 256GB スペースグレイ",
@@ -2887,6 +2839,18 @@
   },
   "Xperia1 IV": {
    "items": [
+    {
+     "name": "Xperia1 IV SO-51C パープル 【docomo版SIMフリー】",
+     "price": 42800,
+     "rank": "中古Aランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/246765"
+    },
+    {
+     "name": "Xperia1 IV SO-51C パープル 【docomo版SIMフリー】",
+     "price": 38800,
+     "rank": "中古Bランク",
+     "url": "https://iosys.co.jp/items/smartphone/xperia1/docomo/xperia1_iv_so-51c/254293"
+    },
     {
      "name": "Xperia1 IV SO-51C アイスホワイト 【docomo版SIMフリー】",
      "price": 33800,
