@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-18T02:30:43+09:00",
+ "fetched_at": "2026-11-19T02:30:41+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -7463,33 +7463,33 @@
   },
   {
    "name": "docomo版SIMフリー Xperia1 VI SO-51E docomo版",
-   "unused_price": 111000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 84000,
+   "used_max": 79000,
+   "used_min": 55000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
    "name": "au版SIMフリー Xperia1 VI SOG13 au版",
-   "unused_price": 111000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 84000,
+   "used_max": 79000,
+   "used_min": 55000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
    "name": "SoftBank版SIMフリー Xperia1 VI A401SO SoftBank版",
-   "unused_price": 111000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 84000,
+   "used_max": 79000,
+   "used_min": 55000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
    "name": "国内版SIMフリー Xperia1 VI 国内版",
-   "unused_price": 111000,
-   "used_max": 85000,
-   "used_min": 63000,
+   "unused_price": 84000,
+   "used_max": 79000,
+   "used_min": 59000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
@@ -7591,33 +7591,33 @@
   },
   {
    "name": "docomo版SIMフリー Xperia1 V SO-51D docomo版",
-   "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 34000,
+   "unused_price": 56000,
+   "used_max": 53000,
+   "used_min": 37000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
    "name": "au版SIMフリー Xperia1 V SOG10 au版",
-   "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 34000,
+   "unused_price": 56000,
+   "used_max": 53000,
+   "used_min": 37000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
    "name": "SoftBank版SIMフリー Xperia1 V 301SO Gaming Edition SoftBank版",
-   "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 34000,
+   "unused_price": 61000,
+   "used_max": 48000,
+   "used_min": 33000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
   {
    "name": "国内版SIMフリー Xperia1 V 国内版",
-   "unused_price": 59000,
-   "used_max": 54000,
-   "used_min": 40000,
+   "unused_price": 61000,
+   "used_max": 58000,
+   "used_min": 43000,
    "brand": "xperia",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/xperia/"
   },
@@ -8911,73 +8911,73 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy S26 SC-51G docomo版SIMフリー 256GB",
-   "unused_price": 97000,
-   "used_max": 90000,
-   "used_min": 63000,
+   "unused_price": 111000,
+   "used_max": 93000,
+   "used_min": 65000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S26 SCG36 au版SIMフリー 256GB",
-   "unused_price": 97000,
-   "used_max": 90000,
-   "used_min": 63000,
+   "unused_price": 111000,
+   "used_max": 93000,
+   "used_min": 65000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy S26 SM-S942Z SoftBank版SIMフリー 256GB",
-   "unused_price": 97000,
-   "used_max": 90000,
-   "used_min": 63000,
+   "unused_price": 111000,
+   "used_max": 93000,
+   "used_min": 65000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMフリー Galaxy S26 国内版 256GB",
-   "unused_price": 97000,
-   "used_max": 90000,
-   "used_min": 63000,
+   "unused_price": 111000,
+   "used_max": 93000,
+   "used_min": 65000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMフリー Galaxy S26 楽天版 256GB",
-   "unused_price": 97000,
-   "used_max": 90000,
-   "used_min": 63000,
+   "unused_price": 111000,
+   "used_max": 93000,
+   "used_min": 65000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy S26 SC-51G docomo版SIMフリー 512GB",
-   "unused_price": 115000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 123000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S26 SCG36 au版SIMフリー 512GB",
-   "unused_price": 115000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 123000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy S26 SM-S942Z SoftBank版SIMフリー 512GB",
-   "unused_price": 115000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 123000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMフリー Galaxy S26 国内版 512GB",
-   "unused_price": 115000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 123000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -9087,65 +9087,65 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy S26 Ultra SC-53G docomo版SIMフリー 512GB",
-   "unused_price": 167000,
-   "used_max": 157000,
-   "used_min": 109000,
+   "unused_price": 186000,
+   "used_max": 163000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S26 Ultra SCG37 au版SIMフリー 512GB",
-   "unused_price": 167000,
-   "used_max": 157000,
-   "used_min": 109000,
+   "unused_price": 186000,
+   "used_max": 163000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy S26 Ultra SM-S948Z SoftBank版SIMフリー 512GB",
-   "unused_price": 167000,
-   "used_max": 157000,
-   "used_min": 109000,
+   "unused_price": 186000,
+   "used_max": 163000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMフリー Galaxy S26 Ultra 国内版 512GB",
-   "unused_price": 167000,
-   "used_max": 157000,
-   "used_min": 109000,
+   "unused_price": 186000,
+   "used_max": 163000,
+   "used_min": 114000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy S26 Ultra SC-53G docomo版SIMフリー 1TB",
-   "unused_price": 190000,
-   "used_max": 175000,
-   "used_min": 122000,
+   "unused_price": 201000,
+   "used_max": 173000,
+   "used_min": 121000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S26 Ultra SCG37 au版SIMフリー 1TB",
-   "unused_price": 190000,
-   "used_max": 175000,
-   "used_min": 122000,
+   "unused_price": 201000,
+   "used_max": 173000,
+   "used_min": 121000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy S26 Ultra SM-S948Z SoftBank版SIMフリー 1TB",
-   "unused_price": 190000,
-   "used_max": 175000,
-   "used_min": 122000,
+   "unused_price": 201000,
+   "used_max": 173000,
+   "used_min": 121000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMフリー Galaxy S26 Ultra 国内版 1TB",
-   "unused_price": 190000,
-   "used_max": 175000,
-   "used_min": 122000,
+   "unused_price": 201000,
+   "used_max": 173000,
+   "used_min": 121000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -9232,56 +9232,56 @@
   {
    "name": "docomo版SIMフリー Galaxy Z Flip7 SC-55F docomo版 12GB/256GB",
    "unused_price": 101000,
-   "used_max": 86000,
-   "used_min": 60000,
+   "used_max": 83000,
+   "used_min": 58000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Flip7 SCG35 au版 12GB/256GB",
    "unused_price": 101000,
-   "used_max": 86000,
-   "used_min": 60000,
+   "used_max": 83000,
+   "used_min": 58000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy Z Flip7 SoftBank版 12GB/256GB",
    "unused_price": 101000,
-   "used_max": 86000,
-   "used_min": 60000,
+   "used_max": 83000,
+   "used_min": 58000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Flip7 国内版 12GB/256GB",
    "unused_price": 101000,
-   "used_max": 86000,
-   "used_min": 60000,
+   "used_max": 83000,
+   "used_min": 58000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy Z Flip7 SC-55F docomo版 12GB/512GB",
-   "unused_price": 118000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 106000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy Z Flip7 SCG35 au版 12GB/512GB",
-   "unused_price": 118000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 106000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy Z Flip7 国内版 12GB/512GB",
-   "unused_price": 118000,
-   "used_max": 108000,
-   "used_min": 75000,
+   "unused_price": 106000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -9503,7 +9503,7 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy S25 Ultra SC-52F docomo版 1TB",
-   "unused_price": 147000,
+   "unused_price": 144000,
    "used_max": 139000,
    "used_min": 97000,
    "brand": "galaxy",
@@ -9511,7 +9511,7 @@
   },
   {
    "name": "au版SIMフリー Galaxy S25 Ultra SCG32 au版 1TB",
-   "unused_price": 147000,
+   "unused_price": 144000,
    "used_max": 139000,
    "used_min": 97000,
    "brand": "galaxy",
@@ -9519,7 +9519,7 @@
   },
   {
    "name": "国内版SIMフリー Galaxy S25 Ultra 国内版 1TB",
-   "unused_price": 147000,
+   "unused_price": 144000,
    "used_max": 139000,
    "used_min": 97000,
    "brand": "galaxy",
@@ -9527,64 +9527,64 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy S25 Ultra SC-52F docomo版 512GB",
-   "unused_price": 144000,
-   "used_max": 131000,
+   "unused_price": 137000,
+   "used_max": 130000,
    "used_min": 91000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S25 Ultra SCG32 au版 512GB",
-   "unused_price": 144000,
-   "used_max": 131000,
+   "unused_price": 137000,
+   "used_max": 130000,
    "used_min": 91000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy S25 Ultra SM-S938Z SoftBank版 512GB",
-   "unused_price": 144000,
-   "used_max": 131000,
+   "unused_price": 137000,
+   "used_max": 130000,
    "used_min": 91000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy S25 Ultra 国内版 512GB",
-   "unused_price": 144000,
-   "used_max": 131000,
+   "unused_price": 137000,
+   "used_max": 130000,
    "used_min": 91000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo版SIMフリー Galaxy S25 Ultra SC-52F docomo版 256GB",
-   "unused_price": 134000,
-   "used_max": 121000,
+   "unused_price": 132000,
+   "used_max": 120000,
    "used_min": 84000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S25 Ultra SCG32 au版 256GB",
-   "unused_price": 134000,
-   "used_max": 121000,
+   "unused_price": 132000,
+   "used_max": 120000,
    "used_min": 84000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SoftBank版SIMフリー Galaxy S25 Ultra SM-S938Z SoftBank版 256GB",
-   "unused_price": 134000,
-   "used_max": 121000,
+   "unused_price": 132000,
+   "used_max": 120000,
    "used_min": 84000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy S25 Ultra 国内版 256GB",
-   "unused_price": 134000,
-   "used_max": 121000,
+   "unused_price": 132000,
+   "used_max": 120000,
    "used_min": 84000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
@@ -9799,7 +9799,7 @@
   },
   {
    "name": "au版SIMフリー Galaxy Z Flip6 SCG29 au版 12GB/512GB",
-   "unused_price": 80000,
+   "unused_price": 72000,
    "used_max": 68000,
    "used_min": 47000,
    "brand": "galaxy",
@@ -9864,24 +9864,24 @@
   {
    "name": "docomo版SIMフリー Galaxy S24 SC-51E docomo版 256GB",
    "unused_price": 66000,
-   "used_max": 52000,
-   "used_min": 36000,
+   "used_max": 59000,
+   "used_min": 41000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S24 SCG25 au版 256GB",
    "unused_price": 66000,
-   "used_max": 52000,
-   "used_min": 36000,
+   "used_max": 59000,
+   "used_min": 41000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy S24 5G 国内版 8GB/256GB",
    "unused_price": 66000,
-   "used_max": 52000,
-   "used_min": 36000,
+   "used_max": 59000,
+   "used_min": 41000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -9935,25 +9935,25 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy S24 Ultra SC-52E docomo版 256GB",
-   "unused_price": 101000,
-   "used_max": 94000,
-   "used_min": 65000,
+   "unused_price": 103000,
+   "used_max": 97000,
+   "used_min": 67000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S24 Ultra SCG26 au版 256GB",
-   "unused_price": 101000,
-   "used_max": 94000,
-   "used_min": 65000,
+   "unused_price": 103000,
+   "used_max": 97000,
+   "used_min": 67000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "国内版SIMフリー Galaxy S24 Ultra 5G 国内版 12GB/256GB",
-   "unused_price": 101000,
-   "used_max": 94000,
-   "used_min": 65000,
+   "unused_price": 103000,
+   "used_max": 97000,
+   "used_min": 67000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -10159,17 +10159,17 @@
   },
   {
    "name": "docomo版SIMフリー Galaxy S23 Ultra SC-52D docomo版",
-   "unused_price": 76000,
-   "used_max": 69000,
-   "used_min": 48000,
+   "unused_price": 78000,
+   "used_max": 74000,
+   "used_min": 51000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au版SIMフリー Galaxy S23 Ultra SCG20 au版",
-   "unused_price": 76000,
-   "used_max": 69000,
-   "used_min": 48000,
+   "unused_price": 78000,
+   "used_max": 74000,
+   "used_min": 51000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -10527,33 +10527,33 @@
   },
   {
    "name": "docomo Galaxy S21 5G SC-51B docomo版",
-   "unused_price": 20000,
-   "used_max": 17000,
-   "used_min": 11000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo Galaxy S21 5G SC-51B Olympic Games Edition docomo版",
-   "unused_price": 20000,
-   "used_max": 17000,
-   "used_min": 11000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au Galaxy S21+ 5G SCG10 au版",
-   "unused_price": 22000,
-   "used_max": 19000,
-   "used_min": 13000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au Galaxy S21 5G SCG09 au版",
-   "unused_price": 20000,
-   "used_max": 17000,
-   "used_min": 11000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -10639,33 +10639,33 @@
   },
   {
    "name": "SIMロック解除済 Galaxy S21 5G SC-51B Olympic Games Edition SIMロック解除済",
-   "unused_price": 20000,
-   "used_max": 17000,
-   "used_min": 11000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S21 5G SCG09 SIMロック解除済",
-   "unused_price": 20000,
-   "used_max": 17000,
-   "used_min": 11000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S21 5G SC-51B SIMロック解除済",
-   "unused_price": 20000,
-   "used_max": 17000,
-   "used_min": 11000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S21+ 5G SCG10 SIMロック解除済",
-   "unused_price": 22000,
-   "used_max": 19000,
-   "used_min": 13000,
+   "unused_price": 25000,
+   "used_max": 23000,
+   "used_min": 16000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -10799,17 +10799,17 @@
   },
   {
    "name": "docomo Galaxy Note20 Ultra 5G SC-53A docomo版",
-   "unused_price": 28000,
-   "used_max": 24000,
-   "used_min": 16000,
+   "unused_price": 32000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au Galaxy Note20 Ultra 5G SCG06 au版",
-   "unused_price": 28000,
-   "used_max": 24000,
-   "used_min": 16000,
+   "unused_price": 32000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -10855,97 +10855,97 @@
   },
   {
    "name": "SIMロック解除済 Galaxy Note20 Ultra 5G SC-53A SIMロック解除済",
-   "unused_price": 28000,
-   "used_max": 24000,
-   "used_min": 16000,
+   "unused_price": 32000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy Note20 Ultra 5G SCG06 SIMロック解除済",
-   "unused_price": 28000,
-   "used_max": 24000,
-   "used_min": 16000,
+   "unused_price": 32000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo Galaxy S20 5G SC-51A docomo版",
-   "unused_price": 13000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "docomo Galaxy S20+ 5G SC-52A docomo版",
-   "unused_price": 15000,
-   "used_max": 13000,
-   "used_min": 9000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au Galaxy S20 5G SCG01 au版",
-   "unused_price": 13000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au Galaxy S20 Ultra 5G SCG03 au版",
-   "unused_price": 22000,
-   "used_max": 19000,
-   "used_min": 13000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "au Galaxy S20+ 5G SCG02 au版",
-   "unused_price": 15000,
-   "used_max": 13000,
-   "used_min": 9000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S20 5G SC-51A SIMロック解除済",
-   "unused_price": 13000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S20 5G SCG01 SIMロック解除済",
-   "unused_price": 13000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S20 Ultra 5G SCG03 SIMロック解除済",
-   "unused_price": 22000,
-   "used_max": 19000,
-   "used_min": 13000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S20+ 5G SC-52A SIMロック解除済",
-   "unused_price": 15000,
-   "used_max": 13000,
-   "used_min": 9000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
   {
    "name": "SIMロック解除済 Galaxy S20+ 5G SCG02 SIMロック解除済",
-   "unused_price": 15000,
-   "used_max": 13000,
-   "used_min": 9000,
+   "unused_price": 18000,
+   "used_max": 16000,
+   "used_min": 11000,
    "brand": "galaxy",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/galaxy/"
   },
@@ -11751,129 +11751,129 @@
   },
   {
    "name": "docomo版SIMフリー Pixel11 Pro XL 256GB",
-   "unused_price": 140000,
-   "used_max": 130000,
-   "used_min": 91000,
+   "unused_price": 131000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel11 Pro XL 256GB",
-   "unused_price": 140000,
-   "used_max": 130000,
-   "used_min": 91000,
+   "unused_price": 131000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel11 Pro XL 256GB",
-   "unused_price": 140000,
-   "used_max": 130000,
-   "used_min": 91000,
+   "unused_price": 131000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel11 Pro XL 256GB",
-   "unused_price": 140000,
-   "used_max": 130000,
-   "used_min": 91000,
+   "unused_price": 131000,
+   "used_max": 116000,
+   "used_min": 81000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Pixel11 Pro XL 512GB",
-   "unused_price": 160000,
-   "used_max": 150000,
-   "used_min": 105000,
+   "unused_price": 151000,
+   "used_max": 136000,
+   "used_min": 95000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel11 Pro XL 512GB",
-   "unused_price": 160000,
-   "used_max": 150000,
-   "used_min": 105000,
+   "unused_price": 151000,
+   "used_max": 136000,
+   "used_min": 95000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel11 Pro XL 512GB",
-   "unused_price": 160000,
-   "used_max": 150000,
-   "used_min": 105000,
+   "unused_price": 151000,
+   "used_max": 136000,
+   "used_min": 95000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel11 Pro XL 512GB",
-   "unused_price": 160000,
-   "used_max": 150000,
-   "used_min": 105000,
+   "unused_price": 151000,
+   "used_max": 136000,
+   "used_min": 95000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
-   "used_max": 190000,
-   "used_min": 133000,
+   "used_max": 185000,
+   "used_min": 129000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
-   "used_max": 190000,
-   "used_min": 133000,
+   "used_max": 185000,
+   "used_min": 129000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
-   "used_max": 190000,
-   "used_min": 133000,
+   "used_max": 185000,
+   "used_min": 129000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel11 Pro Fold 256GB",
    "unused_price": 200000,
-   "used_max": 190000,
-   "used_min": 133000,
+   "used_max": 185000,
+   "used_min": 129000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Pixel11 Pro Fold 512GB",
-   "unused_price": 225000,
-   "used_max": 215000,
-   "used_min": 150000,
+   "unused_price": 205000,
+   "used_max": 195000,
+   "used_min": 136000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel11 Pro Fold 512GB",
-   "unused_price": 225000,
-   "used_max": 215000,
-   "used_min": 150000,
+   "unused_price": 205000,
+   "used_max": 195000,
+   "used_min": 136000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel11 Pro Fold 512GB",
-   "unused_price": 225000,
-   "used_max": 215000,
-   "used_min": 150000,
+   "unused_price": 205000,
+   "used_max": 195000,
+   "used_min": 136000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel11 Pro Fold 512GB",
-   "unused_price": 225000,
-   "used_max": 215000,
-   "used_min": 150000,
+   "unused_price": 205000,
+   "used_max": 195000,
+   "used_min": 136000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -12095,177 +12095,177 @@
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 256GB",
-   "unused_price": 90000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 86000,
+   "used_max": 76000,
+   "used_min": 53000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 256GB",
-   "unused_price": 90000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 86000,
+   "used_max": 76000,
+   "used_min": 53000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 256GB",
-   "unused_price": 90000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 86000,
+   "used_max": 76000,
+   "used_min": 53000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 256GB",
-   "unused_price": 90000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 86000,
+   "used_max": 76000,
+   "used_min": 53000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "楽天版SIMフリー Google Pixel 10 256GB",
-   "unused_price": 90000,
-   "used_max": 85000,
-   "used_min": 59000,
+   "unused_price": 86000,
+   "used_max": 76000,
+   "used_min": 53000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro 256GB",
    "unused_price": 111000,
-   "used_max": 96000,
-   "used_min": 67000,
+   "used_max": 89000,
+   "used_min": 62000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro 256GB",
    "unused_price": 111000,
-   "used_max": 96000,
-   "used_min": 67000,
+   "used_max": 89000,
+   "used_min": 62000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro 256GB",
    "unused_price": 111000,
-   "used_max": 96000,
-   "used_min": 67000,
+   "used_max": 89000,
+   "used_min": 62000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro 256GB",
    "unused_price": 111000,
-   "used_max": 96000,
-   "used_min": 67000,
+   "used_max": 89000,
+   "used_min": 62000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "楽天版SIMフリー Google Pixel 10 Pro 256GB",
    "unused_price": 111000,
-   "used_max": 96000,
-   "used_min": 67000,
+   "used_max": 89000,
+   "used_min": 62000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro 512GB",
    "unused_price": 121000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 126000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 126000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro 512GB",
-   "unused_price": 126000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "unused_price": 121000,
+   "used_max": 101000,
+   "used_min": 70000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro XL 256GB",
    "unused_price": 121000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 96000,
+   "used_min": 67000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro XL 256GB",
    "unused_price": 121000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 96000,
+   "used_min": 67000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro XL 256GB",
    "unused_price": 121000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 96000,
+   "used_min": 67000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro XL 256GB",
    "unused_price": 121000,
-   "used_max": 106000,
-   "used_min": 74000,
+   "used_max": 96000,
+   "used_min": 67000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Google Pixel 10 Pro XL 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Google Pixel 10 Pro XL 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Google Pixel 10 Pro XL 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Google Pixel 10 Pro XL 512GB",
    "unused_price": 131000,
-   "used_max": 116000,
-   "used_min": 81000,
+   "used_max": 111000,
+   "used_min": 77000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -12335,65 +12335,65 @@
   },
   {
    "name": "docomo版SIMフリー Pixel9 128GB docomo版",
-   "unused_price": 68000,
-   "used_max": 61000,
-   "used_min": 42000,
+   "unused_price": 66000,
+   "used_max": 58000,
+   "used_min": 40000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 128GB au版",
-   "unused_price": 68000,
-   "used_max": 61000,
-   "used_min": 42000,
+   "unused_price": 66000,
+   "used_max": 58000,
+   "used_min": 40000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 128GB SoftBank版",
-   "unused_price": 68000,
-   "used_max": 61000,
-   "used_min": 42000,
+   "unused_price": 66000,
+   "used_max": 58000,
+   "used_min": 40000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel9 128GB 国内版",
-   "unused_price": 68000,
-   "used_max": 61000,
-   "used_min": 48000,
+   "unused_price": 66000,
+   "used_max": 58000,
+   "used_min": 46000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "docomo版SIMフリー Pixel9 256GB docomo版",
-   "unused_price": 78000,
-   "used_max": 66000,
-   "used_min": 46000,
+   "unused_price": 76000,
+   "used_max": 64000,
+   "used_min": 44000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel9 256GB au版",
-   "unused_price": 78000,
-   "used_max": 66000,
-   "used_min": 46000,
+   "unused_price": 76000,
+   "used_max": 64000,
+   "used_min": 44000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel9 256GB SoftBank版",
-   "unused_price": 78000,
-   "used_max": 66000,
-   "used_min": 46000,
+   "unused_price": 76000,
+   "used_max": 64000,
+   "used_min": 44000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel9 256GB 国内版",
-   "unused_price": 78000,
-   "used_max": 66000,
-   "used_min": 52000,
+   "unused_price": 76000,
+   "used_max": 64000,
+   "used_min": 51000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -12672,32 +12672,32 @@
   {
    "name": "docomo版SIMフリー Pixel8 128GB docomo版",
    "unused_price": 46000,
-   "used_max": 39000,
-   "used_min": 27000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel8 128GB au版",
    "unused_price": 46000,
-   "used_max": 39000,
-   "used_min": 27000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel8 128GB SoftBank版",
    "unused_price": 46000,
-   "used_max": 39000,
-   "used_min": 27000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel8 128GB 国内版",
    "unused_price": 46000,
-   "used_max": 39000,
-   "used_min": 31000,
+   "used_max": 36000,
+   "used_min": 28000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -12712,29 +12712,45 @@
   {
    "name": "SoftBank版SIMフリー Pixel8 256GB SoftBank版",
    "unused_price": 49000,
-   "used_max": 41000,
-   "used_min": 28000,
+   "used_max": 39000,
+   "used_min": 27000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel8 256GB 国内版",
    "unused_price": 49000,
-   "used_max": 41000,
-   "used_min": 32000,
+   "used_max": 39000,
+   "used_min": 31000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel8 Pro 128GB au版",
-   "unused_price": 56000,
-   "used_max": 51000,
-   "used_min": 35000,
+   "unused_price": 51000,
+   "used_max": 46000,
+   "used_min": 32000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel8 Pro 128GB SoftBank版",
+   "unused_price": 51000,
+   "used_max": 46000,
+   "used_min": 32000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "国内版SIMフリー Pixel8 Pro 128GB 国内版",
+   "unused_price": 51000,
+   "used_max": 46000,
+   "used_min": 36000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "docomo版SIMフリー Pixel8 Pro 256GB docomo版",
    "unused_price": 56000,
    "used_max": 51000,
    "used_min": 35000,
@@ -12742,7 +12758,23 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "国内版SIMフリー Pixel8 Pro 128GB 国内版",
+   "name": "au版SIMフリー Pixel8 Pro 256GB au版",
+   "unused_price": 56000,
+   "used_max": 51000,
+   "used_min": 35000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "SoftBank版SIMフリー Pixel8 Pro 256GB SoftBank版",
+   "unused_price": 56000,
+   "used_max": 51000,
+   "used_min": 35000,
+   "brand": "pixel",
+   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
+  },
+  {
+   "name": "国内版SIMフリー Pixel8 Pro 256GB 国内版",
    "unused_price": 56000,
    "used_max": 51000,
    "used_min": 40000,
@@ -12750,66 +12782,34 @@
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
-   "name": "docomo版SIMフリー Pixel8 Pro 256GB docomo版",
-   "unused_price": 59000,
-   "used_max": 56000,
-   "used_min": 39000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "au版SIMフリー Pixel8 Pro 256GB au版",
-   "unused_price": 59000,
-   "used_max": 56000,
-   "used_min": 39000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "SoftBank版SIMフリー Pixel8 Pro 256GB SoftBank版",
-   "unused_price": 59000,
-   "used_max": 56000,
-   "used_min": 39000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
-   "name": "国内版SIMフリー Pixel8 Pro 256GB 国内版",
-   "unused_price": 59000,
-   "used_max": 56000,
-   "used_min": 44000,
-   "brand": "pixel",
-   "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
-  },
-  {
    "name": "docomo版SIMフリー Pixel8 Pro 512GB docomo版",
-   "unused_price": 64000,
-   "used_max": 59000,
-   "used_min": 41000,
+   "unused_price": 61000,
+   "used_max": 56000,
+   "used_min": 39000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "au版SIMフリー Pixel8 Pro 512GB au版",
-   "unused_price": 64000,
-   "used_max": 59000,
-   "used_min": 41000,
+   "unused_price": 61000,
+   "used_max": 56000,
+   "used_min": 39000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "SoftBank版SIMフリー Pixel8 Pro 512GB SoftBank版",
-   "unused_price": 64000,
-   "used_max": 59000,
-   "used_min": 41000,
+   "unused_price": 61000,
+   "used_max": 56000,
+   "used_min": 39000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
   {
    "name": "国内版SIMフリー Pixel8 Pro 512GB 国内版",
-   "unused_price": 64000,
-   "used_max": 59000,
-   "used_min": 47000,
+   "unused_price": 61000,
+   "used_max": 56000,
+   "used_min": 44000,
    "brand": "pixel",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/pixel/"
   },
@@ -15287,73 +15287,73 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS sense10 SH-53F docomo版",
-   "unused_price": 48000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 44000,
+   "used_max": 41000,
+   "used_min": 28000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "au版SIM版フリー AQUOS sense10 SHG15 au版",
-   "unused_price": 48000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 44000,
+   "used_max": 41000,
+   "used_min": 28000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SoftBank版SIMフリー AQUOS sense10 A505SH SoftBank版",
-   "unused_price": 48000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 44000,
+   "used_max": 41000,
+   "used_min": 28000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "mineo AQUOS sense10 SH-M33 mineo版 128GB",
-   "unused_price": 48000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 44000,
+   "used_max": 41000,
+   "used_min": 28000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "楽天版SIMフリー AQUOS sense10 SH-M33 楽天版 128GB",
-   "unused_price": 48000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 44000,
+   "used_max": 41000,
+   "used_min": 28000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense10 SH-M33 国内版 128GB",
-   "unused_price": 48000,
-   "used_max": 45000,
-   "used_min": 31000,
+   "unused_price": 44000,
+   "used_max": 41000,
+   "used_min": 28000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "mineo AQUOS sense10 SH-M33 mineo版 256GB",
-   "unused_price": 51000,
-   "used_max": 48000,
-   "used_min": 33000,
+   "unused_price": 47000,
+   "used_max": 44000,
+   "used_min": 30000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "楽天版SIMフリー AQUOS sense10 SH-M33 楽天版 256GB",
-   "unused_price": 51000,
-   "used_max": 48000,
-   "used_min": 33000,
+   "unused_price": 47000,
+   "used_max": 44000,
+   "used_min": 30000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense10 SH-M33 国内版 256GB",
-   "unused_price": 51000,
-   "used_max": 48000,
-   "used_min": 33000,
+   "unused_price": 47000,
+   "used_max": 44000,
+   "used_min": 30000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -15439,81 +15439,81 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS sense9 SH-53E docomo版",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "au版SIMフリー AQUOS sense9 SHG14 au版",
-   "unused_price": 33000,
-   "used_max": 30000,
-   "used_min": 21000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SoftBank版SIMフリー AQUOS sense9 A405SH SoftBank版",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "楽天版SIMフリー AQUOS sense9 SH-M29 楽天版",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "mineo版SIMフリー AQUOS sense9 SH-M29 mineo版 128GB",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "mineo版SIMフリー AQUOS sense9 SH-M29 mineo版 256GB",
-   "unused_price": 34000,
-   "used_max": 31000,
-   "used_min": 21000,
+   "unused_price": 41000,
+   "used_max": 38000,
+   "used_min": 26000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "UQmobile版SIMフリー AQUOS sense9 SHG14 UQmobile版",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "J:COM版SIMフリー AQUOS sense9 SHG14 J:com版",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense9 SH-M29 国内版 128GB",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense9 SH-M29 国内版 256GB",
-   "unused_price": 34000,
-   "used_max": 31000,
-   "used_min": 21000,
+   "unused_price": 41000,
+   "used_max": 38000,
+   "used_min": 26000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -15591,49 +15591,49 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS sense8 docomo版",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "au版SIMフリー AQUOS sense8 au版",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "楽天版SIMフリー AQUOS sense8 楽天版",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "UQmobile版SIMフリー AQUOS sense8 UQmobile",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "J:COM版SIMフリー AQUOS sense8 J:COM版",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense8 国内版",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -15735,49 +15735,49 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS sense7 SH-53C docomo版",
-   "unused_price": 17000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "au版SIMフリー AQUOS sense7 SHG10 au版",
-   "unused_price": 15000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "UQmobile版SIMフリー AQUOS sense7 SHG10 UQmobile版",
-   "unused_price": 15000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "楽天版SIMフリー AQUOS sense7 SH-M24 楽天版",
-   "unused_price": 17000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense7 SH-M24 国内版",
-   "unused_price": 17000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SoftBank版SIMフリー AQUOS sense7 plus A208SH SoftBank版",
-   "unused_price": 17000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -15800,7 +15800,7 @@
   {
    "name": "au版SIMフリー AQUOS sense6s SHG07 au版",
    "unused_price": 13000,
-   "used_max": 10000,
+   "used_max": 11000,
    "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
@@ -15808,7 +15808,7 @@
   {
    "name": "UQmobile版SIMフリー AQUOS sense6s SHG07 UQmobile版",
    "unused_price": 13000,
-   "used_max": 10000,
+   "used_max": 11000,
    "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
@@ -15871,41 +15871,41 @@
   },
   {
    "name": "docomo版SIMフリー AQUOS sense6 SH-54B docomo版",
-   "unused_price": 12000,
-   "used_max": 9000,
-   "used_min": 6000,
+   "unused_price": 13000,
+   "used_max": 11000,
+   "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "au版SIMフリー AQUOS sense6 SHG05 au版",
-   "unused_price": 11000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 13000,
+   "used_max": 11000,
+   "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense6 SH-M19 国内版",
-   "unused_price": 11000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 13000,
+   "used_max": 11000,
+   "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "楽天版SIMフリー AQUOS sense6 SH-RM19 楽天版",
-   "unused_price": 11000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 13000,
+   "used_max": 11000,
+   "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "OCN版SIMフリー AQUOS sense6 SH-M19 OCN版 4GB/64GB",
-   "unused_price": 11000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 13000,
+   "used_max": 11000,
+   "used_min": 7000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -16304,72 +16304,72 @@
   {
    "name": "docomo AQUOS sense5G SH-53A docomo版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "au AQUOS sense5G SHG03 au版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "Softbank AQUOS sense5G A004SH Softbank版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SIMロック解除済 AQUOS sense5G SH-53A SIMロック解除済",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SIMロック解除済 AQUOS sense5G SHG03 SIMロック解除済",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "SIMロック解除済 AQUOS sense5G A004SH SIMロック解除済",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "J:COM AQUOS sense5G SHG03 J:COM版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "OCN AQUOS sense5G SH-M17 OCN版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
   {
    "name": "国内版SIMフリー AQUOS sense5G SH-M17 国内版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "aquos",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/aquos/"
   },
@@ -18999,49 +18999,49 @@
   },
   {
    "name": "au版SIMフリー OPPO A5 5G OPG06 au版",
-   "unused_price": 12000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 17000,
+   "used_max": 15000,
+   "used_min": 10000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
   {
    "name": "国内版 OPPO A5 5G 国内版",
-   "unused_price": 12000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 17000,
+   "used_max": 15000,
+   "used_min": 10000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
   {
    "name": "楽天版 OPPO A5 5G 楽天版",
-   "unused_price": 12000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 17000,
+   "used_max": 15000,
+   "used_min": 10000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
   {
    "name": "mineo版 OPPO A5 5G mineo版",
-   "unused_price": 12000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 17000,
+   "used_max": 15000,
+   "used_min": 10000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
   {
    "name": "UQmobile版 OPPO A5 5G OPG06 UQmobile版",
-   "unused_price": 12000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 17000,
+   "used_max": 15000,
+   "used_min": 10000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
   {
    "name": "Ymobile版 OPPO A5 5G A502OP Ymobile版",
-   "unused_price": 12000,
-   "used_max": 11000,
-   "used_min": 7000,
+   "unused_price": 17000,
+   "used_max": 15000,
+   "used_min": 10000,
    "brand": "oppo",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/oppo/"
   },
@@ -21175,49 +21175,49 @@
   },
   {
    "name": "SIMフリー AQUOS sense9 SH-M29 楽天版",
-   "unused_price": 31000,
-   "used_max": 28000,
-   "used_min": 19000,
+   "unused_price": 38000,
+   "used_max": 36000,
+   "used_min": 25000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー AQUOS sense8 SH-M26 楽天版",
-   "unused_price": 27000,
-   "used_max": 23000,
-   "used_min": 16000,
+   "unused_price": 31000,
+   "used_max": 29000,
+   "used_min": 20000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー AQUOS sense7 SH-M24 楽天版",
-   "unused_price": 17000,
-   "used_max": 14000,
-   "used_min": 9000,
+   "unused_price": 23000,
+   "used_max": 21000,
+   "used_min": 14000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー AQUOS sense6s SH-RM19s 楽天版",
    "unused_price": 13000,
-   "used_max": 10000,
+   "used_max": 11000,
    "used_min": 7000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー AQUOS sense6 SH-RM19 楽天版",
-   "unused_price": 11000,
-   "used_max": 8000,
-   "used_min": 5000,
+   "unused_price": 13000,
+   "used_max": 11000,
+   "used_min": 7000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
   {
    "name": "SIMフリー AQUOS sense5G SH-M17 楽天版",
    "unused_price": 8000,
-   "used_max": 5000,
-   "used_min": 3000,
+   "used_max": 7000,
+   "used_min": 4000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
