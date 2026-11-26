@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-26T02:30:47+09:00",
+ "fetched_at": "2026-11-27T02:30:42+09:00",
  "source": "https://k-tai-iosys.com/pricelist/smartphone/<brand>/",
  "note": "本番(Streamlit Cloud)からは買取サイトが403で取得できないため、住宅IP環境で取得したこのスナップショットをフォールバックに使う。",
  "brands": [
@@ -24,160 +24,160 @@
   {
    "name": "docomo版SIMフリー iPhone Duo 256GB",
    "unused_price": 330000,
-   "used_max": 305000,
-   "used_min": 244000,
+   "used_max": 302000,
+   "used_min": 242000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Duo 256GB",
    "unused_price": 330000,
-   "used_max": 305000,
-   "used_min": 244000,
+   "used_max": 302000,
+   "used_min": 242000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Duo 256GB",
    "unused_price": 330000,
-   "used_max": 305000,
-   "used_min": 244000,
+   "used_max": 302000,
+   "used_min": 242000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Duo 256GB",
    "unused_price": 330000,
-   "used_max": 305000,
-   "used_min": 244000,
+   "used_max": 302000,
+   "used_min": 242000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Duo 256GB",
    "unused_price": 330000,
-   "used_max": 305000,
-   "used_min": 244000,
+   "used_max": 302000,
+   "used_min": 242000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone Duo 512GB",
    "unused_price": 360000,
-   "used_max": 325000,
-   "used_min": 260000,
+   "used_max": 322000,
+   "used_min": 258000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Duo 512GB",
    "unused_price": 360000,
-   "used_max": 325000,
-   "used_min": 260000,
+   "used_max": 322000,
+   "used_min": 258000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Duo 512GB",
    "unused_price": 360000,
-   "used_max": 325000,
-   "used_min": 260000,
+   "used_max": 322000,
+   "used_min": 258000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Duo 512GB",
    "unused_price": 360000,
-   "used_max": 325000,
-   "used_min": 260000,
+   "used_max": 322000,
+   "used_min": 258000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Duo 512GB",
    "unused_price": 360000,
-   "used_max": 325000,
-   "used_min": 260000,
+   "used_max": 322000,
+   "used_min": 258000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone Duo 1TB",
    "unused_price": 405000,
-   "used_max": 375000,
-   "used_min": 300000,
+   "used_max": 372000,
+   "used_min": 298000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Duo 1TB",
    "unused_price": 405000,
-   "used_max": 375000,
-   "used_min": 300000,
+   "used_max": 372000,
+   "used_min": 298000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Duo 1TB",
    "unused_price": 405000,
-   "used_max": 375000,
-   "used_min": 300000,
+   "used_max": 372000,
+   "used_min": 298000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Duo 1TB",
    "unused_price": 405000,
-   "used_max": 375000,
-   "used_min": 300000,
+   "used_max": 372000,
+   "used_min": 298000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Duo 1TB",
    "unused_price": 405000,
-   "used_max": 375000,
-   "used_min": 300000,
+   "used_max": 372000,
+   "used_min": 298000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "docomo版SIMフリー iPhone Duo 2TB",
    "unused_price": 485000,
-   "used_max": 455000,
-   "used_min": 364000,
+   "used_max": 452000,
+   "used_min": 362000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone Duo 2TB",
    "unused_price": 485000,
-   "used_max": 455000,
-   "used_min": 364000,
+   "used_max": 452000,
+   "used_min": 362000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone Duo 2TB",
    "unused_price": 485000,
-   "used_max": 455000,
-   "used_min": 364000,
+   "used_max": 452000,
+   "used_min": 362000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone Duo 2TB",
    "unused_price": 485000,
-   "used_max": 455000,
-   "used_min": 364000,
+   "used_max": 452000,
+   "used_min": 362000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版SIMフリー iPhone Duo 2TB",
    "unused_price": 485000,
-   "used_max": 455000,
-   "used_min": 364000,
+   "used_max": 452000,
+   "used_min": 362000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
@@ -3464,47 +3464,47 @@
   {
    "name": "docomo版SIMフリー iPhone14 128GB",
    "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 37000,
+   "used_max": 48000,
+   "used_min": 36000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "au版SIMフリー iPhone14 128GB",
    "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 37000,
+   "used_max": 48000,
+   "used_min": 36000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "SoftBank版SIMフリー iPhone14 128GB",
    "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 37000,
+   "used_max": 48000,
+   "used_min": 36000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "Rakuten版 iPhone14 128GB",
    "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 37000,
+   "used_max": 48000,
+   "used_min": 36000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "国内版SIMフリー iPhone14 128GB",
    "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 37000,
+   "used_max": 48000,
+   "used_min": 36000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
   },
   {
    "name": "海外版SIMフリー iPhone14 128GB",
    "unused_price": 38000,
-   "used_max": 34000,
+   "used_max": 33000,
    "used_min": 25000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
@@ -3512,7 +3512,7 @@
   {
    "name": "香港版SIMフリー iPhone14 128GB",
    "unused_price": 38000,
-   "used_max": 34000,
+   "used_max": 33000,
    "used_min": 25000,
    "brand": "iphone",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/iphone/"
@@ -20488,8 +20488,8 @@
   {
    "name": "Rakuten iPhone14 128GB",
    "unused_price": 54000,
-   "used_max": 49000,
-   "used_min": 37000,
+   "used_max": 48000,
+   "used_min": 36000,
    "brand": "rakuten",
    "page_url": "https://k-tai-iosys.com/pricelist/smartphone/rakuten/"
   },
